@@ -1,0 +1,37 @@
+---
+export const prerender = false;
+import Layout from '../../layout/Layout.astro';
+import LoginForm from '../../components/auth/LoginForm';
+import { supabase } from '../../lib/supabase';
+
+const { cookies } = Astro;
+
+const accessToken = cookies.get('sb-access-token');
+const refreshToken = cookies.get('sb-refresh-token');
+
+// Set up Supabase client with cookies
+const { data: { session } } = await supabase.auth.setSession({
+  access_token: accessToken?.value || '',
+  refresh_token: refreshToken?.value || ''
+});
+
+if (session) {
+  return Astro.redirect('/dashboard');
+}
+---
+
+<Layout title="登入">
+  <main class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        登入您的帳號
+      </h2>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <LoginForm client:only="react" />
+      </div>
+    </div>
+  </main>
+</Layout>

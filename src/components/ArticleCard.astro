@@ -1,0 +1,36 @@
+---
+import type { Article } from '../db/schema';
+
+export interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const { id, title, createdAt, author, content } = article;
+const excerpt = content.substring(0, 150) + '...';
+const date = new Date(createdAt).toLocaleDateString('zh-TW');
+---
+
+<article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-2 text-gray-500 text-sm">
+      <span>{author}</span>
+      <div class="text-gray-400">{date}</div>
+    </div>
+    <h2 class="text-xl font-bold text-gray-900 mb-2 hover:text-indigo-600 transition-colors">
+      <a href={`/articles/${id}`} class="block">
+        {title}
+      </a>
+    </h2>
+    <p class="text-gray-600 mb-4">{excerpt}</p>
+    <a 
+      href={`/articles/${id}`}
+      class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium"
+    >
+      閱讀更多
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </a>
+  </div>
+</article>

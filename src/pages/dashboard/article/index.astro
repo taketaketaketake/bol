@@ -1,0 +1,55 @@
+---
+export const prerender = false;
+
+import Layout from '../../../layout/Layout.astro';
+import { supabase } from '../../../lib/supabase';
+import ArticleManager from '../../../components/dashboard/ArticleManager';
+
+const { cookies } = Astro;
+const accessToken = cookies.get('sb-access-token');
+const refreshToken = cookies.get('sb-refresh-token');
+
+if (!accessToken?.value || !refreshToken?.value) {
+  return Astro.redirect('/auth/login');
+}
+
+// Set up Supabase client with cookies
+const { data: { session } } = await supabase.auth.setSession({
+  access_token: accessToken.value,
+  refresh_token: refreshToken.value
+});
+
+if (!session) {
+  return Astro.redirect('/auth/login');
+}
+---
+
+<Layout title="文章管理">
+  <div class="min-h-screen bg-gray-50">
+    <header class="bg-white shadow">
+      <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">文章管理後台</h1>
+        <div class="space-x-4">
+          <a 
+            href="/" 
+            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            返回前台
+          </a>
+          <a 
+            href="/auth/signout"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            登出
+          </a>
+        </div>
+      </div>
+    </header>
+    
+    <main>
+      <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <ArticleManager client:load />
+      </div>
+    </main>
+  </div>
+</Layout>
