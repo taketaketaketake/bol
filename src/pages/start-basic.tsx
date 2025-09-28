@@ -138,7 +138,7 @@ export default function StartBasic() {
           const response = await fetch(
             `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
               query
-            )}.json?access_token=pk.eyJ1IjoidGFrZS1kZXRyb2l0LXRlY2giLCJhIjoiY2szaGR2ZHpqMDF6NzNucGd4NTBmZTJ6ciJ9.t8nObId6SpX-Kw5AfT5SoA&country=US&types=address,poi&limit=5&bbox=-90.4180,41.6962,-82.4137,48.3063`
+            )}.json?access_token=${import.meta.env.PUBLIC_MAPBOX_ACCESS_TOKEN}&country=US&types=address,poi&limit=5&bbox=-90.4180,41.6962,-82.4137,48.3063`
           );
           const data = await response.json();
           showSuggestions(data.features || [], query.length >= 10);
@@ -215,7 +215,7 @@ export default function StartBasic() {
           const response = await fetch(
             `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
               query
-            )}.json?access_token=pk.eyJ1IjoidGFrZS1kZXRyb2l0LXRlY2giLCJhIjoiY2szaGR2ZHpqMDF6NzNucGd4NTBmZTJ6ciJ9.t8nObId6SpX-Kw5AfT5SoA&country=US&types=postcode&limit=5&bbox=-90.4180,41.6962,-82.4137,48.3063`
+            )}.json?access_token=${import.meta.env.PUBLIC_MAPBOX_ACCESS_TOKEN}&country=US&types=postcode&limit=5&bbox=-90.4180,41.6962,-82.4137,48.3063`
           );
           const data = await response.json();
           showSuggestions(data.features || [], query.length >= 3);
