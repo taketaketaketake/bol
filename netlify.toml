@@ -2,6 +2,10 @@
   command = "npm run build"
   publish = "dist"
 
+  [build.environment]
+    # Allow these public variables to be included in build output
+    SECRETS_SCAN_OMIT_KEYS = "PUBLIC_SUPABASE_URL,PUBLIC_SUPABASE_ANON_KEY,PUBLIC_SITE_URL,NODE_ENV"
+
 [dev]
   command = "npm run dev"
   port = 3000
