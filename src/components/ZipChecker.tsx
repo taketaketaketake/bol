@@ -122,11 +122,22 @@ export default function ZipChecker({ mapboxToken }: ZipCheckerProps) {
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            // Only allow numbers and limit to 5 digits
+            const numbersOnly = e.target.value.replace(/\D/g, '').slice(0, 5);
+            setQuery(numbersOnly);
+
+            // Clear result when input is empty
+            if (numbersOnly === '') {
+              setServiceAreaResult(null);
+            }
+          }}
           onKeyPress={handleKeyPress}
           placeholder="Enter your ZIP code (e.g., 48226)"
           className="w-full px-4 py-3 sm:px-5 sm:py-4 pr-20 sm:pr-24 rounded-2xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-brand-primary/20 focus:border-brand-primary text-gray-900 placeholder-gray-500 text-base sm:text-lg transition-all"
-          maxLength={10}
+          maxLength={5}
+          inputMode="numeric"
+          pattern="[0-9]*"
         />
         <button
           type="button"
@@ -162,7 +173,7 @@ export default function ZipChecker({ mapboxToken }: ZipCheckerProps) {
 
       {/* Service area result */}
       {serviceAreaResult && (
-        <div className={`absolute top-full left-0 right-0 mt-2 border rounded-xl shadow-lg p-4 z-50 ${
+        <div className={`mt-4 border rounded-xl shadow-lg p-4 ${
           serviceAreaResult.isServiced
             ? 'bg-green-50 border-green-200 text-green-800'
             : 'bg-amber-50 border-amber-200 text-amber-800'
