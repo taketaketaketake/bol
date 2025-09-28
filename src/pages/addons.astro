@@ -1,0 +1,307 @@
+---
+import Layout from '../layout/Layout.astro';
+import ProgressSteps from '../components/ProgressSteps';
+import { readWizard, writeWizard } from "../utils/wizard.server";
+
+// Server-side handling
+let w = {};
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const addonPrefs = {
+      eco: formData.get("eco") === "on",
+      hangDry: formData.get("hangDry") === "on",
+      rush: formData.get("rush") === "on",
+      notes: String(formData.get("notes") || "")
+    };
+    return writeWizard(Astro.request, { addonPrefs }, "/details");
+  } catch (error) {
+    console.error("Error processing addons:", error);
+  }
+}
+
+w = await readWizard(Astro.request);
+
+// Redirect if prerequisites not met
+if (!w.orderType) {
+  return Astro.redirect("/order-type");
+}
+
+// SEO
+const title = "Add-ons & Preferences | Bags of Laundry";
+const description = "Customize your laundry service with optional add-ons and special instructions.";
+---
+
+<Layout title={title} description={description}>
+  <div class="min-h-screen bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 py-8">
+
+      <!-- Progress Steps -->
+      <ProgressSteps client:load currentStep={3} />
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Any add-ons?</h1>
+        <p class="text-gray-600">Customize your laundry service with these optional extras</p>
+      </div>
+
+      <form method="post" class="space-y-6">
+        <!-- Add-on Options -->
+        <div class="space-y-4">
+          <!-- Eco-Friendly -->
+          <label class="cursor-pointer group block">
+            <div class="relative bg-white rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 group-hover:border-blue-300 addon-container" data-addon="eco">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 mt-1">
+                  <input
+                    type="checkbox"
+                    name="eco"
+                    class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 addon-checkbox"
+                  />
+                </div>
+
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.5 2.5L16 4.5 14.5 3 16 1.5 17.5 3 16 4.5 17.5 6M13 13h4-4V8H9v5h4 0z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-semibold text-gray-900 text-lg">Eco-Friendly Detergent</h3>
+                    <span class="font-bold text-gray-900">+$0.10/lb</span>
+                  </div>
+                  <p class="text-sm text-gray-600">Hypoallergenic, plant-based detergent that's gentle on skin and environment</p>
+                </div>
+              </div>
+            </div>
+          </label>
+
+          <!-- Hang-Dry -->
+          <label class="cursor-pointer group block">
+            <div class="relative bg-white rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 group-hover:border-blue-300 addon-container" data-addon="hangDry">
+              <div class="absolute -top-2 -right-2 z-10">
+                <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">Popular</span>
+              </div>
+
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 mt-1">
+                  <input
+                    type="checkbox"
+                    name="hangDry"
+                    class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 addon-checkbox"
+                  />
+                </div>
+
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-semibold text-gray-900 text-lg">Hang-Dry Delicates</h3>
+                    <span class="font-bold text-gray-900">+$0.25/lb</span>
+                  </div>
+                  <p class="text-sm text-gray-600">Air-dry your delicate items to prevent shrinking and extend fabric life</p>
+                </div>
+              </div>
+            </div>
+          </label>
+
+          <!-- Rush Service -->
+          <label class="cursor-pointer group block">
+            <div class="relative bg-white rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 group-hover:border-blue-300 addon-container" data-addon="rush">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 mt-1">
+                  <input
+                    type="checkbox"
+                    name="rush"
+                    class="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 addon-checkbox"
+                  />
+                </div>
+
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-semibold text-gray-900 text-lg">Same-Day Rush Service</h3>
+                    <span class="font-bold text-gray-900">+$10 flat fee</span>
+                  </div>
+                  <p class="text-xs text-orange-600 font-medium">Limited availability</p>
+                  <p class="text-sm text-gray-600">Get your laundry back the same day (pickup before 10 AM required)</p>
+                </div>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <label class="block">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900">Special Instructions</h3>
+            </div>
+            <textarea
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+              name="notes"
+              rows="4"
+              placeholder="Gate code, pet instructions, preferred pickup location, stain notes, etc."
+            >{w.addonPrefs?.notes || ""}</textarea>
+            <p class="text-xs text-gray-500 mt-2">Help us provide the best service by sharing any important details</p>
+          </label>
+        </div>
+
+        <!-- Estimate Preview -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width={2}
+                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900">Add-on Estimate</h3>
+          </div>
+
+          <!-- Line items -->
+          <div class="space-y-1 text-sm" id="addon-breakdown">
+            <!-- Dynamic content will be inserted here -->
+          </div>
+
+          <!-- Total -->
+          <div class="flex justify-between font-semibold border-t border-blue-200 pt-2 mt-2">
+            <span>Add-on Total</span>
+            <span id="addon-total">$0.00</span>
+          </div>
+
+          <p class="text-xs text-gray-500 mt-2">
+            Add-on costs are in addition to your main service selection
+          </p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a
+            href="/order-type"
+            class="bg-white text-gray-700 border-2 border-gray-300 px-6 py-4 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </a>
+          <button
+            type="submit"
+            class="flex-1 bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 hover:shadow-lg flex items-center justify-center gap-2"
+          >
+            Continue to Details
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const addonCheckboxes = document.querySelectorAll('.addon-checkbox');
+      const addonContainers = document.querySelectorAll('.addon-container');
+
+      // Addon data
+      const addonInfo = {
+        eco: { name: 'Eco-Friendly Detergent', price: '+$0.10/lb' },
+        hangDry: { name: 'Hang-Dry Delicates', price: '+$0.25/lb' },
+        rush: { name: 'Same-Day Rush', price: '+$10.00' }
+      };
+
+      // Update visual state of addon containers
+      function updateAddonVisuals() {
+        addonContainers.forEach(container => {
+          const addonId = container.getAttribute('data-addon');
+          const checkbox = container.querySelector('.addon-checkbox') as HTMLInputElement;
+
+          if (checkbox?.checked) {
+            container.classList.add('border-blue-500', 'shadow-md', 'ring-2', 'ring-blue-100');
+            container.classList.remove('border-gray-200', 'shadow-sm');
+          } else {
+            container.classList.remove('border-blue-500', 'shadow-md', 'ring-2', 'ring-blue-100');
+            container.classList.add('border-gray-200', 'shadow-sm');
+          }
+        });
+      }
+
+      // Update estimate breakdown
+      function updateEstimate() {
+        const breakdown = document.getElementById('addon-breakdown')!;
+        const totalElement = document.getElementById('addon-total')!;
+
+        breakdown.innerHTML = '';
+        let flatFeeTotal = 0;
+
+        addonCheckboxes.forEach((checkbox: any) => {
+          if (checkbox.checked) {
+            const addonId = checkbox.name;
+            const info = addonInfo[addonId as keyof typeof addonInfo];
+
+            if (info) {
+              const div = document.createElement('div');
+              div.className = 'flex justify-between';
+              div.innerHTML = `<span>${info.name}</span><span>${info.price}</span>`;
+              breakdown.appendChild(div);
+
+              // Add flat fees to total (rush service)
+              if (addonId === 'rush') {
+                flatFeeTotal += 10;
+              }
+            }
+          }
+        });
+
+        if (breakdown.children.length === 0) {
+          const div = document.createElement('div');
+          div.className = 'text-gray-500 italic text-center';
+          div.textContent = 'No add-ons selected';
+          breakdown.appendChild(div);
+        }
+
+        totalElement.textContent = `$${flatFeeTotal.toFixed(2)}`;
+      }
+
+      // Event listeners
+      addonCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          updateAddonVisuals();
+          updateEstimate();
+        });
+      });
+
+      // Initialize
+      updateAddonVisuals();
+      updateEstimate();
+    });
+  </script>
+</Layout>

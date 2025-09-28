@@ -1,0 +1,414 @@
+---
+import Layout from '../layout/Layout.astro';
+import ProgressSteps from '../components/ProgressSteps';
+import { z } from "zod";
+import { readWizard, writeWizard } from "../utils/wizard.server";
+
+const Schema = z.object({
+  line1: z.string().min(3),
+  dropoffLine1: z.string().optional(),
+  dropoffDate: z.string().optional(),
+  sameAsPickup: z.boolean().default(true),
+  date: z.string().min(10), // YYYY-MM-DD
+  phone: z.string().min(7)
+}).refine((data) => {
+  if (!data.sameAsPickup) {
+    return (
+      data.dropoffLine1 &&
+      data.dropoffLine1.length >= 3 &&
+      data.dropoffDate &&
+      data.dropoffDate.length >= 10
+    );
+  }
+  return true;
+}, {
+  message: "Drop-off address and date are required when different from pickup",
+  path: ["dropoffLine1"]
+}).refine((data) => {
+  if (!data.sameAsPickup && data.dropoffDate && data.date) {
+    return new Date(data.dropoffDate) > new Date(data.date);
+  }
+  return true;
+}, {
+  message: "Drop-off date must be after pickup date",
+  path: ["dropoffDate"]
+});
+
+// Server-side handling
+let w = {};
+let actionError = "";
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+
+    const data = {
+      line1: String(formData.get("line1") || ""),
+      dropoffLine1: String(formData.get("dropoffLine1") || ""),
+      dropoffDate: String(formData.get("dropoffDate") || ""),
+      sameAsPickup: formData.get("sameAsPickup") === "on",
+      date: String(formData.get("date") || ""),
+      phone: String(formData.get("phone") || "")
+    };
+
+    const parsed = Schema.safeParse(data);
+    if (!parsed.success) {
+      actionError = parsed.error.issues[0]?.message || "Please complete all fields.";
+    } else {
+      return writeWizard(Astro.request, {
+        address: { line1: parsed.data.line1 },
+        dropoffAddress: parsed.data.sameAsPickup ? null : {
+          line1: parsed.data.dropoffLine1!,
+          date: parsed.data.dropoffDate!
+        },
+        date: parsed.data.date,
+        phone: parsed.data.phone
+      }, "/order-type");
+    }
+  } catch (error) {
+    actionError = "An error occurred processing your request.";
+  }
+}
+
+w = await readWizard(Astro.request);
+
+// Get today's date as minimum
+const today = new Date();
+const minDate = today.toISOString().split('T')[0];
+
+// SEO
+const title = "Schedule Pickup | Bags of Laundry";
+const description = "Schedule your laundry pickup. Enter your address, date, and contact info to get started.";
+---
+
+<Layout title={title} description={description}>
+  <div class="min-h-screen bg-gray-50">
+    <div class="max-w-2xl mx-auto px-4 py-8">
+
+      <!-- Progress Steps -->
+      <ProgressSteps client:load currentStep={1} />
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          Where & when should we pick up?
+        </h1>
+        <p class="text-gray-600">
+          Enter your pickup details to get started with your laundry service
+        </p>
+      </div>
+
+      <!-- Error Message -->
+      {actionError && (
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p class="text-red-700 font-medium">{actionError}</p>
+          </div>
+        </div>
+      )}
+
+      <!-- Form -->
+      <form method="post" class="space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+          <!-- Pickup Address Section -->
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-900 mb-2">
+              Pickup Address
+            </label>
+            <input
+              id="address-input"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+              name="line1"
+              placeholder="Enter your street address"
+              value={w.address?.line1 || ""}
+              required
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              We'll pick up from this location during your selected time window
+            </p>
+          </div>
+
+          <!-- Details Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <!-- Date -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-900 mb-2">
+                Pickup Date
+              </label>
+              <input
+                id="pickup-date"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900"
+                type="date"
+                name="date"
+                min={minDate}
+                value={w.date || ""}
+                required
+              />
+            </div>
+
+            <!-- Phone -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-900 mb-2">
+                Mobile Number
+              </label>
+              <input
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                name="phone"
+                type="tel"
+                placeholder="(555) 123-4567"
+                value={w.phone || ""}
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Same as Pickup Checkbox -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center">
+            <input
+              type="checkbox"
+              id="sameAsPickup"
+              name="sameAsPickup"
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              checked
+            />
+            <label for="sameAsPickup" class="ml-3 text-sm font-medium text-gray-900">
+              Drop-off at same location as pickup
+            </label>
+          </div>
+          <p class="text-xs text-gray-500 mt-2 ml-7">
+            Uncheck this if you need delivery to a different address
+          </p>
+        </div>
+
+        <!-- Drop-off Section -->
+        <div id="dropoff-section" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hidden">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Drop-off Address</h3>
+
+          <!-- Drop-off Address -->
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-900 mb-2">
+              Drop-off Address
+            </label>
+            <input
+              id="dropoff-address-input"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+              name="dropoffLine1"
+              placeholder="Enter drop-off street address"
+              value={w.dropoffAddress?.line1 || ""}
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              We'll deliver your clean laundry to this location
+            </p>
+          </div>
+
+          <!-- Drop-off Date -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-900 mb-2">
+              Drop-off Date
+            </label>
+            <input
+              type="date"
+              id="dropoff-date"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 sm:max-w-xs"
+              name="dropoffDate"
+              min={minDate}
+              value={w.dropoffAddress?.date || ""}
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              When would you like your clean laundry delivered?
+            </p>
+          </div>
+        </div>
+
+        <!-- Service Info -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 mb-1">Quick & Convenient</h3>
+              <p class="text-sm text-gray-600 mb-2">
+                We'll text you 30 minutes before pickup and provide real-time updates throughout the process.
+              </p>
+              <div class="flex flex-wrap gap-4 text-xs text-gray-500">
+                <span>• 24-hour turnaround</span>
+                <span>• $35 minimum order</span>
+                <span>• Free pickup & delivery</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            type="submit"
+            class="flex-1 bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            Continue to Services
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <a
+            href="/pricing"
+            class="bg-white text-gray-700 border-2 border-gray-300 px-6 py-4 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2z" />
+            </svg>
+            View Pricing
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Toggle dropoff section
+    document.addEventListener('DOMContentLoaded', function() {
+      const sameAsPickupCheckbox = document.getElementById('sameAsPickup') as HTMLInputElement;
+      const dropoffSection = document.getElementById('dropoff-section');
+      const dropoffInputs = dropoffSection?.querySelectorAll('input');
+
+      function toggleDropoffSection() {
+        if (sameAsPickupCheckbox.checked) {
+          dropoffSection?.classList.add('hidden');
+          dropoffInputs?.forEach(input => {
+            input.removeAttribute('required');
+          });
+        } else {
+          dropoffSection?.classList.remove('hidden');
+          dropoffInputs?.forEach(input => {
+            if (input.name === 'dropoffLine1' || input.name === 'dropoffDate') {
+              input.setAttribute('required', '');
+            }
+          });
+        }
+      }
+
+      sameAsPickupCheckbox?.addEventListener('change', toggleDropoffSection);
+      toggleDropoffSection(); // Initialize
+
+      // Update dropoff date minimum when pickup date changes
+      const pickupDateInput = document.getElementById('pickup-date') as HTMLInputElement;
+      const dropoffDateInput = document.getElementById('dropoff-date') as HTMLInputElement;
+
+      function updateDropoffMinDate() {
+        if (pickupDateInput?.value && dropoffDateInput) {
+          // Set dropoff minimum to the day after pickup
+          const pickupDate = new Date(pickupDateInput.value);
+          pickupDate.setDate(pickupDate.getDate() + 1);
+          const minDropoffDate = pickupDate.toISOString().split('T')[0];
+          dropoffDateInput.setAttribute('min', minDropoffDate);
+
+          // If current dropoff date is before the new minimum, clear it
+          if (dropoffDateInput.value && dropoffDateInput.value <= pickupDateInput.value) {
+            dropoffDateInput.value = '';
+          }
+        }
+      }
+
+      pickupDateInput?.addEventListener('change', updateDropoffMinDate);
+      // Initialize on page load
+      updateDropoffMinDate();
+
+      // Address autocomplete functionality
+      const setupAddressAutocomplete = (input: HTMLInputElement) => {
+        if (!input || input.dataset.autocompleteInitialized) return;
+        input.dataset.autocompleteInitialized = "true";
+
+        let debounceTimer: NodeJS.Timeout;
+        let suggestionsList: HTMLElement | null = null;
+
+        const removeSuggestions = () => {
+          if (suggestionsList) {
+            suggestionsList.remove();
+            suggestionsList = null;
+          }
+        };
+
+        const showSuggestions = (suggestions: any[], showNoResults = false) => {
+          removeSuggestions();
+          suggestionsList = document.createElement("div");
+          suggestionsList.className =
+            "absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto mt-1";
+
+          if (suggestions.length === 0 && showNoResults) {
+            const noResultsItem = document.createElement("div");
+            noResultsItem.className = "px-4 py-3 text-gray-500 text-sm";
+            noResultsItem.textContent =
+              "No addresses found. Service area limited to Michigan.";
+            suggestionsList.appendChild(noResultsItem);
+          } else if (suggestions.length > 0) {
+            suggestions.forEach((suggestion: any) => {
+              const item = document.createElement("div");
+              item.className =
+                "px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0";
+              item.textContent = suggestion.place_name;
+
+              item.addEventListener("click", () => {
+                input.value = suggestion.place_name;
+                removeSuggestions();
+              });
+
+              suggestionsList!.appendChild(item);
+            });
+          } else {
+            return;
+          }
+
+          input.parentElement!.style.position = "relative";
+          input.parentElement!.appendChild(suggestionsList);
+        };
+
+        const searchAddresses = async (query: string) => {
+          if (query.length < 3) {
+            removeSuggestions();
+            return;
+          }
+          try {
+            const response = await fetch(
+              `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+                query
+              )}.json?access_token=${import.meta.env.PUBLIC_MAPBOX_ACCESS_TOKEN}&country=US&types=address,poi&limit=5&bbox=-90.4180,41.6962,-82.4137,48.3063`
+            );
+            const data = await response.json();
+            showSuggestions(data.features || [], query.length >= 10);
+          } catch (error) {
+            console.error("Address search error:", error);
+          }
+        };
+
+        input.addEventListener("input", (e) => {
+          const query = (e.target as HTMLInputElement).value;
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => searchAddresses(query), 300);
+        });
+
+        input.addEventListener("blur", () => {
+          setTimeout(removeSuggestions, 150);
+        });
+      };
+
+      const addressInput = document.getElementById('address-input') as HTMLInputElement;
+      const dropoffAddressInput = document.getElementById('dropoff-address-input') as HTMLInputElement;
+
+      setupAddressAutocomplete(addressInput);
+      setupAddressAutocomplete(dropoffAddressInput);
+    });
+  </script>
+</Layout>

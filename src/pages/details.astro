@@ -1,0 +1,422 @@
+---
+import Layout from '../layout/Layout.astro';
+import ProgressSteps from '../components/ProgressSteps';
+import { z } from "zod";
+import { readWizard, writeWizard } from "../utils/wizard.server";
+
+const Schema = z.object({
+  fullName: z.string().min(2),
+  email: z.string().email()
+});
+
+// Server-side handling
+let w = {};
+let actionError = "";
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+
+    const data = {
+      fullName: String(formData.get("fullName") || ""),
+      email: String(formData.get("email") || "")
+    };
+
+    const parsed = Schema.safeParse(data);
+    if (!parsed.success) {
+      actionError = parsed.error.issues[0]?.message || "Please complete all fields.";
+    } else {
+      return writeWizard(Astro.request, {
+        customer: {
+          fullName: parsed.data.fullName,
+          email: parsed.data.email
+        }
+      }, "/checkout");
+    }
+  } catch (error) {
+    actionError = "An error occurred processing your request.";
+  }
+}
+
+w = await readWizard(Astro.request);
+
+// Redirect if prerequisites not met
+if (!w.addonPrefs) {
+  return Astro.redirect("/addons");
+}
+
+// SEO
+const title = "Contact Details | Bags of Laundry";
+const description = "Enter your contact information to complete your laundry service booking.";
+---
+
+<Layout title={title} description={description}>
+  <div class="min-h-screen bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+
+      <!-- Progress Steps -->
+      <ProgressSteps client:load currentStep={4} />
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          Contact Information
+        </h1>
+        <p class="text-gray-600">
+          We'll use this information to keep you updated on your order
+        </p>
+      </div>
+
+      <!-- Error Message -->
+      {actionError && (
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p class="text-red-700 font-medium">{actionError}</p>
+          </div>
+        </div>
+      )}
+
+      <div class="grid lg:grid-cols-5 gap-8">
+
+        <!-- Main Content -->
+        <div class="lg:col-span-3 space-y-6">
+          <form method="post" class="space-y-6">
+
+            <!-- Contact Information Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Contact Information</h2>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <label class="block font-medium text-gray-900 mb-2">Full Name</label>
+                  <input
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    name="fullName"
+                    placeholder="John Doe"
+                    value={w.customer?.fullName || ""}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label class="block font-medium text-gray-900 mb-2">Email Address</label>
+                  <input
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    name="email"
+                    type="email"
+                    placeholder="john@example.com"
+                    value={w.customer?.email || ""}
+                    required
+                  />
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-2">
+                We'll send order updates and pickup notifications to your email
+              </p>
+            </div>
+
+            <!-- Pickup Information -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Pickup Details</h2>
+                <a href="/start-basic" class="ml-auto text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  Edit
+                </a>
+              </div>
+              <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="font-medium text-gray-900">Address:</span>
+                  <p class="text-gray-600 mt-1">{w.address?.line1}</p>
+                  {w.address?.postal && <p class="text-gray-600">{w.address.postal}</p>}
+                </div>
+                <div>
+                  <span class="font-medium text-gray-900">Date & Contact:</span>
+                  <p class="text-gray-600 mt-1">{w.date}</p>
+                  <p class="text-gray-600">{w.phone}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Drop-off Information -->
+            {w.dropoffAddress && (
+              <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2" />
+                    </svg>
+                  </div>
+                  <h2 class="text-xl font-semibold text-gray-900">Drop-off Details</h2>
+                  <a href="/start-basic" class="ml-auto text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    Edit
+                  </a>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span class="font-medium text-gray-900">Address:</span>
+                    <p class="text-gray-600 mt-1">{w.dropoffAddress.line1}</p>
+                  </div>
+                  <div>
+                    <span class="font-medium text-gray-900">Delivery Date:</span>
+                    <p class="text-gray-600 mt-1">{w.dropoffAddress.date}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <!-- Service Selection -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Service</h2>
+                <a href="/order-type" class="ml-auto text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  Edit
+                </a>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-medium text-gray-900">{w.orderType?.replace('_', ' ') || 'Selected service'}</h3>
+                  <p class="text-sm text-gray-600">
+                    {w.orderType === 'per_pound' ? '$2.49 per lb • 24-hour turnaround' : '24-hour turnaround'}
+                  </p>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm text-gray-500">Starting at</span>
+                  <p class="font-semibold text-gray-900">
+                    {w.orderType === 'per_pound' ? '$2.49/lb' :
+                     w.orderType === 'small_bag' ? '$35' :
+                     w.orderType === 'medium_bag' ? '$55' :
+                     w.orderType === 'large_bag' ? '$85' : 'TBD'}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Specialty Items -->
+              <div class="mt-4 pt-4 border-t border-gray-200">
+                <h4 class="font-medium text-gray-900 mb-2">Specialty Items</h4>
+                <div class="space-y-1">
+                  {w.addons && (w.addons.comforter > 0 || w.addons.bedding_bundle > 0 || w.addons.dry_cleaning > 0) ? (
+                    <>
+                      {w.addons.comforter && w.addons.comforter > 0 && (
+                        <div class="flex justify-between text-sm">
+                          <span>Comforter × {w.addons.comforter}</span>
+                          <span>${(20 * w.addons.comforter).toFixed(2)}</span>
+                        </div>
+                      )}
+                      {w.addons.bedding_bundle && w.addons.bedding_bundle > 0 && (
+                        <div class="flex justify-between text-sm">
+                          <span>Bedding Bundle × {w.addons.bedding_bundle}</span>
+                          <span>${(25 * w.addons.bedding_bundle).toFixed(2)}</span>
+                        </div>
+                      )}
+                      {w.addons.dry_cleaning && w.addons.dry_cleaning > 0 && (
+                        <div class="flex justify-between text-sm">
+                          <span>Dry Cleaning × {w.addons.dry_cleaning}</span>
+                          <span>${(8 * w.addons.dry_cleaning).toFixed(2)}</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p class="text-sm text-gray-500 italic">No specialty items selected</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <!-- Add-ons -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                  </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Add-ons</h2>
+                <a href="/addons" class="ml-auto text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  Edit
+                </a>
+              </div>
+
+              {(w.addonPrefs?.eco || w.addonPrefs?.hangDry || w.addonPrefs?.rush) ? (
+                <div class="space-y-3">
+                  {w.addonPrefs?.eco && (
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center">
+                          <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.5 2.5L16 4.5 14.5 3 16 1.5 17.5 3 16 4.5 17.5 6M13 13h4-4V8H9v5h4 0z" />
+                          </svg>
+                        </div>
+                        <span class="text-gray-900">Eco-friendly detergent</span>
+                      </div>
+                      <span class="text-gray-600">+$0.10/lb</span>
+                    </div>
+                  )}
+
+                  {w.addonPrefs?.hangDry && (
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
+                          <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                          </svg>
+                        </div>
+                        <span class="text-gray-900">Hang-dry delicates</span>
+                      </div>
+                      <span class="text-gray-600">+$0.25/lb</span>
+                    </div>
+                  )}
+
+                  {w.addonPrefs?.rush && (
+                    <div class="flex justify-between items-center py-2">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center">
+                          <svg class="w-4 h-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        </div>
+                        <span class="text-gray-900">Same-day rush service</span>
+                      </div>
+                      <span class="text-gray-600">+$10</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p class="text-gray-500 italic">No add-ons selected</p>
+              )}
+            </div>
+
+            <!-- Privacy Notice -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900">Privacy & Security</h3>
+              </div>
+              <p class="text-sm text-gray-600">
+                Your information is encrypted and secure. We'll only use it to process your order and send service updates. We never share your data with third parties.
+              </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row gap-3">
+              <a
+                href="/addons"
+                class="bg-white text-gray-700 border-2 border-gray-300 px-6 py-4 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 flex items-center justify-center gap-2"
+              >
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </a>
+              <button
+                type="submit"
+                class="flex-1 bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-lg"
+              >
+                Continue to Payment
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-8">
+            <!-- Order Summary -->
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+              <ul class="space-y-3 text-sm text-gray-600">
+                <li class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2"></div>
+                  <div>
+                    <span class="font-medium text-gray-900">Pickup:</span>
+                    <br>{w.address?.line1} on {w.date}
+                  </div>
+                </li>
+                <li class="flex items-start gap-2">
+                  <div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2"></div>
+                  <div>
+                    <span class="font-medium text-gray-900">Service:</span>
+                    <br>{w.orderType?.replace('_', ' ') || 'Selected service'}
+                  </div>
+                </li>
+                {w.addonPrefs?.eco && (
+                  <li class="flex items-start gap-2">
+                    <div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-2"></div>
+                    <span>Eco-friendly detergent</span>
+                  </li>
+                )}
+                {w.addonPrefs?.hangDry && (
+                  <li class="flex items-start gap-2">
+                    <div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-2"></div>
+                    <span>Hang-dry delicates</span>
+                  </li>
+                )}
+                {w.addonPrefs?.rush && (
+                  <li class="flex items-start gap-2">
+                    <div class="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2"></div>
+                    <span>Same-day rush service</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <!-- What's Next -->
+            <div class="border-t border-gray-200 pt-6">
+              <h4 class="font-semibold text-gray-900 mb-3">What's Next?</h4>
+              <ul class="space-y-2 text-sm text-gray-600">
+                <li class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  Review & confirm order
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  Secure payment processing
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  Pickup confirmation via text
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

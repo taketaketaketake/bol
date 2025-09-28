@@ -1,0 +1,108 @@
+---
+import Layout from '../layout/Layout.astro';
+
+// SEO
+const title = "Order Confirmed | Bags of Laundry";
+const description = "Your laundry pickup has been scheduled. We'll text you 30 minutes before arrival.";
+---
+
+<Layout title={title} description={description}>
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div class="max-w-2xl mx-auto text-center">
+
+      <!-- Success Icon -->
+      <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg class="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+
+      <!-- Header -->
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Order Confirmed!
+      </h1>
+
+      <p class="text-lg text-gray-600 mb-8">
+        Your laundry pickup has been scheduled. We'll text you 30 minutes before arrival with driver details.
+      </p>
+
+      <!-- Next Steps -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 text-left">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">What happens next?</h2>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="text-xs font-bold text-blue-600">1</span>
+            </div>
+            <div>
+              <h3 class="font-medium text-gray-900">Prepare your laundry</h3>
+              <p class="text-sm text-gray-600">Place your items in any sturdy bag and leave by your door</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="text-xs font-bold text-blue-600">2</span>
+            </div>
+            <div>
+              <h3 class="font-medium text-gray-900">We'll text you</h3>
+              <p class="text-sm text-gray-600">30 minutes before pickup with driver name and arrival time</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="text-xs font-bold text-blue-600">3</span>
+            </div>
+            <div>
+              <h3 class="font-medium text-gray-900">Professional cleaning</h3>
+              <p class="text-sm text-gray-600">We'll wash, dry, and fold according to your preferences</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="text-xs font-bold text-green-600">4</span>
+            </div>
+            <div>
+              <h3 class="font-medium text-gray-900">Fresh delivery</h3>
+              <p class="text-sm text-gray-600">Clean, folded laundry delivered back to your door in ~24 hours</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+        <h3 class="font-semibold text-gray-900 mb-2">Need to make changes?</h3>
+        <p class="text-sm text-gray-600 mb-3">
+          Contact us if you need to reschedule or modify your order before pickup.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+          <a href="tel:+15551234567" class="text-blue-600 hover:text-blue-700 font-medium">
+            📞 (555) 123-4567
+          </a>
+          <a href="mailto:support@bagsoflaundry.com" class="text-blue-600 hover:text-blue-700 font-medium">
+            ✉️ support@bagsoflaundry.com
+          </a>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/"
+          class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-200"
+        >
+          Back to Home
+        </a>
+        <a
+          href="/start-basic"
+          class="bg-white text-gray-700 border-2 border-gray-300 px-8 py-3 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+        >
+          Schedule Another Pickup
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

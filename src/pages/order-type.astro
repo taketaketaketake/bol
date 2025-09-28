@@ -1,0 +1,640 @@
+---
+import Layout from '../layout/Layout.astro';
+import ProgressSteps from '../components/ProgressSteps';
+import { readWizard, writeWizard } from "../utils/wizard.server";
+
+// Server-side handling
+let w = {};
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const orderType = String(formData.get("orderType") || "");
+    const addons: { [id: string]: number } = {};
+
+    // Parse addon quantities
+    for (const [key, value] of formData.entries()) {
+      if (key.startsWith("addon_")) {
+        const id = key.replace("addon_", "");
+        addons[id] = parseInt(String(value), 10) || 0;
+      }
+    }
+
+    return writeWizard(Astro.request, { orderType, addons }, "/addons");
+  } catch (error) {
+    console.error("Error processing order type:", error);
+  }
+}
+
+w = await readWizard(Astro.request);
+
+// Redirect if prerequisites not met
+if (!w.address || !w.date || !w.phone) {
+  return Astro.redirect("/start-basic");
+}
+
+// SEO
+const title = "Choose Service | Bags of Laundry";
+const description = "Select your laundry service type and any specialty items.";
+---
+
+<Layout title={title} description={description}>
+  <div class="min-h-screen bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+
+      <!-- Progress Steps -->
+      <ProgressSteps client:load currentStep={2} />
+
+      <!-- Header + Member Toggle -->
+      <div class="text-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Choose Your Service</h1>
+        <p class="text-gray-600 mb-6">Select a main service and add any specialty items.</p>
+
+        <div class="inline-flex items-center bg-white rounded-xl p-1 shadow-sm border-2 border-gray-200 mb-4">
+          <button
+            type="button"
+            id="non-member-btn"
+            class="px-6 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-600 text-white shadow-sm"
+          >
+            Non-Member
+          </button>
+          <button
+            type="button"
+            id="member-btn"
+            class="px-6 py-2 rounded-lg font-medium transition-all duration-200 text-gray-600 hover:text-gray-800"
+          >
+            Member
+          </button>
+        </div>
+
+        <div class="text-center mb-6">
+          <p class="text-sm mb-4" id="pricing-info">
+            Non-Member Pricing: <span class="font-semibold">$2.49/lb</span>. Save with membership – $99/year unlocks <span class="font-semibold">$1.99/lb</span>.
+          </p>
+
+          <!-- Membership Signup Section -->
+          <div id="membership-signup" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-6 max-w-md mx-auto">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.5 2.5L16 4.5 14.5 3 16 1.5 17.5 3 16 4.5 17.5 6M13 13h4-4V8H9v5h4 0z" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900">Become a Member</h3>
+            </div>
+
+            <div class="space-y-4">
+              <div class="text-left">
+                <h4 class="font-medium text-gray-900 mb-2">Membership Benefits:</h4>
+                <ul class="text-sm text-gray-600 space-y-1">
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Save $0.50 per pound ($1.99 vs $2.49)</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Priority booking & pickup times</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Exclusive member-only promotions</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="bg-white rounded-lg p-4 border border-blue-200">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm text-gray-600">Membership (Annual)</span>
+                  <span class="font-semibold">$99/year</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-green-600">Savings on this order:</span>
+                  <span class="font-semibold text-green-600" id="current-order-savings">-</span>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <button
+                  type="button"
+                  id="cancel-membership"
+                  class="flex-1 bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200"
+                >
+                  Maybe Later
+                </button>
+                <button
+                  type="button"
+                  id="signup-membership"
+                  class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200"
+                >
+                  Sign Up & Save
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Become Member CTA -->
+          <button
+            type="button"
+            id="become-member-cta"
+            class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Become a Member & Save
+          </button>
+        </div>
+      </div>
+
+      <form method="post" class="space-y-12" id="order-form">
+        <input type="hidden" name="orderType" id="selected-order-type" value={w.orderType || ""} />
+
+        <!-- Per Pound -->
+        <div>
+          <h2 class="text-xl font-bold mb-4">Per Pound</h2>
+          <label class="cursor-pointer group block">
+            <input
+              type="radio"
+              name="orderType"
+              value="per_pound"
+              checked={w.orderType === "per_pound"}
+              class="sr-only order-type-radio"
+            />
+            <div class={`relative bg-white rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group-hover:border-blue-400 ${
+              w.orderType === "per_pound" ? "border-blue-500 shadow-lg ring-4 ring-blue-100" : "border-gray-200 shadow-sm"
+            }`}>
+              <div class="flex gap-6">
+                <img src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=400&auto=format&fit=crop" alt="Per Pound" class="w-24 h-24 rounded-xl object-cover" />
+                <div class="flex-1">
+                  <div class="flex justify-between">
+                    <h3 class="font-bold text-xl">Per Pound</h3>
+                    <span class="font-bold" id="per-pound-price">$2.49/lb · $35 minimum</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mt-2">Professional wash, dry & fold. Pay only for actual weight.</p>
+                </div>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Per Bag -->
+        <div>
+          <h2 class="text-xl font-bold mb-4">Per Bag</h2>
+          <div class="space-y-4">
+            <label class="cursor-pointer group block">
+              <input
+                type="radio"
+                name="orderType"
+                value="small_bag"
+                checked={w.orderType === "small_bag"}
+                class="sr-only order-type-radio"
+              />
+              <div class={`relative bg-green-50 rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group-hover:border-green-400 ${
+                w.orderType === "small_bag" ? "border-green-500 shadow-lg ring-4 ring-green-100" : "border-green-200 shadow-sm"
+              }`}>
+                <div class="flex gap-6">
+                  <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" alt="Small Bag" class="w-24 h-24 rounded-xl object-cover" />
+                  <div class="flex-1">
+                    <div class="flex justify-between">
+                      <h3 class="font-bold text-xl">Small Bag</h3>
+                      <span class="font-bold">$35</span>
+                    </div>
+                    <p class="text-sm text-gray-500">Fits 12–18 lb</p>
+                    <p class="text-sm text-gray-600 mt-2">Great for individuals or small loads.</p>
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <label class="cursor-pointer group block">
+              <input
+                type="radio"
+                name="orderType"
+                value="medium_bag"
+                checked={w.orderType === "medium_bag"}
+                class="sr-only order-type-radio"
+              />
+              <div class={`relative bg-green-50 rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group-hover:border-green-400 ${
+                w.orderType === "medium_bag" ? "border-green-500 shadow-lg ring-4 ring-green-100" : "border-green-200 shadow-sm"
+              }`}>
+                <div class="flex gap-6">
+                  <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" alt="Medium Bag" class="w-24 h-24 rounded-xl object-cover" />
+                  <div class="flex-1">
+                    <div class="flex justify-between">
+                      <h3 class="font-bold text-xl">Medium Bag</h3>
+                      <span class="font-bold">$55</span>
+                    </div>
+                    <p class="text-sm text-gray-500">Fits 20–30 lb</p>
+                    <p class="text-sm text-gray-600 mt-2">Most popular · perfect for weekly family laundry.</p>
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <label class="cursor-pointer group block">
+              <input
+                type="radio"
+                name="orderType"
+                value="large_bag"
+                checked={w.orderType === "large_bag"}
+                class="sr-only order-type-radio"
+              />
+              <div class={`relative bg-green-50 rounded-xl border-2 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group-hover:border-green-400 ${
+                w.orderType === "large_bag" ? "border-green-500 shadow-lg ring-4 ring-green-100" : "border-green-200 shadow-sm"
+              }`}>
+                <div class="flex gap-6">
+                  <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" alt="Large Bag" class="w-24 h-24 rounded-xl object-cover" />
+                  <div class="flex-1">
+                    <div class="flex justify-between">
+                      <h3 class="font-bold text-xl">Large Bag</h3>
+                      <span class="font-bold">$85</span>
+                    </div>
+                    <p class="text-sm text-gray-500">Fits 35–45 lb</p>
+                    <p class="text-sm text-gray-600 mt-2">Best value for bulk laundry or large households.</p>
+                  </div>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Specialty -->
+        <div>
+          <h2 class="text-xl font-bold mb-4">Specialty Items</h2>
+          <div class="space-y-4">
+            <div class="bg-purple-50 rounded-xl border-2 p-6">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="font-bold">Comforter</h3>
+                  <p class="text-sm text-gray-500">$20 each</p>
+                </div>
+                <div class="flex items-center gap-2" data-addon="comforter">
+                  <div class="addon-controls hidden">
+                    <button type="button" class="addon-decrease px-2 py-1 border rounded">-</button>
+                    <span class="addon-quantity">0</span>
+                    <button type="button" class="addon-increase px-2 py-1 border rounded">+</button>
+                  </div>
+                  <button type="button" class="addon-add px-3 py-1 bg-blue-600 text-white rounded" data-addon="comforter" data-price="20">Add</button>
+                </div>
+              </div>
+              <input type="hidden" name="addon_comforter" class="addon-input" value="0" />
+            </div>
+
+            <div class="bg-purple-50 rounded-xl border-2 p-6">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="font-bold">Bedding Bundle</h3>
+                  <p class="text-sm text-gray-500">$25 set</p>
+                </div>
+                <div class="flex items-center gap-2" data-addon="bedding_bundle">
+                  <div class="addon-controls hidden">
+                    <button type="button" class="addon-decrease px-2 py-1 border rounded">-</button>
+                    <span class="addon-quantity">0</span>
+                    <button type="button" class="addon-increase px-2 py-1 border rounded">+</button>
+                  </div>
+                  <button type="button" class="addon-add px-3 py-1 bg-blue-600 text-white rounded" data-addon="bedding_bundle" data-price="25">Add</button>
+                </div>
+              </div>
+              <input type="hidden" name="addon_bedding_bundle" class="addon-input" value="0" />
+            </div>
+
+            <div class="bg-purple-50 rounded-xl border-2 p-6">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="font-bold">Dry Cleaning</h3>
+                  <p class="text-sm text-gray-500">$8 per item</p>
+                </div>
+                <div class="flex items-center gap-2" data-addon="dry_cleaning">
+                  <div class="addon-controls hidden">
+                    <button type="button" class="addon-decrease px-2 py-1 border rounded">-</button>
+                    <span class="addon-quantity">0</span>
+                    <button type="button" class="addon-increase px-2 py-1 border rounded">+</button>
+                  </div>
+                  <button type="button" class="addon-add px-3 py-1 bg-blue-600 text-white rounded" data-addon="dry_cleaning" data-price="8">Add</button>
+                </div>
+              </div>
+              <input type="hidden" name="addon_dry_cleaning" class="addon-input" value="0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Estimate Preview -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg
+                class="w-5 h-5 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width={2}
+                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900">Estimated Total</h3>
+          </div>
+
+          <div class="space-y-2 text-sm" id="estimate-breakdown">
+            <!-- Dynamic content will be inserted here -->
+          </div>
+
+          <div class="flex justify-between font-semibold border-t border-blue-200 pt-2 mt-2">
+            <span>Total</span>
+            <span id="total-estimate">$0.00</span>
+          </div>
+
+          <p class="text-xs text-gray-500 mt-3">
+            Final pricing confirmed at pickup · $35 minimum applies
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a
+            href="/start-basic"
+            class="bg-white text-gray-700 border-2 border-gray-300 px-6 py-4 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </a>
+          <button type="submit" class="flex-1 bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700">Continue</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let isMember = false;
+      const memberRate = 1.99;
+      const nonMemberRate = 2.49;
+
+      const memberBtn = document.getElementById('member-btn');
+      const nonMemberBtn = document.getElementById('non-member-btn');
+      const pricingInfo = document.getElementById('pricing-info');
+      const perPoundPrice = document.getElementById('per-pound-price');
+
+      // Membership signup elements
+      const becomeMemberCTA = document.getElementById('become-member-cta');
+      const membershipSignup = document.getElementById('membership-signup');
+      const cancelMembershipBtn = document.getElementById('cancel-membership');
+      const signupMembershipBtn = document.getElementById('signup-membership');
+      const currentOrderSavings = document.getElementById('current-order-savings');
+
+      // Member toggle functionality
+      function updateMemberStatus(member: boolean) {
+        isMember = member;
+        const currentRate = member ? memberRate : nonMemberRate;
+
+        if (member) {
+          memberBtn?.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+          memberBtn?.classList.remove('text-gray-600', 'hover:text-gray-800');
+          nonMemberBtn?.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+          nonMemberBtn?.classList.add('text-gray-600', 'hover:text-gray-800');
+          pricingInfo!.innerHTML = '<span class="text-green-600 font-medium">🎉 Member Pricing Active: $1.99/lb (requires $99/year membership)</span>';
+        } else {
+          nonMemberBtn?.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+          nonMemberBtn?.classList.remove('text-gray-600', 'hover:text-gray-800');
+          memberBtn?.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+          memberBtn?.classList.add('text-gray-600', 'hover:text-gray-800');
+          pricingInfo!.innerHTML = 'Non-Member Pricing: <span class="font-semibold">$2.49/lb</span>. Save with membership – $99/year unlocks <span class="font-semibold">$1.99/lb</span>.';
+        }
+
+        perPoundPrice!.textContent = `$${currentRate.toFixed(2)}/lb · $35 minimum`;
+
+        // Show/hide membership CTA
+        if (member) {
+          becomeMemberCTA?.classList.add('hidden');
+        } else {
+          becomeMemberCTA?.classList.remove('hidden');
+        }
+
+        updateEstimate();
+        updateMembershipSavings();
+      }
+
+      memberBtn?.addEventListener('click', () => updateMemberStatus(true));
+      nonMemberBtn?.addEventListener('click', () => updateMemberStatus(false));
+
+      // Membership signup event handlers
+      becomeMemberCTA?.addEventListener('click', () => {
+        membershipSignup?.classList.remove('hidden');
+        becomeMemberCTA?.classList.add('hidden');
+        updateMembershipSavings();
+      });
+
+      cancelMembershipBtn?.addEventListener('click', () => {
+        membershipSignup?.classList.add('hidden');
+        becomeMemberCTA?.classList.remove('hidden');
+      });
+
+      signupMembershipBtn?.addEventListener('click', () => {
+        // Here you would integrate with your payment processor for membership signup
+        // For now, we'll just switch to member pricing
+        updateMemberStatus(true);
+        membershipSignup?.classList.add('hidden');
+
+        // Show success message
+        alert('Membership signup successful! You now have member pricing applied to this order.');
+      });
+
+      // Calculate membership savings for current order
+      function updateMembershipSavings() {
+        if (!currentOrderSavings) return;
+
+        const selectedOrderType = (document.querySelector('.order-type-radio:checked') as HTMLInputElement)?.value;
+        let savings = 0;
+
+        if (selectedOrderType === 'per_pound') {
+          // Calculate savings based on estimated 20 lbs
+          const nonMemberCost = 20 * nonMemberRate;
+          const memberCost = 20 * memberRate;
+          savings = nonMemberCost - memberCost;
+        }
+
+        if (savings > 0) {
+          currentOrderSavings.textContent = `$${savings.toFixed(2)}`;
+        } else {
+          currentOrderSavings.textContent = '-';
+        }
+      }
+
+      // Order type selection
+      const orderTypeRadios = document.querySelectorAll('.order-type-radio');
+      const selectedOrderTypeInput = document.getElementById('selected-order-type') as HTMLInputElement;
+
+      function updateOrderTypeSelection() {
+        orderTypeRadios.forEach((radio: any) => {
+          const label = radio.closest('label');
+          const container = label?.querySelector('div');
+
+          if (radio.checked) {
+            container?.classList.add('border-blue-500', 'shadow-lg', 'ring-4', 'ring-blue-100');
+            container?.classList.remove('border-gray-200', 'shadow-sm', 'border-green-200', 'border-green-500', 'ring-green-100');
+            selectedOrderTypeInput.value = radio.value;
+          } else {
+            container?.classList.remove('border-blue-500', 'shadow-lg', 'ring-4', 'ring-blue-100', 'border-green-500', 'ring-green-100');
+
+            if (radio.value.includes('bag')) {
+              container?.classList.add('border-green-200', 'shadow-sm');
+            } else {
+              container?.classList.add('border-gray-200', 'shadow-sm');
+            }
+          }
+        });
+        updateEstimate();
+        updateMembershipSavings();
+      }
+
+      orderTypeRadios.forEach(radio => {
+        radio.addEventListener('change', updateOrderTypeSelection);
+      });
+
+      // Addon management
+      const addonData: { [key: string]: { price: number, quantity: number } } = {
+        comforter: { price: 20, quantity: 0 },
+        bedding_bundle: { price: 25, quantity: 0 },
+        dry_cleaning: { price: 8, quantity: 0 }
+      };
+
+      function updateAddonDisplay(addonId: string) {
+        const container = document.querySelector(`[data-addon="${addonId}"]`)?.closest('.bg-purple-50');
+        const addBtn = container?.querySelector('.addon-add') as HTMLButtonElement;
+        const controls = container?.querySelector('.addon-controls') as HTMLElement;
+        const quantitySpan = container?.querySelector('.addon-quantity') as HTMLSpanElement;
+        const hiddenInput = container?.querySelector('.addon-input') as HTMLInputElement;
+
+
+        const quantity = addonData[addonId].quantity;
+
+        if (quantity > 0) {
+          addBtn.classList.add('hidden');
+          controls.classList.remove('hidden');
+          quantitySpan.textContent = quantity.toString();
+          hiddenInput.value = quantity.toString();
+        } else {
+          addBtn.classList.remove('hidden');
+          controls.classList.add('hidden');
+          hiddenInput.value = '0';
+        }
+      }
+
+      function updateAddonQuantity(addonId: string, delta: number) {
+        const newQty = Math.max(0, addonData[addonId].quantity + delta);
+        addonData[addonId].quantity = newQty;
+        updateAddonDisplay(addonId);
+        updateEstimate();
+        updateMembershipSavings();
+      }
+
+      // Setup addon controls
+      document.querySelectorAll('.addon-add').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const target = e.target as HTMLButtonElement;
+          const addonId = target.dataset.addon!;
+          updateAddonQuantity(addonId, 1);
+        });
+      });
+
+      document.querySelectorAll('.addon-increase').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const addonId = (e.target as HTMLElement).closest('[data-addon]')?.getAttribute('data-addon')!;
+          updateAddonQuantity(addonId, 1);
+        });
+      });
+
+      document.querySelectorAll('.addon-decrease').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const addonId = (e.target as HTMLElement).closest('[data-addon]')?.getAttribute('data-addon')!;
+          updateAddonQuantity(addonId, -1);
+        });
+      });
+
+      // Initialize addon displays - start with 0 quantities
+      Object.keys(addonData).forEach(addonId => {
+        const hiddenInput = document.querySelector(`input[name="addon_${addonId}"]`) as HTMLInputElement;
+        // Always start with 0 quantity (fresh start)
+        addonData[addonId].quantity = 0;
+        updateAddonDisplay(addonId);
+      });
+
+      // Estimate calculation
+      function updateEstimate() {
+        const breakdown = document.getElementById('estimate-breakdown')!;
+        const totalElement = document.getElementById('total-estimate')!;
+
+        let total = 0;
+        breakdown.innerHTML = '';
+
+        const selectedOrderType = (document.querySelector('.order-type-radio:checked') as HTMLInputElement)?.value;
+
+        if (selectedOrderType) {
+          const div = document.createElement('div');
+          div.className = 'flex justify-between';
+
+          if (selectedOrderType === 'per_pound') {
+            const currentRate = isMember ? memberRate : nonMemberRate;
+            total += 20 * currentRate; // estimate 20 lb
+            div.innerHTML = `<span>Per Pound (est. 20 lb)</span><span>$${(20 * currentRate).toFixed(2)}</span>`;
+          } else {
+            const prices: { [key: string]: number } = {
+              small_bag: 35,
+              medium_bag: 55,
+              large_bag: 85
+            };
+            total += prices[selectedOrderType] || 0;
+            const names: { [key: string]: string } = {
+              small_bag: 'Small Bag',
+              medium_bag: 'Medium Bag',
+              large_bag: 'Large Bag'
+            };
+            div.innerHTML = `<span>${names[selectedOrderType]}</span><span>$${prices[selectedOrderType]}</span>`;
+          }
+          breakdown.appendChild(div);
+        }
+
+        // Add addons to breakdown
+        Object.entries(addonData).forEach(([addonId, data]) => {
+          if (data.quantity > 0) {
+            const div = document.createElement('div');
+            div.className = 'flex justify-between';
+            const names: { [key: string]: string } = {
+              comforter: 'Comforter',
+              bedding_bundle: 'Bedding Bundle',
+              dry_cleaning: 'Dry Cleaning'
+            };
+            const addonTotal = data.price * data.quantity;
+            total += addonTotal;
+            div.innerHTML = `<span>${names[addonId]} × ${data.quantity}</span><span>$${addonTotal.toFixed(2)}</span>`;
+            breakdown.appendChild(div);
+          }
+        });
+
+        totalElement.textContent = `$${total.toFixed(2)}`;
+      }
+
+      // Initialize
+      updateOrderTypeSelection();
+      updateEstimate();
+      updateMembershipSavings();
+    });
+  </script>
+</Layout>
