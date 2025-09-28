@@ -1,7 +1,7 @@
 ---
-import Layout from '../layout/Layout.astro';
-import { supabase } from '../lib/supabase';
-import SignupForm from '../components/auth/SignupForm';
+import Layout from '../../layout/Layout.astro';
+import { supabase } from '../../lib/supabase';
+import SignupForm from '../../components/auth/SignupForm';
 
 const { data: { session } } = await supabase.auth.getSession();
 
