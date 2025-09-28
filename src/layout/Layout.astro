@@ -1,25 +1,29 @@
 ---
-import { ClientRouter } from 'astro:transitions';
+import SiteHeader from '../components/SiteHeader';
 import '../styles/global.css';
 
-interface Props {
+export interface Props {
   title?: string;
+  description?: string;
+  session?: any;
 }
 
-const { title = 'Todo App' } = Astro.props;
+const { title = "Bags of Laundry", description = "Professional laundry and dry cleaning services", session } = Astro.props;
+const currentPath = Astro.url.pathname;
 ---
+
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="A simple todo application" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <title>{title}</title>
-    <ClientRouter />
   </head>
-  <body class="min-h-full bg-gray-50">
-    <main class="min-h-screen">
-      <slot />
-    </main>
+  <body>
+    <SiteHeader session={session} currentPath={currentPath} client:load />
+    <slot />
   </body>
 </html>
