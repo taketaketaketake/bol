@@ -3,7 +3,7 @@ import Layout from '../layout/Layout.astro';
 import ZipChecker from '../components/ZipChecker';
 
 // Environment variables - Astro way
-const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN;
+const mapboxToken = import.meta.env.PUBLIC_MAPBOX_ACCESS_TOKEN;
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const imageBaseUrl = `${supabaseUrl}/storage/v1/object/public/bol-images`;
 

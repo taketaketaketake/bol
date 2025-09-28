@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 interface ZipCheckerProps {
-  mapboxToken: string;
+  mapboxToken?: string;
 }
 
 export default function ZipChecker({ mapboxToken }: ZipCheckerProps) {
@@ -16,7 +16,7 @@ export default function ZipChecker({ mapboxToken }: ZipCheckerProps) {
 
   // ZIP autocomplete effect
   useEffect(() => {
-    if (!query || query.length < 2) {
+    if (!query || query.length < 2 || !mapboxToken) {
       setSuggestions([]);
       return;
     }
@@ -33,6 +33,7 @@ export default function ZipChecker({ mapboxToken }: ZipCheckerProps) {
         setSuggestions(data.features || []);
       } catch (err) {
         console.error("Mapbox ZIP search failed:", err);
+        setSuggestions([]);
       } finally {
         setLoading(false);
       }
@@ -48,52 +49,94 @@ export default function ZipChecker({ mapboxToken }: ZipCheckerProps) {
   };
 
   const checkServiceArea = () => {
+    console.log('Check button clicked!', query); // Debug log
     if (!query.trim()) {
+      console.log('Query is empty, returning');
       return;
     }
 
-    // Known service ZIP codes
+    // Comprehensive service ZIP codes for Detroit metro area
     const serviceZips = [
-      '48226', '48201', '48216', '48202', '48207', // Detroit
-      '48067', '48073', // Royal Oak
-      '48124', '48126', '48127', // Dearborn
-      '48220', '48221', '48228', // Ferndale area
-      '48236', '48230', // Grosse Pointe
-      '48089', '48091', '48092', // Warren
-      '48075', '48076', '48034', // Southfield
-      '48083', '48084', '48085', // Troy
-      '48150', '48152', '48154', // Livonia
-      '48187', '48188', // Canton
+      // Detroit Core
+      '48226', '48201', '48216', '48202', '48207', '48208', '48209', '48210', '48211', '48212', '48213', '48214', '48215', '48217', '48219', '48221', '48222', '48223', '48224', '48227', '48228', '48233', '48234', '48235', '48238', '48243', '48244', '48255', '48260', '48264', '48265', '48266', '48267', '48268', '48269', '48272', '48275', '48277', '48278', '48279', '48288',
+
+      // Royal Oak & Ferndale
+      '48067', '48073', '48220', '48237',
+
+      // Dearborn & Dearborn Heights
+      '48124', '48125', '48126', '48127', '48128',
+
+      // Grosse Pointe Area
+      '48230', '48236', '48215', '48224', '48236',
+
+      // Warren & Sterling Heights
+      '48089', '48091', '48092', '48088', '48093', '48310', '48311', '48312', '48313', '48314',
+
+      // Southfield & Oak Park
+      '48075', '48076', '48033', '48034', '48237',
+
+      // Troy & Birmingham
+      '48083', '48084', '48085', '48009', '48012', '48013', '48025', '48069', '48098',
+
+      // Livonia & Westland
+      '48150', '48152', '48154', '48185', '48186',
+
+      // Canton & Plymouth
+      '48187', '48188', '48170', '48174',
+
+      // Additional Metro Detroit
+      '48146', '48141', '48180', '48183', '48184', // Lincoln Park, Southgate, Wyandotte
+      '48101', '48105', '48108', '48111', // Allen Park, Ann Arbor outskirts
+      '48070', '48071', '48072', // Huntington Woods, Madison Heights
+      '48030', '48038', '48039', // Hazel Park, Clinton Township
+      '48066', '48065', // Roseville, Romeo
+      '48021', '48026', '48035', // Eastpointe, Fraser, Mount Clemens
+      '48045', '48047', '48048', // Harrison Township, New Baltimore, Shelby Township
     ];
 
-    const zipCode = query.replace(/\D/g, '');
+    const zipCode = query.replace(/\D/g, '').slice(0, 5); // Get first 5 digits only
     const isServiced = serviceZips.includes(zipCode);
+
+    console.log('Checking ZIP:', zipCode, 'Is serviced:', isServiced); // Debug log
 
     setServiceAreaResult({
       isServiced,
       message: isServiced
-        ? `Great! We deliver to ${zipCode}. Start your order above.`
-        : `Sorry, we don't currently serve ${zipCode}. We're expanding soon!`
+        ? `🎉 Great! We deliver to ${zipCode}. Schedule your pickup above.`
+        : `📍 Sorry, we don't currently serve ${zipCode}. We're expanding to new areas regularly - check back soon!`
     });
+  };
+
+  // Handle Enter key press
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      checkServiceArea();
+    }
   };
 
   return (
     <div className="relative">
-      <input
-        ref={inputRef}
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Enter your ZIP code to check availability"
-        className="w-full px-4 py-3 sm:px-5 sm:py-4 rounded-2xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-gray-900 placeholder-gray-500 text-base sm:text-lg"
-      />
-      <button
-        type="button"
-        onClick={checkServiceArea}
-        className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-2 rounded-xl text-sm sm:text-base font-semibold hover:bg-blue-700 transition-all touch-manipulation"
-      >
-        Check
-      </button>
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Enter your ZIP code (e.g., 48226)"
+          className="w-full px-4 py-3 sm:px-5 sm:py-4 pr-20 sm:pr-24 rounded-2xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-brand-primary/20 focus:border-brand-primary text-gray-900 placeholder-gray-500 text-base sm:text-lg transition-all"
+          maxLength={10}
+        />
+        <button
+          type="button"
+          onClick={checkServiceArea}
+          disabled={!query.trim()}
+          className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 bg-brand-primary text-white px-4 py-2 sm:px-6 sm:py-2 rounded-xl text-sm sm:text-base font-semibold hover:bg-brand-primaryDeep disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-manipulation"
+        >
+          Check
+        </button>
+      </div>
 
       {/* Autocomplete Dropdown */}
       {suggestions.length > 0 && (
@@ -122,24 +165,50 @@ export default function ZipChecker({ mapboxToken }: ZipCheckerProps) {
         <div className={`absolute top-full left-0 right-0 mt-2 border rounded-xl shadow-lg p-4 z-50 ${
           serviceAreaResult.isServiced
             ? 'bg-green-50 border-green-200 text-green-800'
-            : 'bg-orange-50 border-orange-200 text-orange-800'
+            : 'bg-amber-50 border-amber-200 text-amber-800'
         }`}>
-          <div className="flex items-center gap-2">
-            <span className="text-lg">
-              {serviceAreaResult.isServiced ? '✅' : '⚠️'}
+          <div className="flex items-start gap-3">
+            <span className="text-xl flex-shrink-0 mt-0.5">
+              {serviceAreaResult.isServiced ? '🎉' : '📍'}
             </span>
-            <span className="font-medium">
-              {serviceAreaResult.message}
-            </span>
+            <div className="flex-1">
+              <p className="font-medium text-sm sm:text-base mb-2">
+                {serviceAreaResult.message}
+              </p>
+              {serviceAreaResult.isServiced ? (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Scroll to form
+                      const form = document.querySelector('form[action="/start-basic"]');
+                      if (form) {
+                        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        const firstInput = form.querySelector('input');
+                        if (firstInput) {
+                          setTimeout(() => firstInput.focus(), 500);
+                        }
+                      }
+                    }}
+                    className="inline-block bg-brand-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-primaryDeep transition-all touch-manipulation text-center"
+                  >
+                    Start Order →
+                  </a>
+                  <a
+                    href="/pricing"
+                    className="inline-block bg-white text-brand-primary border border-brand-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-primary hover:text-white transition-all touch-manipulation text-center"
+                  >
+                    View Pricing
+                  </a>
+                </div>
+              ) : (
+                <div className="text-xs text-amber-600">
+                  <p>We're actively expanding our service area. Follow us for updates!</p>
+                </div>
+              )}
+            </div>
           </div>
-          {serviceAreaResult.isServiced && (
-            <a
-              href="#top-order"
-              className="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-all touch-manipulation"
-            >
-              Start Order →
-            </a>
-          )}
         </div>
       )}
 
