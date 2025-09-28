@@ -1,0 +1,189 @@
+---
+import Layout from '../layout/Layout.astro';
+
+// Environment variables
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const imageBaseUrl = `${supabaseUrl}/storage/v1/object/public/bol-images`;
+
+// SEO Meta
+const title = "Laundry Services | Pickup & Delivery in Detroit | Bags of Laundry";
+const description = "Laundry pickup & delivery across Detroit and nearby suburbs. Wash & fold, dry cleaning, and commercial laundry with fast turnaround. Start your order today.";
+---
+
+<Layout title={title} description={description}>
+  <main>
+    {/* SERVICE CARDS */}
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">What we offer</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+
+          {/* Pickup & Delivery */}
+          <article class="card overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1583016060830-35b0c530c707?q=80&w=1600&auto=format&fit=crop"
+              alt="Driver picking up laundry bag"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6">
+              <div class="inline-block bg-orange-100 text-brand-primaryDeep border border-orange-200 rounded-full px-3 py-1 text-xs font-bold mb-3">
+                Core Service
+              </div>
+              <h3 class="text-xl font-bold text-brand-text mb-3">Pickup & Delivery Laundry</h3>
+              <p class="sub mb-4">
+                Door-to-door laundry service across Detroit & suburbs. Choose your pickup window, set preferences,
+                and we do the rest. Most orders return in ~24 hours.
+              </p>
+              <ul class="sub text-sm mb-6 space-y-1 pl-4">
+                <li>• Reliable time windows & text updates</li>
+                <li>• Safe doorstep handoff or contactless</li>
+                <li>• Per-bag or per-pound pricing</li>
+              </ul>
+              <a href="/schedule" class="btn">Start an Order</a>
+            </div>
+          </article>
+
+          {/* Wash & Fold */}
+          <article class="card overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=1600&auto=format&fit=crop"
+              alt="Neatly folded laundry"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6">
+              <div class="inline-block bg-teal-100 text-brand-accent border border-teal-200 rounded-full px-3 py-1 text-xs font-bold mb-3">
+                Everyday
+              </div>
+              <h3 class="text-xl font-bold text-brand-text mb-3">Wash & Fold</h3>
+              <p class="sub mb-4">
+                Everyday clothing washed, dried, and folded to your preferences—delivered back ready to put away.
+              </p>
+              <ul class="sub text-sm mb-6 space-y-1 pl-4">
+                <li>• Detergent, temperature, softener, & fold style options</li>
+                <li>• Stain pretreatment for visible spots</li>
+                <li>• Family & weekly plans available</li>
+              </ul>
+              <a href="/pricing" class="btn-alt">See Pricing</a>
+            </div>
+          </article>
+
+          {/* Dry Cleaning */}
+          <article class="card overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=1600&auto=format&fit=crop"
+              alt="Garments on hangers"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6">
+              <div class="inline-block bg-red-100 text-brand-secondary border border-red-200 rounded-full px-3 py-1 text-xs font-bold mb-3">
+                Garments
+              </div>
+              <h3 class="text-xl font-bold text-brand-text mb-3">Dry Cleaning Pickup & Delivery</h3>
+              <p class="sub mb-4">
+                Professional cleaning and pressing for suits, dresses, uniforms, and delicates—pickup & delivery included.
+              </p>
+              <ul class="sub text-sm mb-6 space-y-1 pl-4">
+                <li>• Care labels followed</li>
+                <li>• Protective packaging on return</li>
+                <li>• Turnaround ~24–48 hours</li>
+              </ul>
+              <a href="#faq" class="btn-alt">What's included</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    {/* COMMERCIAL LAUNDRY */}
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <img
+              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop"
+              alt="Commercial towels and linens"
+              class="rounded-xl border border-brand-line w-full shadow-soft"
+            />
+          </div>
+          <div>
+            <h2 class="section-title text-brand-text mb-6">Commercial Laundry</h2>
+            <p class="sub mb-6 leading-relaxed">
+              Reliable recurring pickups for <strong class="text-brand-text">short-term rentals</strong>,
+              <strong class="text-brand-text"> gyms & studios</strong>, <strong class="text-brand-text">salons & spas</strong>,
+              <strong class="text-brand-text"> restaurants & caterers</strong>, <strong class="text-brand-text">medical/dental</strong>,
+              and <strong class="text-brand-text"> offices</strong>. Volume pricing and custom scheduling available.
+            </p>
+            <ul class="sub mb-8 space-y-2 pl-4">
+              <li>• Linens, towels, uniforms, kitchen & front-of-house textiles</li>
+              <li>• Weekly, bi-weekly, or custom routes</li>
+              <li>• Inventory tracking & delivery manifests</li>
+            </ul>
+            <div class="flex flex-wrap gap-4">
+              <a href="/contact" class="btn">Talk to Sales</a>
+              <a href="/pricing" class="btn-alt">Commercial Pricing</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ADD-ONS & PREFERENCES */}
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Add-ons & preferences</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Eco-friendly</h3>
+            <p class="sub">Sensitive-skin detergents and cold-water cycles available.</p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Hang-dry</h3>
+            <p class="sub">We'll hang-dry delicates or activewear on request.</p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Special care</h3>
+            <p class="sub">Label garments or leave notes for stain treatment or fold style.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* FAQ */}
+    <section id="faq" class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Services FAQ</h2>
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How does pickup & delivery work?</h3>
+            <p class="sub">Choose a window, place bags at your door, and we'll text updates. Most orders are returned in ~24 hours.</p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Do you offer same-day?</h3>
+            <p class="sub">Yes in select areas. Choose an early pickup; availability appears at checkout.</p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Can I set preferences?</h3>
+            <p class="sub">Yes—detergent, temperature, softener, fold style, and hang-dry can be saved to your profile.</p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Is there a minimum?</h3>
+            <p class="sub">Some areas have order minimums; you'll see them after entering your ZIP during scheduling.</p>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <a href="/schedule" class="btn">Start an Order</a>
+        </div>
+      </div>
+    </section>
+
+    
+  </main>
+</Layout>
