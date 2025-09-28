@@ -1,1 +1,55 @@
 @import "tailwindcss";
+
+/* Custom component classes for the landing page */
+
+.pill {
+  @apply inline-block px-3 py-1 bg-brand-primary/10 text-brand-primary text-sm font-semibold rounded-full;
+}
+
+.hero {
+  @apply bg-white p-6 sm:p-8 rounded-2xl border border-brand-line shadow-soft;
+}
+
+.card {
+  @apply bg-white rounded-2xl border border-brand-line shadow-soft;
+}
+
+.btn {
+  @apply bg-brand-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-primaryDeep transition-all focus:ring-4 focus:ring-brand-primary/20 touch-manipulation;
+}
+
+.btn-alt {
+  @apply bg-transparent text-brand-primary border-2 border-brand-primary px-6 py-3 rounded-xl font-semibold hover:bg-brand-primary hover:text-white transition-all focus:ring-4 focus:ring-brand-primary/20 touch-manipulation;
+}
+
+.btn-ghost {
+  @apply text-brand-primary hover:bg-brand-primary hover:text-white px-4 py-2 rounded-lg transition-all touch-manipulation;
+}
+
+.input {
+  @apply w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-4 focus:ring-brand-primary/20 focus:border-brand-primary text-brand-text placeholder-brand-muted transition-all;
+}
+
+.section-title {
+  @apply text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight;
+}
+
+.sub {
+  @apply text-brand-muted;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .btn, .btn-alt {
+    @apply min-h-[48px] text-base;
+  }
+
+  .input {
+    @apply min-h-[48px] text-base;
+  }
+
+  /* Improve touch targets on mobile */
+  button, a, input, [role="button"] {
+    touch-action: manipulation;
+  }
+}
