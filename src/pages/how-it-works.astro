@@ -1,0 +1,139 @@
+---
+import Layout from "../layout/Layout.astro";
+
+// SEO
+const title = "How It Works | Bags of Laundry Pickup & Delivery";
+const description =
+  "Simple, transparent laundry pickup & delivery in Detroit. See how it works in four easy steps: schedule, pickup, clean, deliver — fresh in ~24 hours.";
+
+const steps = [
+  {
+    number: "01",
+    title: "Schedule",
+    text: "Book online in seconds. Choose your pickup window and set detergent, temperature, and folding preferences.",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
+  },
+  {
+    number: "02",
+    title: "Pickup",
+    text: "Place your bag(s) at the door. We scan, confirm, and text you updates as we head your way.",
+    image: "https://images.unsplash.com/photo-1583016060830-35b0c530c707?q=80&w=1600&auto=format&fit=crop",
+  },
+  {
+    number: "03",
+    title: "Clean",
+    text: "Sorted, washed, and folded with care. We pretreat stains and follow your preferences every time.",
+    image: "https://images.unsplash.com/photo-1609710228159-0fa9bd7c85b0?q=80&w=1600&auto=format&fit=crop",
+  },
+  {
+    number: "04",
+    title: "Deliver",
+    text: "Fresh, folded laundry arrives back at your door—often in 24 hours or less.",
+    image: "https://images.unsplash.com/photo-1604335399361-6839c7e4a4fa?q=80&w=1600&auto=format&fit=crop",
+  },
+];
+---
+
+<Layout title={title} description={description}>
+  <!-- HERO -->
+  <section class="relative bg-gradient-to-r from-orange-50 via-white to-blue-50 py-20">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <h1 class="text-4xl lg:text-6xl font-extrabold text-brand-text mb-6">
+        How It Works
+      </h1>
+      <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+        From doorstep to dresser: four simple steps. Transparent, reliable, and
+        built for busy Detroiters.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="/schedule" class="btn">Schedule Pickup</a>
+        <a href="/pricing" class="btn-alt">See Pricing</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS STEPS -->
+  <section class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="section-title text-center mb-12">Four Simple Steps</h2>
+      <div class="grid md:grid-cols-2 gap-10">
+        {steps.map((s) => (
+          <div class="group card overflow-hidden hover:shadow-xl transition">
+            <img src={s.image} alt={s.title} class="h-56 w-full object-cover group-hover:scale-105 transition" />
+            <div class="p-6">
+              <span class="block text-sm text-brand-primary font-bold mb-2">{s.number}</span>
+              <h3 class="text-xl font-semibold mb-3">{s.title}</h3>
+              <p class="text-gray-600">{s.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="py-20 bg-brand-bg">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="section-title text-center mb-12">Typical Timeline</h2>
+      <div class="relative border-l-2 border-gray-200 space-y-10 pl-6">
+        <div>
+          <h3 class="font-bold text-brand-text">0:00 — Booking</h3>
+          <p class="text-gray-500">Choose pickup window + preferences.</p>
+        </div>
+        <div>
+          <h3 class="font-bold text-brand-text">+2–6 hrs — Pickup</h3>
+          <p class="text-gray-500">Driver collects and scans your order.</p>
+        </div>
+        <div>
+          <h3 class="font-bold text-brand-text">+12–20 hrs — Cleaning</h3>
+          <p class="text-gray-500">Sorting, pretreating stains, folding/pressing.</p>
+        </div>
+        <div class="bg-orange-50 p-4 rounded-lg">
+          <h3 class="font-bold text-brand-text">~24 hrs — Delivery</h3>
+          <p class="text-gray-500">Fresh laundry arrives at your door.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="section-title text-center mb-12">FAQs</h2>
+      <div class="space-y-4">
+        <details class="card p-6">
+          <summary class="cursor-pointer font-semibold">How long does it take?</summary>
+          <p class="mt-2 text-gray-500">
+            Most orders are returned within 24 hours. Same-day may be available
+            depending on pickup time and load size.
+          </p>
+        </details>
+        <details class="card p-6">
+          <summary class="cursor-pointer font-semibold">Do you handle stains & delicates?</summary>
+          <p class="mt-2 text-gray-500">
+            Yes. We pretreat visible stains and follow care labels. Special-care
+            items should be marked as Dry Cleaning.
+          </p>
+        </details>
+        <details class="card p-6">
+          <summary class="cursor-pointer font-semibold">What if I’m not home?</summary>
+          <p class="mt-2 text-gray-500">
+            No problem—leave a note with a safe spot for pickup or drop-off.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="py-20 bg-gradient-to-r from-blue-50 to-orange-50">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold mb-4">Ready to skip laundry day?</h2>
+      <p class="text-gray-600 mb-8">Pickup & delivery service trusted across Detroit.</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="/schedule" class="btn">Schedule Pickup</a>
+        <a href="/pricing" class="btn-alt">View Pricing</a>
+      </div>
+    </div>
+  </section>
+</Layout>

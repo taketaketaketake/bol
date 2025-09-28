@@ -7,54 +7,25 @@ interface PriceCalculatorProps {
 export default function PriceCalculator({ isMember }: PriceCalculatorProps) {
   const memberRate = 1.99;
   const standardRate = 2.25;
-  const currentRate = isMember ? memberRate : standardRate;
+  const [selectedRate, setSelectedRate] = useState(standardRate);
   const [estimate, setEstimate] = useState('$45.00');
+  const [pounds, setPounds] = useState(20);
+  const [rush, setRush] = useState(false);
+  const [eco, setEco] = useState(false);
+  const [hang, setHang] = useState(false);
 
   useEffect(() => {
-    const calculatePrice = () => {
-      const lbsInput = document.getElementById('lbs') as HTMLInputElement;
-      const rushCheckbox = document.getElementById('rush') as HTMLInputElement;
-      const ecoCheckbox = document.getElementById('eco') as HTMLInputElement;
-      const hangCheckbox = document.getElementById('hang') as HTMLInputElement;
+    const lbs = Math.max(0, pounds || 0);
+    const rate = selectedRate;
+    const rushFee = rush ? 10 : 0;
+    const ecoFee = eco ? 0.10 : 0;
+    const hangFee = hang ? 0.25 : 0;
 
-      if (!lbsInput || !rushCheckbox || !ecoCheckbox || !hangCheckbox) return;
+    let subtotal = lbs * (rate + ecoFee + hangFee) + rushFee;
+    if (subtotal < 35) subtotal = 35; // minimum
 
-      const lbs = Math.max(0, parseFloat(lbsInput.value) || 0);
-      const rate = currentRate;
-      const rush = rushCheckbox.checked ? 10 : 0;
-      const eco = ecoCheckbox.checked ? 0.10 : 0;
-      const hang = hangCheckbox.checked ? 0.25 : 0;
-
-      let subtotal = lbs * (rate + eco + hang) + rush;
-      if (subtotal < 35) subtotal = 35; // minimum
-
-      setEstimate(`$${subtotal.toFixed(2)}`);
-    };
-
-    // Add event listeners
-    const inputs = ['lbs', 'rush', 'eco', 'hang'];
-    inputs.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.addEventListener('input', calculatePrice);
-        element.addEventListener('change', calculatePrice);
-      }
-    });
-
-    // Initial calculation
-    calculatePrice();
-
-    // Cleanup
-    return () => {
-      inputs.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.removeEventListener('input', calculatePrice);
-          element.removeEventListener('change', calculatePrice);
-        }
-      });
-    };
-  }, [currentRate]);
+    setEstimate(`$${subtotal.toFixed(2)}`);
+  }, [selectedRate, pounds, rush, eco, hang]);
 
   return (
     <div className="card p-4 sm:p-6 lg:p-8">
@@ -66,7 +37,8 @@ export default function PriceCalculator({ isMember }: PriceCalculatorProps) {
             id="lbs"
             type="number"
             min="1"
-            defaultValue="20"
+            value={pounds}
+            onChange={(e) => setPounds(parseFloat(e.target.value) || 0)}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
           <p className="text-xs text-gray-500 mt-2">Tip: 1 kitchen trash bag ≈ 12–18 lb</p>
@@ -74,26 +46,47 @@ export default function PriceCalculator({ isMember }: PriceCalculatorProps) {
 
         <div>
           <div className="mb-3 sm:mb-4">
-            <label className="block text-sm font-bold text-brand-text mb-2">Current rate</label>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <span className="text-base sm:text-lg font-bold text-brand-text">${currentRate}/lb</span>
-              <span className="text-xs sm:text-sm text-gray-500 ml-2">
-                {isMember ? 'Member pricing' : 'Standard pricing'}
-              </span>
-            </div>
+            <label htmlFor="rateSelect" className="block text-sm font-bold text-brand-text mb-2">Pricing type</label>
+            <select
+              id="rateSelect"
+              value={selectedRate}
+              onChange={(e) => setSelectedRate(parseFloat(e.target.value))}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-brand-primary/20 focus:border-brand-primary bg-white"
+            >
+              <option value={standardRate}>Standard - ${standardRate}/lb</option>
+              <option value={memberRate}>Member - ${memberRate}/lb (Save $0.26/lb!)</option>
+            </select>
           </div>
 
           <div className="space-y-2 sm:space-y-3">
             <label className="flex items-center gap-3">
-              <input id="rush" type="checkbox" className="rounded" />
+              <input
+                id="rush"
+                type="checkbox"
+                checked={rush}
+                onChange={(e) => setRush(e.target.checked)}
+                className="rounded"
+              />
               <span className="text-xs sm:text-sm text-gray-500">Add rush (+$10)</span>
             </label>
             <label className="flex items-center gap-3">
-              <input id="eco" type="checkbox" className="rounded" />
+              <input
+                id="eco"
+                type="checkbox"
+                checked={eco}
+                onChange={(e) => setEco(e.target.checked)}
+                className="rounded"
+              />
               <span className="text-xs sm:text-sm text-gray-500">Eco detergent (+$0.10/lb)</span>
             </label>
             <label className="flex items-center gap-3">
-              <input id="hang" type="checkbox" className="rounded" />
+              <input
+                id="hang"
+                type="checkbox"
+                checked={hang}
+                onChange={(e) => setHang(e.target.checked)}
+                className="rounded"
+              />
               <span className="text-xs sm:text-sm text-gray-500">Hang-dry (+$0.25/lb)</span>
             </label>
           </div>

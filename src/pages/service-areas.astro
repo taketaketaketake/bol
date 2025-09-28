@@ -1,0 +1,321 @@
+---
+import Layout from '../layout/Layout.astro';
+import ZipChecker from '../components/ZipChecker';
+import CountySection from '../components/CountySection';
+
+// Environment variables
+const mapboxToken = import.meta.env.PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+// SEO Meta
+const title = "Service Areas | Laundry Pickup & Delivery Around Detroit | Bags of Laundry";
+const description = "We pick up & deliver laundry across Detroit and Metro suburbs within ~30 miles: Royal Oak, Dearborn, Ferndale, Grosse Pointe, Warren, Southfield, Troy, Livonia, Canton, Hamtramck, and more.";
+
+// Service area data
+const detroitNeighborhoods = [
+  {
+    name: "Downtown Detroit",
+    description: "Central Business District, Capitol Park, Greektown, Campus Martius",
+    zipCodes: ["48226"]
+  },
+  {
+    name: "Midtown",
+    description: "Cass Corridor, Cultural Center, Wayne State area",
+    zipCodes: ["48201"]
+  },
+  {
+    name: "New Center / North End",
+    description: "Henry Ford Hospital area, Milwaukee Junction",
+    zipCodes: ["48202", "48211"]
+  },
+  {
+    name: "Corktown / Mexicantown",
+    description: "Roosevelt Park, Michigan Ave corridor, Southwest",
+    zipCodes: ["48216", "48209"]
+  },
+  {
+    name: "Eastern Market",
+    description: "Market District & adjacent lofts",
+    zipCodes: ["48207"]
+  },
+  {
+    name: "West Village / Islandview",
+    description: "Parker's Alley, Kercheval corridor",
+    zipCodes: ["48214"]
+  },
+  {
+    name: "Boston-Edison / Virginia Park",
+    description: "Historic homes, Linwood corridor",
+    zipCodes: ["48206"]
+  },
+  {
+    name: "Rosedale Park / Grandmont",
+    description: "Grand River & Southfield area",
+    zipCodes: ["48223"]
+  },
+  {
+    name: "University District / Palmer Woods",
+    description: "Livernois Avenue of Fashion",
+    zipCodes: ["48221"]
+  },
+  {
+    name: "Conant Gardens",
+    description: "Near City Airport",
+    zipCodes: ["48234"]
+  },
+  {
+    name: "Jefferson-Chalmers",
+    description: "Canals District",
+    zipCodes: ["48215"]
+  },
+  {
+    name: "Northwest / Brightmoor",
+    description: "Outer Drive & Telegraph",
+    zipCodes: ["48235"]
+  }
+];
+
+const wayneCountySuburbs = [
+  {
+    name: "Dearborn",
+    description: "East/West Dearborn, Aviation Sub",
+    zipCodes: ["48124", "48126", "48127"]
+  },
+  {
+    name: "Dearborn Heights",
+    zipCodes: ["48125", "48127"]
+  },
+  {
+    name: "Livonia",
+    zipCodes: ["48150", "48152", "48154"]
+  },
+  {
+    name: "Canton",
+    zipCodes: ["48187", "48188"]
+  },
+  {
+    name: "Westland",
+    zipCodes: ["48185", "48186"]
+  },
+  {
+    name: "Taylor",
+    zipCodes: ["48180"]
+  },
+  {
+    name: "Hamtramck",
+    zipCodes: ["48212"]
+  },
+  {
+    name: "Highland Park",
+    zipCodes: ["48203"]
+  },
+  {
+    name: "Downriver Cities",
+    description: "Allen Park, Lincoln Park, Southgate, Riverview, Wyandotte, Trenton",
+    zipCodes: ["48101", "48146", "48195", "48192"]
+  }
+];
+
+const oaklandCountySuburbs = [
+  {
+    name: "Royal Oak",
+    zipCodes: ["48067", "48073"]
+  },
+  {
+    name: "Ferndale",
+    zipCodes: ["48220"]
+  },
+  {
+    name: "Southfield",
+    zipCodes: ["48033", "48034", "48075"]
+  },
+  {
+    name: "Troy",
+    zipCodes: ["48083", "48084", "48085"]
+  },
+  {
+    name: "Birmingham",
+    zipCodes: ["48009"]
+  },
+  {
+    name: "Farmington Hills",
+    zipCodes: ["48334", "48335"]
+  }
+];
+
+const macombCountySuburbs = [
+  {
+    name: "Warren",
+    zipCodes: ["48088", "48089", "48091"]
+  },
+  {
+    name: "Sterling Heights",
+    zipCodes: ["48310", "48312"]
+  },
+  {
+    name: "St. Clair Shores",
+    zipCodes: ["48080", "48081"]
+  },
+  {
+    name: "Clinton Township",
+    zipCodes: ["48035", "48036"]
+  },
+  {
+    name: "Grosse Pointe",
+    description: "Park, City, Farms, Woods, Shores",
+    zipCodes: ["48230", "48236"]
+  },
+  {
+    name: "Roseville",
+    zipCodes: ["48066"]
+  }
+];
+---
+
+<Layout title={title} description={description}>
+  <!-- Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": "https://bagsoflaundry.com/service-areas#business",
+    "name": "Bags of Laundry",
+    "url": "https://bagsoflaundry.com/service-areas",
+    "image": "https://bagsoflaundry.com/assets/og.jpg",
+    "telephone": "+1-313-555-0123",
+    "description": "Laundry pickup & delivery for homes and businesses across Detroit and Metro Detroit suburbs.",
+    "areaServed": [
+      {"@type": "City", "name": "Detroit"},
+      {"@type": "City", "name": "Royal Oak"},
+      {"@type": "City", "name": "Dearborn"},
+      {"@type": "City", "name": "Ferndale"},
+      {"@type": "City", "name": "Grosse Pointe"},
+      {"@type": "City", "name": "Warren"},
+      {"@type": "City", "name": "Southfield"},
+      {"@type": "City", "name": "Troy"},
+      {"@type": "City", "name": "Livonia"},
+      {"@type": "City", "name": "Canton"},
+      {"@type": "City", "name": "Hamtramck"}
+    ],
+    "openingHours": "Mo-Su 08:00-20:00",
+    "priceRange": "$$"
+  })} />
+
+  {/* HERO SECTION */}
+  <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg/90">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="hero">
+        <div class="pill mb-4 sm:mb-6">Detroit • ~30 mile radius</div>
+        <h1 class="text-2xl sm:text-3xl lg:text-5xl font-bold text-brand-text mb-4 sm:mb-6 leading-tight">
+          Where we pick up & deliver
+        </h1>
+        <p class="text-base sm:text-lg text-gray-500 mb-6 sm:mb-8 leading-relaxed max-w-4xl">
+          We serve Detroit's core neighborhoods and Metro Detroit suburbs. Below you'll find
+          every city and neighborhood we cover, plus ZIP codes for quick reference. Don't see your area? <a href="/contact" class="text-brand-primary hover:underline">Contact us</a>.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <a href="/schedule" class="btn w-full sm:w-auto">Schedule Pickup</a>
+          <a href="/pricing" class="btn-alt w-full sm:w-auto">View Pricing</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* QUICK INDEX BAR */}
+  <div class="sticky top-16 z-40 bg-brand-bg/90 backdrop-blur-sm border-b border-gray-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+      <div class="flex flex-wrap gap-2 sm:gap-3 items-center">
+        <span class="pill text-xs">Jump to:</span>
+        <a href="#detroit" class="text-xs sm:text-sm text-brand-text hover:text-brand-primary transition px-2 sm:px-3 py-1 rounded-full border border-gray-200 hover:bg-orange-50">Detroit</a>
+        <a href="#wayne" class="text-xs sm:text-sm text-brand-text hover:text-brand-primary transition px-2 sm:px-3 py-1 rounded-full border border-gray-200 hover:bg-orange-50">Wayne</a>
+        <a href="#oakland" class="text-xs sm:text-sm text-brand-text hover:text-brand-primary transition px-2 sm:px-3 py-1 rounded-full border border-gray-200 hover:bg-orange-50">Oakland</a>
+        <a href="#macomb" class="text-xs sm:text-sm text-brand-text hover:text-brand-primary transition px-2 sm:px-3 py-1 rounded-full border border-gray-200 hover:bg-orange-50">Macomb</a>
+        <a href="#faq" class="text-xs sm:text-sm text-brand-text hover:text-brand-primary transition px-2 sm:px-3 py-1 rounded-full border border-gray-200 hover:bg-orange-50">FAQ</a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <CountySection
+      client:load
+      id="detroit"
+      title="Detroit Neighborhoods"
+      subtitle="Core neighborhoods and districts inside Detroit city limits."
+      neighborhoods={detroitNeighborhoods}
+      bgColor="bg-brand-bg"
+    />
+
+    <CountySection
+      client:load
+      id="wayne"
+      title="Wayne County Suburbs"
+      subtitle="Cities within ~30 miles of Downtown Detroit."
+      neighborhoods={wayneCountySuburbs}
+      bgColor="bg-white"
+    />
+
+    <CountySection
+      client:load
+      id="oakland"
+      title="Oakland County Suburbs"
+      subtitle="North & northwest of Detroit."
+      neighborhoods={oaklandCountySuburbs}
+      bgColor="bg-brand-bg"
+    />
+
+    <CountySection
+      client:load
+      id="macomb"
+      title="Macomb County Suburbs"
+      subtitle="Northeast of Detroit along the lake & inland."
+      neighborhoods={macombCountySuburbs}
+      bgColor="bg-white"
+    />
+
+    {/* ZIP CHECKER */}
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="card p-12 text-center">
+          <h2 class="section-title text-brand-text mb-4">Not sure if we cover your address?</h2>
+          <p class="text-gray-500 mb-8">Enter your ZIP code below to check availability instantly.</p>
+
+          <div class="max-w-xl mx-auto mb-8">
+            <ZipChecker client:load mapboxToken={mapboxToken} />
+          </div>
+
+          <div class="flex flex-wrap justify-center gap-4">
+            <a href="/schedule" class="btn">Schedule Pickup</a>
+            <a href="/contact" class="btn-alt">Ask a Question</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* FAQ */}
+    <section id="faq" class="py-8 sm:py-12 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-8 sm:mb-12">Service Areas FAQ</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">How far from Downtown Detroit do you go?</h3>
+            <p class="text-gray-500 text-sm sm:text-base">Roughly a 20–30 mile radius, covering most of Wayne, southern Oakland, and southern Macomb counties.</p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Do you charge extra for farther suburbs?</h3>
+            <p class="text-gray-500">Pricing is transparent; some areas may have different minimums or limited same-day pickup. You'll see details at booking.</p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Can businesses outside this list get service?</h3>
+            <p class="text-gray-500">Yes—reach out. We offer custom routes for commercial clients with recurring volume.</p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What if my neighborhood isn't listed?</h3>
+            <p class="text-gray-500">We're expanding! Try your ZIP in the scheduler or <a href="/contact" class="text-brand-primary hover:underline">contact us</a> to confirm coverage.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
