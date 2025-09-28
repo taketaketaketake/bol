@@ -42,12 +42,6 @@ A modern blog starter built with Astro, featuring Supabase authentication, Markd
    ```
 
 3. Set up environment variables
-   Copy `.env.example` to `.env` and update with your Supabase credentials:
-   ```env
-   PUBLIC_SUPABASE_URL=your_supabase_project_url
-   PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   DATABASE_URL=your_database_connection_string
-   PUBLIC_SITE_URL=http://localhost:4321
    ```
 
 4. Start the development server
