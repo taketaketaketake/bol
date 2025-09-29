@@ -4,7 +4,7 @@
 
   [build.environment]
     # Allow these public variables to be included in build output
-    SECRETS_SCAN_OMIT_KEYS = "PUBLIC_SUPABASE_URL,PUBLIC_SUPABASE_ANON_KEY,PUBLIC_SITE_URL,NODE_ENV"
+    SECRETS_SCAN_OMIT_KEYS = "PUBLIC_SUPABASE_URL,PUBLIC_SUPABASE_ANON_KEY,PUBLIC_MAPBOX_ACCESS_TOKEN,PUBLIC_SITE_URL,NODE_ENV"
 
 [dev]
   command = "npm run dev"
