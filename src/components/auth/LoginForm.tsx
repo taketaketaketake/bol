@@ -39,15 +39,15 @@ export default function LoginForm() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || '登入失敗，請稍後再試');
+        throw new Error(data.error || 'Login failed, please try again');
       }
       
       // If we get here, something went wrong with the redirect
       window.location.href = '/dashboard';
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '登入失敗，請稍後再試';
+      const errorMessage = err instanceof Error ? err.message : 'Login failed, please try again';
       setError(errorMessage);
-      console.error('登入錯誤:', err);
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -67,12 +67,12 @@ export default function LoginForm() {
         window.location.href = response.url;
       } else {
         const data = await response.json();
-        throw new Error(data.error || `${provider} 登入失敗`);
+        throw new Error(data.error || `${provider} login failed`);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : `${provider} 登入失敗`;
+      const errorMessage = err instanceof Error ? err.message : `${provider} login failed`;
       setError(errorMessage);
-      console.error(`${provider} 登入錯誤:`, err);
+      console.error(`${provider} login error:`, err);
     }
   };
 
@@ -96,7 +96,7 @@ export default function LoginForm() {
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            電子郵件
+            Email
           </label>
           <div className="mt-1">
             <input
@@ -115,11 +115,11 @@ export default function LoginForm() {
         <div>
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              密碼
+              Password
             </label>
             <div className="text-sm">
               <a href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                忘記密碼？
+                Forgot password?
               </a>
             </div>
           </div>
@@ -149,9 +149,9 @@ export default function LoginForm() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                登入中...
+                Signing in...
               </>
-            ) : '登入'}
+            ) : 'Sign In'}
           </button>
         </div>
       </form>
@@ -162,7 +162,7 @@ export default function LoginForm() {
             <div className="w-full border-t border-gray-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">或</span>
+            <span className="px-2 bg-white text-gray-500">or</span>
           </div>
         </div>
 
@@ -173,7 +173,7 @@ export default function LoginForm() {
               onClick={() => handleSocialLogin('github')}
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
-              <span className="sr-only">使用 GitHub 登入</span>
+              <span className="sr-only">Sign in with GitHub</span>
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.944.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.14 18.198 20 14.438 20 10.017 20 4.484 15.522 0 10 0z" clipRule="evenodd" />
               </svg>
@@ -185,7 +185,7 @@ export default function LoginForm() {
               onClick={() => handleSocialLogin('google')}
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
-              <span className="sr-only">使用 Google 登入</span>
+              <span className="sr-only">Sign in with Google</span>
               <svg className="w-5 h-5" aria-hidden="true" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -199,9 +199,9 @@ export default function LoginForm() {
 
       <div className="mt-6 text-center text-sm">
         <p className="text-gray-600">
-          還沒有帳號？{' '}
+          Don't have an account?{' '}
           <a href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-            立即註冊
+            Sign up
           </a>
         </p>
       </div>

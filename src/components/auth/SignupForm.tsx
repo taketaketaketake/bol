@@ -50,7 +50,7 @@ export default function SignupForm() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '註冊失敗，請稍後再試');
+      if (!res.ok) throw new Error(data.error || 'Registration failed, please try again');
 
       if (data.redirectTo) {
         window.location.href = data.redirectTo;
@@ -61,8 +61,8 @@ export default function SignupForm() {
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '發生未知錯誤');
-      console.error('註冊錯誤:', err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      console.error('Registration error:', err);
     } finally {
       setLoading(false);
     }
@@ -87,7 +87,7 @@ export default function SignupForm() {
 
       <div>
         <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-          全名
+          Full Name
         </label>
         <div className="mt-1">
           <input
@@ -104,7 +104,7 @@ export default function SignupForm() {
       </div>
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          電子郵件
+          Email
         </label>
         <div className="mt-1">
           <input
@@ -121,7 +121,7 @@ export default function SignupForm() {
       </div>
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          密碼
+          Password
         </label>
         <div className="mt-1 flex space-x-2 flex-col justify-start">
           <input
@@ -141,7 +141,7 @@ export default function SignupForm() {
             onClick={handleGeneratePassword}
             className="text-indigo-600 hover:text-indigo-800 text-xs underline px-2 py-1 rounded focus:outline-none text-left cursor-pointer"
           >
-            產生隨機密碼
+            Generate Random Password
           </button>
         </div>
       </div>
@@ -157,9 +157,9 @@ export default function SignupForm() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              註冊中...
+              Signing up...
             </>
-          ) : '註冊'}
+          ) : 'Sign Up'}
         </button>
       </div>
     </form>

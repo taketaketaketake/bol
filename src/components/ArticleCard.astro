@@ -8,7 +8,7 @@ export interface Props {
 const { article } = Astro.props;
 const { id, title, createdAt, author, content } = article;
 const excerpt = content.substring(0, 150) + '...';
-const date = new Date(createdAt).toLocaleDateString('zh-TW');
+const date = new Date(createdAt).toLocaleDateString('en-US');
 ---
 
 <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -27,7 +27,7 @@ const date = new Date(createdAt).toLocaleDateString('zh-TW');
       href={`/articles/${id}`}
       class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-medium"
     >
-      閱讀更多
+      Read More
       <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
       </svg>
