@@ -23,8 +23,19 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
   <div class="min-h-screen bg-brand-bg">
 
     <!-- HERO SECTION -->
-    <section class="py-8 sm:py-12 lg:py-24">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="pt-0 pb-8 sm:pb-12 lg:pb-24 relative overflow-hidden">
+      <!-- Background Image -->
+      <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/70"></div>
+        <img
+          src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+          alt="Clean laundry background"
+          class="w-full h-full object-cover opacity-20"
+          loading="eager"
+        />
+      </div>
+
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center">
 
           <!-- Hero Content -->
@@ -66,8 +77,8 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
           </div>
 
           <!-- Order Form - Mobile First -->
-          <div class="order-1 lg:order-2">
-            <div class="hero">
+          <div class="order-1 lg:order-2 mt-8 sm:mt-0">
+            <div class="hero bg-white/95 backdrop-blur-sm">
               <h2 class="text-lg sm:text-xl font-bold text-brand-text mb-4 sm:mb-6">Start Your Laundry Order</h2>
               <form method="POST" action="/start-basic" class="space-y-4 sm:space-y-5">
 

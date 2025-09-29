@@ -1,118 +1,302 @@
-# Astro Supabase Blog Starter
+# Bags of Laundry - Professional Laundry Service Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Astro](https://img.shields.io/badge/Astro-5.7.13-FF5D01?logo=astro&logoColor=white)](https://astro.build/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Astro](https://img.shields.io/badge/Astro-5.14.1-FF5D01?logo=astro&logoColor=white)](https://astro.build/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Latest-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.1.0-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.7-06B6D4?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Supabase](https://img.shields.io/badge/Supabase-2.49.5-181818?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Latest-06B6D4?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Latest-181818?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Stripe](https://img.shields.io/badge/Stripe-Latest-008CDD?logo=stripe&logoColor=white)](https://stripe.com/)
 
-A modern blog starter built with Astro, featuring Supabase authentication, Markdown-based content management, and styled with Tailwind CSS.
+A modern, comprehensive laundry service platform built with Astro, featuring guest authentication, real-time availability checking, Stripe payment integration, and advanced capacity management for pickup and delivery operations.
 
-## ✨ Features
+## ✨ Core Features
 
-- 🔐 User authentication with Supabase
-- 📝 Complete blog post management with Markdown support
-- 🎨 Clean, responsive design optimized for readability
-- ⚡ Blazing fast performance with Astro
-- 🛠️ Built with TypeScript for type safety and better developer experience
-- 🌟 SEO-optimized with automatic sitemap generation
+### 🚀 **Modern Booking Experience**
+- **Smart Availability Checking** - Real-time capacity management with service area validation
+- **Guest Authentication** - Passwordless ordering with secure token-based access
+- **Dynamic Time Windows** - Live capacity display with overbooking prevention
+- **Progressive Web Experience** - Mobile-first booking flow
 
-## 🚀 Quick Start
+### 💳 **Complete Payment System**
+- **Stripe Integration** - Secure card processing with PCI compliance
+- **Membership Subscriptions** - Annual membership with automatic billing
+- **Authorization & Capture** - Hold minimum amount, capture actual weight pricing
+- **Webhook Security** - Verified payment confirmations and status updates
 
-### Prerequisites
+### 📍 **Operational Management**
+- **Service Zone Management** - Geographic service areas with postal code validation
+- **Capacity Planning** - Daily capacity management per zone and time window
+- **Order Tracking** - Complete status machine from pickup to delivery
+- **Driver Assignment** - Route optimization and capacity allocation
 
-- Node.js 18+
-- Yarn or npm
-- Supabase account
+### 🔍 **Enterprise SEO**
+- **Technical SEO** - Complete meta tags, structured data, sitemaps
+- **Local Business Schema** - Rich snippets for Google Business listings
+- **Social Media Ready** - Open Graph and Twitter Card integration
+- **Performance Optimized** - Fast loading with Core Web Vitals optimization
 
-### Installation
+## 🎯 Business Model
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/calpa/astro-supabase-blog-starter.git
-   cd astro-supabase-blog-starter
-   ```
+### Service Offerings
+- **Per-Pound Pricing**: $2.49/lb with $35 minimum order
+- **Membership Program**: $99/year for $1.99/lb pricing + perks
+- **Add-On Services**: Rush delivery, eco-friendly options, hang-dry delicates
+- **Specialty Items**: Comforters, bedding bundles, dry cleaning
 
-2. Install dependencies
-   ```bash
-   yarn install
-   # or
-   npm install
-   ```
+### Geographic Coverage
+- **Primary Market**: Detroit Metro Area
+- **Service Zones**: Expandable postal code-based service areas
+- **Delivery Model**: Free pickup & delivery within service zones
 
-3. Set up environment variables
-   ```
+## 🏗️ Architecture
 
-4. Start the development server
-   ```bash
-   yarn dev
-   ```
-   Your app will be available at [http://localhost:4321](http://localhost:4321)
+### Authentication Model
+```
+Guest Order → Magic Link → Optional Account Upgrade
+```
+- **Guest Orders**: Instant booking with email + phone
+- **Secure Tokens**: 14-day access tokens for order tracking
+- **Progressive Enhancement**: Natural upgrade path to full accounts
+
+### Payment Processing
+```
+Booking: $35 Authorization Hold → Pickup: Weight Captured → Final: Actual Charge
+```
+- **Authorization**: Minimum hold at booking
+- **Capture**: Actual amount after weight measurement
+- **Subscriptions**: Automatic membership billing
+
+### Order Lifecycle
+```
+scheduled → en_route_pickup → picked_up → processing → ready_for_delivery → delivered → completed
+```
 
 ## 📂 Project Structure
 
 ```
 /
-├── public/               # Static files
+├── public/                     # Static assets
 ├── src/
-│   ├── components/       # Shared components
-│   │   ├── auth/         # Authentication components
-│   │   └── dashboard/    # Admin dashboard components
-│   ├── db/               # Database related
-│   ├── layout/           # Layout components
-│   ├── lib/              # Utility functions
-│   ├── middleware.ts     # Application middleware
-│   └── pages/            # Page components
-│       ├── api/          # API routes
-│       ├── auth/         # Authentication pages
-│       ├── dashboard/    # Admin dashboard pages
-│       └── articles/     # Article pages
-├── .env.example          # Environment variables example
-├── package.json          # Project dependencies
-└── tsconfig.json         # TypeScript configuration
+│   ├── components/            # Shared components
+│   │   ├── StripeElements.tsx # Payment processing
+│   │   └── ProgressSteps/     # Booking flow UI
+│   ├── layout/
+│   │   └── Layout.astro       # SEO-optimized layout
+│   ├── pages/
+│   │   ├── api/               # Backend APIs
+│   │   │   ├── create-order.ts          # Guest order creation
+│   │   │   ├── check-availability.ts    # Real-time availability
+│   │   │   ├── create-payment-intent.ts # Payment processing
+│   │   │   ├── capture-payment.ts       # Post-weight capture
+│   │   │   └── stripe-webhook.ts        # Payment confirmations
+│   │   ├── orders/
+│   │   │   └── [id].astro     # Token-authenticated order view
+│   │   ├── start-basic.astro  # Enhanced booking entry
+│   │   ├── checkout.astro     # Payment & membership upsell
+│   │   └── confirm.astro      # Order confirmation
+│   └── utils/
+│       ├── guest-auth.ts      # Token utilities & email
+│       ├── order-status.ts    # Status machine
+│       └── wizard.server.ts   # Booking flow state
+├── database-migrations.sql     # Database schema updates
+├── sql-functions.sql          # Availability & capacity functions
+├── GUEST-AUTH-IMPLEMENTATION.md # Complete auth documentation
+└── .env                       # Environment configuration
 ```
 
-## 🧑‍💻 Development Commands
+## 🗄️ Database Schema
 
-| Command                 | Description                                    |
-| :--------------------- | :-------------------------------------------- |
-| `yarn install`         | Install dependencies                          |
-| `yarn dev`             | Start development server (http://localhost:4321) |
-| `yarn build`           | Build for production (outputs to `./dist`)    |
-| `yarn preview`         | Preview production build                      |
-| `yarn astro ...`       | Run Astro CLI commands                       |
-| `yarn astro -- --help` | Show Astro CLI help                           |
+### Core Tables
+- **`customers`** - Customer information with auth integration
+- **`orders`** - Main order tracking with pricing, status, Stripe integration
+- **`addresses`** - Customer addresses with geolocation
+- **`memberships`** - Subscription tracking for Stripe integration
 
-## 🔒 Environment Variables
+### Operational Tables
+- **`service_zones`** - Geographic service areas with postal codes
+- **`time_windows`** - Available pickup/delivery time slots
+- **`daily_capacity`** - Daily capacity management per zone/window
+- **`drivers`** - Driver management and assignments
 
-Create a `.env` file based on `.env.example` and set the following variables:
+### Content & Management
+- **`articles`** - Content management system
+- **`notifications`** - Communication tracking
+- **`tasks`** - Internal task management
 
-- `PUBLIC_SUPABASE_URL`: Your Supabase project URL
-- `PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anon/public key
-- `DATABASE_URL`: Database connection string
-- `PUBLIC_SITE_URL`: Your site URL (usually http://localhost:4321 in development)
+## 🚀 Quick Start
 
-## 📝 License
+### Prerequisites
+- Node.js 18+
+- Supabase account
+- Stripe account
+- Mapbox account (for address autocomplete)
 
-This project is licensed under the [MIT License](LICENSE).
+### Installation
 
-## 🙏 Acknowledgements
+1. **Clone and Install**
+   ```bash
+   git clone [repository]
+   cd bol-new-new
+   npm install
+   ```
 
-- [Astro](https://astro.build/) - The all-in-one web framework
-- [Supabase](https://supabase.com/) - Open source Firebase alternative
-- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework
+2. **Database Setup**
+   ```sql
+   -- Run in Supabase SQL Editor
+   -- 1. Execute database-migrations.sql
+   -- 2. Execute sql-functions.sql
+   ```
+
+3. **Environment Configuration**
+   ```bash
+   cp .env.example .env
+   # Update with your actual API keys:
+   # - Supabase URL and keys
+   # - Stripe API keys (test/live)
+   # - Mapbox access token
+   ```
+
+4. **Sample Data** (for testing)
+   ```sql
+   -- Add sample service zones
+   INSERT INTO service_zones (name, postal_codes, base_min_order_cents) VALUES
+   ('Detroit Core', ARRAY['48201', '48202', '48226', '48207'], 3500);
+
+   -- Add sample time windows
+   INSERT INTO time_windows (label, start_time, end_time, is_active) VALUES
+   ('Morning', '08:00', '12:00', true),
+   ('Afternoon', '12:00', '16:00', true),
+   ('Evening', '16:00', '20:00', true);
+
+   -- Add today's capacity
+   INSERT INTO daily_capacity (service_date, zone_id, time_window_id, pickup_capacity, delivery_capacity)
+   SELECT CURRENT_DATE, sz.id, tw.id, 10, 10
+   FROM service_zones sz, time_windows tw;
+   ```
+
+5. **Start Development**
+   ```bash
+   npm run dev
+   # Visit http://localhost:4323
+   ```
+
+## 🧪 Testing the System
+
+### Booking Flow Test
+1. Navigate to `/start-basic`
+2. Enter Detroit address: "123 Main St, Detroit, MI 48201"
+3. Select today's date
+4. Watch real-time availability checking
+5. Select available time window
+6. Complete booking flow through checkout
+
+### Payment Testing
+- Use Stripe test cards: `4242424242424242`
+- Test membership signup during checkout
+- Verify webhook handling in Stripe dashboard
+
+## 🔧 Development Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+| `npm run type-check` | TypeScript checking |
+
+## 🌟 Key Implementation Highlights
+
+### ✅ **SEO Implementation Complete**
+- **Technical Foundation**: Comprehensive meta tags, structured data, sitemaps
+- **Local Business Schema**: Rich snippets for Google Business listings
+- **Social Media Ready**: Open Graph and Twitter Card integration
+- **Performance Optimized**: Fast loading with enterprise-level SEO
+
+### ✅ **Guest Authentication System**
+- **Passwordless Ordering**: Email + phone creates instant orders with secure tokens
+- **Magic Links**: 14-day secure access without account creation
+- **Progressive Enhancement**: Natural upgrade path to full accounts
+- **Mobile Optimized**: SMS-friendly links and bookmarkable order pages
+
+### ✅ **Real-Time Availability Management**
+- **Service Area Validation**: Postal code-based zone verification
+- **Capacity Management**: Live slot availability with overbooking prevention
+- **Dynamic Time Windows**: Real-time display of available pickup times
+- **Smart Form Enhancement**: Progressive disclosure based on availability
+
+### ✅ **Complete Stripe Integration**
+- **Secure Payments**: Full PCI-compliant card processing
+- **Membership Subscriptions**: Annual billing with automatic renewals
+- **Authorization Flow**: Hold minimum, capture actual weight pricing
+- **Webhook Security**: Verified payment confirmations and status updates
+
+### ✅ **Membership Upsell System**
+- **Strategic Placement**: Optimally positioned during checkout flow
+- **Value Communication**: Clear savings display and member benefits
+- **One-Click Addition**: Seamless membership signup experience
+- **Dynamic Pricing**: Real-time total calculations with member discounts
+
+## 🚀 Production Deployment
+
+### Database Setup
+1. Run `database-migrations.sql` in Supabase
+2. Execute `sql-functions.sql` for availability checking
+3. Populate service zones and time windows
+4. Set up daily capacity for initial markets
+
+### API Configuration
+1. Replace Stripe test keys with live keys
+2. Configure Stripe webhook endpoints
+3. Set up proper domain in environment variables
+4. Enable Mapbox geocoding for address validation
+
+### Monitoring & Analytics
+1. Set up Google Search Console
+2. Configure Google Analytics
+3. Monitor Core Web Vitals
+4. Track conversion rates and operational metrics
+
+## 📈 Business Impact
+
+### Operational Efficiency
+- **No Overbooking**: Real-time capacity prevents scheduling conflicts
+- **Automated Validation**: Service area checking reduces manual work
+- **Smart Routing**: Zone-based assignments optimize driver routes
+
+### Revenue Growth
+- **Membership Conversion**: Upsell at point of purchase increases AOV
+- **Retention**: Members show higher lifetime value and reorder rates
+- **Scalability**: Zone-based expansion model supports geographic growth
+
+### Customer Experience
+- **Frictionless Booking**: No signup required for first orders
+- **Transparent Pricing**: Clear capacity and availability information
+- **Professional Communication**: Automated notifications and confirmations
+
+## 📝 Documentation
+
+- **`GUEST-AUTH-IMPLEMENTATION.md`** - Complete authentication system guide
+- **`database-migrations.sql`** - Schema updates and new tables
+- **`sql-functions.sql`** - Availability checking and capacity management
+- **Implementation Notes** - Detailed session notes and feature documentation
+
+## 🔒 Security & Compliance
+
+- **PCI Compliance**: Stripe handles all sensitive card data
+- **Token Security**: Crypto-secure guest access tokens
+- **Webhook Verification**: Stripe signature verification
+- **Data Protection**: Secure handling of customer information
+
+## 📞 Support & Contact
+
+For questions about implementation or deployment:
+- Review documentation in project files
+- Check Stripe dashboard for payment issues
+- Verify Supabase configuration for database connectivity
+- Test availability system with sample data
 
 ---
 
-<p align="center">
-  <a href="https://github.com/calpa/astro-supabase-blog-starter/stargazers">
-    <img src="https://img.shields.io/github/stars/calpa/astro-supabase-blog-starter?style=social" alt="GitHub Stars">
-  </a>
-  <a href="https://github.com/calpa/astro-supabase-blog-starter/forks">
-    <img src="https://img.shields.io/github/forks/calpa/astro-supabase-blog-starter?style=social" alt="GitHub Forks">
-  </a>
-  <a href="https://github.com/calpa/astro-supabase-blog-starter/issues">
-    <img src="https://img.shields.io/github/issues/calpa/astro-supabase-blog-starter" alt="GitHub Issues">
-  </a>
-</p>
+**Built for modern laundry operations with enterprise-grade scalability and security.** 🧺✨
