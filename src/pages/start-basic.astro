@@ -53,27 +53,42 @@ if (Astro.request.method === "POST") {
       phone: String(formData.get("phone") || "")
     };
 
-    const parsed = Schema.safeParse(data);
-    if (!parsed.success) {
-      actionError = parsed.error.issues[0]?.message || "Please complete all fields.";
+    // Check if this is a homepage pre-fill (has address/phone but missing timeWindow)
+    const isHomepagePrefill = data.line1 && data.phone && !data.timeWindow;
+
+    if (isHomepagePrefill) {
+      // Homepage pre-fill: Store partial data in wizard state, don't validate yet
+      w = {
+        address: { line1: data.line1 },
+        phone: data.phone,
+        date: data.date || undefined, // Include date if provided from homepage
+        dropoffAddress: data.sameAsPickup ? null : undefined
+      };
     } else {
-      return writeWizard(Astro.request, {
-        address: { line1: parsed.data.line1 },
-        dropoffAddress: parsed.data.sameAsPickup ? null : {
-          line1: parsed.data.dropoffLine1!,
-          date: parsed.data.dropoffDate!
-        },
-        date: parsed.data.date,
-        timeWindow: parsed.data.timeWindow,
-        phone: parsed.data.phone
-      }, "/order-type");
+      // Complete form submission: Validate and proceed
+      const parsed = Schema.safeParse(data);
+      if (!parsed.success) {
+        actionError = parsed.error.issues[0]?.message || "Please complete all fields.";
+      } else {
+        return writeWizard(Astro.request, {
+          address: { line1: parsed.data.line1 },
+          dropoffAddress: parsed.data.sameAsPickup ? null : {
+            line1: parsed.data.dropoffLine1!,
+            date: parsed.data.dropoffDate!
+          },
+          date: parsed.data.date,
+          timeWindow: parsed.data.timeWindow,
+          phone: parsed.data.phone
+        }, "/order-type");
+      }
     }
   } catch (error) {
     actionError = "An error occurred processing your request.";
   }
+} else {
+  // GET request: Load existing wizard state
+  w = await readWizard(Astro.request);
 }
-
-w = await readWizard(Astro.request);
 
 // Get today's date as minimum
 const today = new Date();

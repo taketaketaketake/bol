@@ -77,7 +77,7 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
           </div>
 
           <!-- Order Form - Mobile First -->
-          <div class="order-1 lg:order-2 mt-8 sm:mt-0">
+          <div class="order-1 lg:order-2 mt-8 sm:mt-0 mb-8 sm:mb-0">
             <div class="hero bg-white border border-gray-200 shadow-lg">
               <h2 class="text-lg sm:text-xl font-bold text-brand-text mb-4 sm:mb-6">Start Your Laundry Order</h2>
               <form method="POST" action="/start-basic" class="space-y-4 sm:space-y-5">
@@ -89,7 +89,7 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
                   </label>
                   <input
                     id="addr"
-                    name="address"
+                    name="line1"
                     type="text"
                     placeholder="e.g., 123 Main St or 48226"
                     required
@@ -164,6 +164,10 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
                     />
                   </div>
                 </div>
+
+                <!-- Hidden fields for compatibility with start-basic -->
+                <input type="hidden" name="sameAsPickup" value="on" />
+                <input type="hidden" name="timeWindow" value="" />
 
                 <!-- Buttons - Stacked on mobile, inline on desktop -->
                 <div class="flex flex-col sm:flex-row gap-3 pt-2 sm:pt-4">
