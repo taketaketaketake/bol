@@ -1,16 +1,23 @@
 ---
 import Layout from '../layout/Layout.astro';
 import ProgressSteps from '../components/ProgressSteps';
-import { readWizard, clearWizard } from "../utils/wizard.server";
+import StripeElements from '../components/StripeElements';
+import { readWizard, clearWizard, writeWizard } from "../utils/wizard.server";
 
 // Server-side handling
 let w = {};
 
 if (Astro.request.method === "POST") {
   try {
-    // TODO: Process payment with Stripe here
-    // For now, just clear the wizard and redirect to confirmation
-    return clearWizard(Astro.request, "/confirm");
+    const formData = await Astro.request.formData();
+    const addMembership = formData.get("add-membership") === "on";
+
+    // Payment processing will now be handled by Stripe Elements component
+    // This form submission is now for non-JS fallback or other actions
+    console.log('Form submitted - this should now be handled by Stripe Elements');
+
+    // Redirect to prevent form resubmission
+    return Astro.redirect('/checkout');
   } catch (error) {
     console.error("Error processing checkout:", error);
   }
@@ -66,7 +73,7 @@ const title = "Review & Confirm Order | Bags of Laundry";
 const description = "Review your laundry service order and complete your booking.";
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} noIndex={true}>
   <div class="min-h-screen bg-gray-50">
     <div class="max-w-6xl mx-auto px-4 py-8">
 
@@ -288,31 +295,107 @@ const description = "Review your laundry service order and complete your booking
             <div class="mb-6">
               <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
 
-              <!-- Stripe Elements Placeholder -->
-              <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50">
-                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
+              <!-- Stripe Elements -->
+              <StripeElements
+                client:load
+                amount={Math.round(parseFloat(calculateTotal()) * 100)}
+                addMembership={false}
+                orderDetails={{
+                  orderType: w.orderType,
+                  customerName: w.customer?.fullName || '',
+                  customerEmail: w.customer?.email || '',
+                  pickupAddress: w.pickup?.address || '',
+                  pickupDate: w.pickup?.date || '',
+                  pickupTimeWindowId: w.pickup?.timeWindowId || '',
+                  notes: w.addonPrefs?.notes || '',
+                  preferences: w.addonPrefs || {},
+                  addons: w.addons || [],
+                  serviceType: 'wash_fold',
+                  estimatedAmount: Math.round(parseFloat(calculateTotal()) * 100)
+                }}
+                onPaymentSuccess={(paymentIntent) => {
+                  console.log('Payment successful:', paymentIntent);
+                  // Redirect to the order view page using the token
+                  if (window.orderData) {
+                    window.location.href = window.orderData.magicLink;
+                  } else {
+                    window.location.href = '/confirm';
+                  }
+                }}
+                onPaymentError={(error) => {
+                  console.error('Payment error:', error);
+                  alert('Payment failed: ' + error);
+                }}
+              />
+            </div>
+
+            <!-- Membership Upsell -->
+            <div class="mb-6" id="membership-upsell">
+              <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
+                <div class="flex items-start gap-4">
+                  <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.5 2.5L16 4.5 14.5 3 16 1.5 17.5 3 16 4.5 17.5 6M13 13h4-4V8H9v5h4 0z" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                      <h3 class="font-semibold text-gray-900">🎉 Special Offer: Join Our Membership</h3>
+                      <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">Save Money</span>
+                    </div>
+
+                    <p class="text-sm text-gray-600 mb-4">
+                      Add annual membership for just $99/year and save on every order. Get member pricing of $1.99/lb instead of $2.49/lb.
+                    </p>
+
+                    <div class="bg-white rounded-lg p-4 mb-4 border border-blue-200">
+                      <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Annual Membership</span>
+                        <span class="font-semibold text-gray-900">$99.00</span>
+                      </div>
+                      <div class="flex justify-between items-center text-sm">
+                        <span class="text-green-600">Savings on this order:</span>
+                        <span class="font-semibold text-green-600" id="membership-savings">$10.00</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs text-gray-500 mt-1">
+                        <span>Your new order total:</span>
+                        <span id="new-total-with-membership">$124.00</span>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                      <label class="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          id="add-membership"
+                          class="sr-only"
+                        />
+                        <div class="relative">
+                          <div class="w-6 h-6 bg-white border-2 border-gray-300 rounded-md transition-all duration-200 checkbox-box"></div>
+                          <svg class="w-4 h-4 text-white absolute top-1 left-1 hidden checkbox-check" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                        <span class="ml-3 text-sm font-medium text-gray-900">
+                          Yes, add membership and start saving immediately!
+                        </span>
+                      </label>
+                    </div>
+
+                    <div class="mt-3 text-xs text-gray-500">
+                      ✓ $0.50 savings per pound  ✓ Priority booking  ✓ Exclusive promotions  ✓ Cancel anytime
+                    </div>
+                  </div>
                 </div>
-                <p class="text-sm text-gray-600 font-medium">Secure Card Payment</p>
-                <p class="text-xs text-gray-500 mt-1">Stripe Elements will load here</p>
               </div>
             </div>
 
             <!-- Navigation Buttons -->
             <div class="space-y-3">
-              <form method="post">
-                <button
-                  type="submit"
-                  class="w-full bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Confirm & Schedule Pickup
-                </button>
-              </form>
+              <input type="hidden" name="add-membership" id="membership-hidden-input" value="off" />
 
               <a
                 href="/details"
@@ -351,4 +434,76 @@ const description = "Review your laundry service order and complete your booking
       </div>
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const addMembershipCheckbox = document.getElementById('add-membership');
+      const membershipHiddenInput = document.getElementById('membership-hidden-input');
+      const checkboxBox = document.querySelector('.checkbox-box');
+      const checkboxCheck = document.querySelector('.checkbox-check');
+      const membershipSavings = document.getElementById('membership-savings');
+      const newTotalWithMembership = document.getElementById('new-total-with-membership');
+
+      // Get current order total from the displayed value
+      const totalElement = document.querySelector('.text-2xl.font-bold.text-gray-900');
+      const currentTotal = parseFloat(totalElement?.textContent?.replace('$', '') || '33.75');
+      const membershipFee = 99.00;
+
+      // Calculate potential savings based on current order
+      function calculateSavings() {
+        // For per-pound orders: 20lbs * $0.50 savings = $10
+        // For fixed-price orders: estimated $10 savings
+        let savings = 10.00;
+        return savings;
+      }
+
+      const savings = calculateSavings();
+      const newTotal = currentTotal + membershipFee - savings;
+
+      // Update display
+      membershipSavings.textContent = `$${savings.toFixed(2)}`;
+      newTotalWithMembership.textContent = `$${newTotal.toFixed(2)}`;
+
+      // Store reference to Stripe Elements component for updates
+      let stripeElementsComponent = null;
+
+      // Wait for Stripe Elements to initialize
+      setTimeout(() => {
+        stripeElementsComponent = document.querySelector('[data-stripe-elements]');
+      }, 1000);
+
+      // Checkbox functionality
+      addMembershipCheckbox?.addEventListener('change', function() {
+        const isChecked = this.checked;
+
+        if (isChecked) {
+          checkboxBox?.classList.remove('border-gray-300', 'bg-white');
+          checkboxBox?.classList.add('border-blue-500', 'bg-blue-500');
+          checkboxCheck?.classList.remove('hidden');
+          membershipHiddenInput.value = 'on';
+        } else {
+          checkboxBox?.classList.add('border-gray-300', 'bg-white');
+          checkboxBox?.classList.remove('border-blue-500', 'bg-blue-500');
+          checkboxCheck?.classList.add('hidden');
+          membershipHiddenInput.value = 'off';
+        }
+
+        // Trigger a custom event that the Stripe component can listen to
+        window.dispatchEvent(new CustomEvent('membershipToggled', {
+          detail: {
+            addMembership: isChecked,
+            newAmount: Math.round((isChecked ? newTotal : currentTotal) * 100) // Convert to cents
+          }
+        }));
+      });
+
+      // Make the label clickable
+      const membershipLabel = document.querySelector('label[for="add-membership"]');
+      membershipLabel?.addEventListener('click', function(e) {
+        e.preventDefault();
+        addMembershipCheckbox.checked = !addMembershipCheckbox.checked;
+        addMembershipCheckbox.dispatchEvent(new Event('change'));
+      });
+    });
+  </script>
 </Layout>

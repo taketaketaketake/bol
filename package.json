@@ -11,6 +11,9 @@
   "dependencies": {
     "@astrojs/netlify": "^6.5.11",
     "@astrojs/react": "^4.2.7",
+    "@astrojs/sitemap": "^3.6.0",
+    "@stripe/react-stripe-js": "^4.0.2",
+    "@stripe/stripe-js": "^7.9.0",
     "@supabase/supabase-js": "^2.49.5",
     "@tailwindcss/vite": "^4.1.7",
     "@types/react": "^19.1.4",
@@ -21,6 +24,7 @@
     "postgres": "^3.4.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "stripe": "^18.5.0",
     "sweetalert2": "^11.21.2",
     "tailwindcss": "^4.1.7",
     "zod": "^3.25.7"

@@ -1,0 +1,27 @@
+# Robots.txt for Bags of Laundry
+User-agent: *
+Allow: /
+
+# Block checkout flow pages from indexing
+Disallow: /start-basic
+Disallow: /order-type
+Disallow: /addons
+Disallow: /details
+Disallow: /checkout
+Disallow: /confirm
+
+# Block any admin or private areas
+Disallow: /admin/
+Disallow: /api/
+
+# Allow important pages
+Allow: /services
+Allow: /pricing
+Allow: /service-areas
+Allow: /how-it-works
+
+# Sitemap location
+Sitemap: https://bagsoflaundry.com/sitemap-index.xml
+
+# Crawl-delay (optional - helps prevent overloading)
+Crawl-delay: 1

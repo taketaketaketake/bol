@@ -10,6 +10,7 @@ const Schema = z.object({
   dropoffDate: z.string().optional(),
   sameAsPickup: z.boolean().default(true),
   date: z.string().min(10), // YYYY-MM-DD
+  timeWindow: z.string().min(1),
   phone: z.string().min(7)
 }).refine((data) => {
   if (!data.sameAsPickup) {
@@ -48,6 +49,7 @@ if (Astro.request.method === "POST") {
       dropoffDate: String(formData.get("dropoffDate") || ""),
       sameAsPickup: formData.get("sameAsPickup") === "on",
       date: String(formData.get("date") || ""),
+      timeWindow: String(formData.get("timeWindow") || ""),
       phone: String(formData.get("phone") || "")
     };
 
@@ -62,6 +64,7 @@ if (Astro.request.method === "POST") {
           date: parsed.data.dropoffDate!
         },
         date: parsed.data.date,
+        timeWindow: parsed.data.timeWindow,
         phone: parsed.data.phone
       }, "/order-type");
     }
@@ -81,7 +84,7 @@ const title = "Schedule Pickup | Bags of Laundry";
 const description = "Schedule your laundry pickup. Enter your address, date, and contact info to get started.";
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} noIndex={true}>
   <div class="min-h-screen bg-gray-50">
     <div class="max-w-2xl mx-auto px-4 py-8">
 
@@ -151,6 +154,9 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
                 value={w.date || ""}
                 required
               />
+              <div id="availability-status" class="mt-1 text-xs text-gray-500">
+                Select a date to see available time windows
+              </div>
             </div>
 
             <!-- Phone -->
@@ -167,6 +173,17 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
                 required
               />
             </div>
+          </div>
+
+          <!-- Time Window Selection -->
+          <div id="time-window-section" class="mt-6 hidden">
+            <label class="block text-sm font-semibold text-gray-900 mb-4">
+              Select Pickup Time Window
+            </label>
+            <div id="time-windows-container" class="space-y-2">
+              <!-- Time windows will be populated by JavaScript -->
+            </div>
+            <input type="hidden" name="timeWindow" id="selected-time-window" required />
           </div>
         </div>
 
@@ -322,9 +339,132 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
         }
       }
 
-      pickupDateInput?.addEventListener('change', updateDropoffMinDate);
+      pickupDateInput?.addEventListener('change', function() {
+        updateDropoffMinDate();
+        checkAvailability();
+      });
       // Initialize on page load
       updateDropoffMinDate();
+
+      // Availability checking functionality
+      let availabilityCheckTimeout: NodeJS.Timeout;
+      const addressInput = document.getElementById('address-input') as HTMLInputElement;
+      const availabilityStatus = document.getElementById('availability-status') as HTMLElement;
+      const timeWindowSection = document.getElementById('time-window-section') as HTMLElement;
+      const timeWindowsContainer = document.getElementById('time-windows-container') as HTMLElement;
+      const selectedTimeWindow = document.getElementById('selected-time-window') as HTMLInputElement;
+      const submitButton = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+
+      let currentTimeWindows: any[] = [];
+
+      const checkAvailability = async () => {
+        const address = addressInput?.value?.trim();
+        const date = pickupDateInput?.value;
+
+        // Clear previous results
+        timeWindowSection?.classList.add('hidden');
+        selectedTimeWindow.value = '';
+        currentTimeWindows = [];
+
+        if (!address || address.length < 10 || !date) {
+          availabilityStatus.textContent = 'Enter address and select date to check availability';
+          availabilityStatus.className = 'mt-1 text-xs text-gray-500';
+          return;
+        }
+
+        availabilityStatus.textContent = 'Checking availability...';
+        availabilityStatus.className = 'mt-1 text-xs text-blue-600';
+
+        try {
+          const response = await fetch('/api/check-availability', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address, date })
+          });
+
+          const data = await response.json();
+
+          if (data.available && data.timeWindows?.length > 0) {
+            currentTimeWindows = data.timeWindows;
+            displayTimeWindows(data.timeWindows);
+            availabilityStatus.textContent = `✓ Available in ${data.zone.name}`;
+            availabilityStatus.className = 'mt-1 text-xs text-green-600';
+            timeWindowSection?.classList.remove('hidden');
+          } else {
+            availabilityStatus.textContent = data.message || 'No availability for this date/location';
+            availabilityStatus.className = 'mt-1 text-xs text-orange-600';
+          }
+        } catch (error) {
+          console.error('Error checking availability:', error);
+          availabilityStatus.textContent = 'Unable to check availability. Please try again.';
+          availabilityStatus.className = 'mt-1 text-xs text-red-600';
+        }
+      };
+
+      const displayTimeWindows = (windows: any[]) => {
+        timeWindowsContainer.innerHTML = '';
+
+        windows.forEach((window: any) => {
+          const windowDiv = document.createElement('div');
+          windowDiv.className = 'relative';
+
+          const windowButton = document.createElement('button');
+          windowButton.type = 'button';
+          windowButton.className = `w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 time-window-option ${
+            window.availableSlots === 0 ? 'opacity-50 cursor-not-allowed' : ''
+          }`;
+          windowButton.disabled = window.availableSlots === 0;
+
+          windowButton.innerHTML = `
+            <div class="flex justify-between items-center">
+              <div>
+                <div class="font-medium text-gray-900">${window.label}</div>
+                <div class="text-sm text-gray-600">${formatTimeRange(window.startTime, window.endTime)}</div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-medium ${window.availableSlots > 0 ? 'text-green-600' : 'text-red-600'}">
+                  ${window.availableSlots > 0 ? `${window.availableSlots} slots` : 'Full'}
+                </div>
+                <div class="text-xs text-gray-500">of ${window.totalCapacity}</div>
+              </div>
+            </div>
+          `;
+
+          windowButton.addEventListener('click', function() {
+            if (this.disabled) return;
+
+            // Clear previous selections
+            document.querySelectorAll('.time-window-option').forEach(btn => {
+              btn.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+
+            // Select this window
+            this.classList.add('border-blue-500', 'bg-blue-50');
+            selectedTimeWindow.value = window.id;
+          });
+
+          windowDiv.appendChild(windowButton);
+          timeWindowsContainer.appendChild(windowDiv);
+        });
+      };
+
+      const formatTimeRange = (start: string, end: string) => {
+        const formatTime = (time: string) => {
+          const [hours, minutes] = time.split(':');
+          const hour = parseInt(hours);
+          const ampm = hour >= 12 ? 'PM' : 'AM';
+          const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+          return `${displayHour}:${minutes} ${ampm}`;
+        };
+
+        return `${formatTime(start)} - ${formatTime(end)}`;
+      };
+
+      // Debounced availability check on address change
+      addressInput?.addEventListener('input', function() {
+        clearTimeout(availabilityCheckTimeout);
+        availabilityCheckTimeout = setTimeout(checkAvailability, 500);
+      });
 
       // Address autocomplete functionality
       const setupAddressAutocomplete = (input: HTMLInputElement) => {
@@ -404,7 +544,6 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
         });
       };
 
-      const addressInput = document.getElementById('address-input') as HTMLInputElement;
       const dropoffAddressInput = document.getElementById('dropoff-address-input') as HTMLInputElement;
 
       setupAddressAutocomplete(addressInput);

@@ -6,7 +6,7 @@ const title = "Order Confirmed | Bags of Laundry";
 const description = "Your laundry pickup has been scheduled. We'll text you 30 minutes before arrival.";
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} noIndex={true}>
   <div class="min-h-screen bg-gray-50 flex items-center justify-center px-4">
     <div class="max-w-2xl mx-auto text-center">
 
@@ -22,8 +22,12 @@ const description = "Your laundry pickup has been scheduled. We'll text you 30 m
         Order Confirmed!
       </h1>
 
-      <p class="text-lg text-gray-600 mb-8">
+      <p class="text-lg text-gray-600 mb-2">
         Your laundry pickup has been scheduled. We'll text you 30 minutes before arrival with driver details.
+      </p>
+
+      <p class="text-sm text-blue-600 mb-8">
+        Check your email for a secure link to track your order status anytime.
       </p>
 
       <!-- Next Steps -->
@@ -105,4 +109,16 @@ const description = "Your laundry pickup has been scheduled. We'll text you 30 m
       </div>
     </div>
   </div>
+
+  <script>
+    // If we have order data from the payment flow, redirect to the magic link
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.orderData && window.orderData.magicLink) {
+        // Small delay to show confirmation briefly, then redirect
+        setTimeout(() => {
+          window.location.href = window.orderData.magicLink;
+        }, 2000);
+      }
+    });
+  </script>
 </Layout>
