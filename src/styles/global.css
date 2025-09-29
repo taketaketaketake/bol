@@ -7,7 +7,14 @@
 }
 
 .hero {
-  @apply bg-white p-6 sm:p-8 rounded-2xl border border-brand-line shadow-soft;
+  @apply bg-white p-5 sm:p-6 lg:p-8 rounded-2xl border border-brand-line shadow-soft;
+}
+
+/* Mobile-specific hero improvements */
+@media (max-width: 640px) {
+  .hero {
+    @apply mx-4 p-6 shadow-xl;
+  }
 }
 
 .card {
