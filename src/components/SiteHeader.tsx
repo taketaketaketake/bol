@@ -67,7 +67,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
             ) : (
               <>
                 <a href="/auth/login" className="btn-ghost">Sign In</a>
-                <a href="/schedule" className="btn">Schedule</a>
+                <a href="/start-basic" className="btn">Schedule</a>
               </>
             )}
           </div>
