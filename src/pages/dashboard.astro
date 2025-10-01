@@ -23,32 +23,129 @@ if (!session) {
 }
 
 const user = session.user;
+
+// Mock data - replace with real database queries later
+const activeOrders = [
+  { id: 1, status: 'In Progress', date: '2025-09-28', items: '15 lbs', total: '$22.50' },
+  { id: 2, status: 'Scheduled', date: '2025-09-30', items: '10 lbs', total: '$15.00' },
+];
+
+const upcomingPickups = [
+  { id: 1, date: '2025-10-01', time: 'Morning (8-12pm)', address: '123 Main St' },
+];
+
+const orderHistory = [
+  { id: 3, date: '2025-09-20', items: '12 lbs', total: '$18.00', status: 'Completed' },
+  { id: 4, date: '2025-09-15', items: '8 lbs', total: '$12.00', status: 'Completed' },
+  { id: 5, date: '2025-09-10', items: '20 lbs', total: '$30.00', status: 'Completed' },
+];
 ---
 
 <Layout title="Dashboard">
   <div class="min-h-screen bg-brand-bg">
-    <main>
-      <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-          <h1 class="text-3xl font-bold text-brand-text mb-2">Welcome back!</h1>
-          <p class="text-brand-muted mb-8">{user.email}</p>
+    <main class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-brand-text">Dashboard</h1>
+        <p class="text-sm text-brand-muted mt-1">{user.email}</p>
+      </div>
 
-          <div class="space-y-6">
-            <div class="border-t border-gray-200 pt-6">
-              <h2 class="text-xl font-semibold text-brand-text mb-4">Quick Actions</h2>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="/start-basic" class="card p-6 hover:shadow-xl transition">
-                  <h3 class="font-semibold text-brand-text mb-2">New Order</h3>
-                  <p class="text-sm text-brand-muted">Schedule a laundry pickup</p>
-                </a>
-                <a href="/pricing" class="card p-6 hover:shadow-xl transition">
-                  <h3 class="font-semibold text-brand-text mb-2">View Pricing</h3>
-                  <p class="text-sm text-brand-muted">See our service rates</p>
-                </a>
+      <!-- Quick Actions -->
+      <div class="mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <a href="/start-basic" class="bg-brand-primary hover:bg-orange-600 text-white p-4 rounded-lg shadow-sm transition text-center">
+            <div class="font-semibold">Schedule Pickup</div>
+            <div class="text-sm opacity-90">New laundry order</div>
+          </a>
+          <a href="/dashboard/profile" class="bg-white hover:bg-gray-50 border border-gray-200 text-brand-text p-4 rounded-lg shadow-sm transition text-center">
+            <div class="font-semibold">Profile Settings</div>
+            <div class="text-sm text-brand-muted">Update preferences</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Active Orders -->
+      {activeOrders.length > 0 && (
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div class="p-4 border-b border-gray-200">
+            <h2 class="font-semibold text-brand-text">Active Orders</h2>
+          </div>
+          <div class="divide-y divide-gray-200">
+            {activeOrders.map(order => (
+              <div class="p-4 hover:bg-gray-50 transition">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <span class="text-sm font-medium text-brand-text">Order #{order.id}</span>
+                    <span class={`ml-2 inline-block px-2 py-1 text-xs rounded-full ${
+                      order.status === 'In Progress' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <span class="text-sm font-semibold text-brand-text">{order.total}</span>
+                </div>
+                <div class="text-sm text-brand-muted">
+                  {order.items} • {order.date}
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
+      )}
+
+      <!-- Upcoming Pickups -->
+      {upcomingPickups.length > 0 && (
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div class="p-4 border-b border-gray-200">
+            <h2 class="font-semibold text-brand-text">Upcoming Pickups</h2>
+          </div>
+          <div class="divide-y divide-gray-200">
+            {upcomingPickups.map(pickup => (
+              <div class="p-4">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 text-brand-primary mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-brand-text">{pickup.date}</div>
+                    <div class="text-sm text-brand-muted">{pickup.time}</div>
+                    <div class="text-sm text-brand-muted truncate">{pickup.address}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Order History -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="font-semibold text-brand-text">Order History</h2>
+        </div>
+        {orderHistory.length > 0 ? (
+          <div class="divide-y divide-gray-200">
+            {orderHistory.map(order => (
+              <div class="p-4 hover:bg-gray-50 transition">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <div class="text-sm font-medium text-brand-text">Order #{order.id}</div>
+                    <div class="text-sm text-brand-muted">{order.date} • {order.items}</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-sm font-semibold text-brand-text">{order.total}</div>
+                    <div class="text-xs text-green-600">{order.status}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div class="p-8 text-center text-brand-muted">
+            <p class="text-sm">No orders yet</p>
+            <a href="/start-basic" class="text-sm text-brand-primary hover:underline mt-2 inline-block">Schedule your first pickup</a>
+          </div>
+        )}
       </div>
     </main>
   </div>

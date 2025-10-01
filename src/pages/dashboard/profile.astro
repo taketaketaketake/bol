@@ -1,0 +1,363 @@
+---
+export const prerender = false;
+
+import Layout from '../../layout/Layout.astro';
+import { supabase } from '../../lib/supabase';
+
+const { cookies } = Astro;
+const accessToken = cookies.get('sb-access-token');
+const refreshToken = cookies.get('sb-refresh-token');
+
+if (!accessToken || !refreshToken) {
+  return Astro.redirect('/auth/login');
+}
+
+const { data: { session } } = await supabase.auth.setSession({
+  access_token: accessToken.value,
+  refresh_token: refreshToken.value
+});
+
+if (!session) {
+  return Astro.redirect('/auth/login');
+}
+
+const user = session.user;
+const userMetadata = user.user_metadata || {};
+---
+
+<Layout title="Profile Settings">
+  <div class="min-h-screen bg-brand-bg">
+    <main class="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="mb-6">
+        <a href="/dashboard" class="text-sm text-brand-primary hover:underline mb-2 inline-block">&larr; Back to Dashboard</a>
+        <h1 class="text-2xl sm:text-3xl font-bold text-brand-text">Profile Settings</h1>
+      </div>
+
+      <!-- Account Info -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="font-semibold text-brand-text">Account Information</h2>
+        </div>
+        <div class="p-4">
+          <form id="profile-form" class="space-y-4">
+            <div>
+              <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                value={userMetadata.full_name || ''}
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={user.email}
+                disabled
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+              />
+              <p class="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+            </div>
+            <div>
+              <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={userMetadata.phone || ''}
+                placeholder="(313) 555-0123"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <button
+                type="submit"
+                class="w-full sm:w-auto bg-brand-primary hover:bg-orange-600 text-white px-6 py-2 rounded-md shadow-sm transition font-medium"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Delivery Address -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="font-semibold text-brand-text">Delivery Address</h2>
+        </div>
+        <div class="p-4">
+          <form id="address-form" class="space-y-4">
+            <div>
+              <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={userMetadata.address || ''}
+                placeholder="123 Main St"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="sm:col-span-2">
+                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={userMetadata.city || ''}
+                  placeholder="Detroit"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label for="zipCode" class="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                <input
+                  type="text"
+                  id="zipCode"
+                  name="zipCode"
+                  value={userMetadata.zip_code || ''}
+                  placeholder="48201"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label for="deliveryInstructions" class="block text-sm font-medium text-gray-700 mb-1">Delivery Instructions (Optional)</label>
+              <textarea
+                id="deliveryInstructions"
+                name="deliveryInstructions"
+                rows="3"
+                value={userMetadata.delivery_instructions || ''}
+                placeholder="Leave at front door, Ring doorbell, etc."
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              ></textarea>
+            </div>
+            <div>
+              <button
+                type="submit"
+                class="w-full sm:w-auto bg-brand-primary hover:bg-orange-600 text-white px-6 py-2 rounded-md shadow-sm transition font-medium"
+              >
+                Save Address
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Laundry Preferences -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="font-semibold text-brand-text">Laundry Preferences</h2>
+        </div>
+        <div class="p-4">
+          <form id="preferences-form" class="space-y-4">
+            <div>
+              <label for="detergent" class="block text-sm font-medium text-gray-700 mb-1">Detergent Type</label>
+              <select
+                id="detergent"
+                name="detergent"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="regular" selected={userMetadata.detergent === 'regular'}>Regular</option>
+                <option value="hypoallergenic" selected={userMetadata.detergent === 'hypoallergenic'}>Hypoallergenic</option>
+                <option value="fragrance-free" selected={userMetadata.detergent === 'fragrance-free'}>Fragrance Free</option>
+              </select>
+            </div>
+            <div>
+              <label for="temperature" class="block text-sm font-medium text-gray-700 mb-1">Water Temperature</label>
+              <select
+                id="temperature"
+                name="temperature"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="cold" selected={userMetadata.temperature === 'cold'}>Cold</option>
+                <option value="warm" selected={userMetadata.temperature === 'warm'}>Warm</option>
+                <option value="hot" selected={userMetadata.temperature === 'hot'}>Hot</option>
+              </select>
+            </div>
+            <div>
+              <label for="drying" class="block text-sm font-medium text-gray-700 mb-1">Drying Preference</label>
+              <select
+                id="drying"
+                name="drying"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="machine-dry" selected={userMetadata.drying === 'machine-dry'}>Machine Dry</option>
+                <option value="hang-dry" selected={userMetadata.drying === 'hang-dry'}>Hang Dry</option>
+                <option value="mixed" selected={userMetadata.drying === 'mixed'}>Mixed (I'll specify)</option>
+              </select>
+            </div>
+            <div>
+              <button
+                type="submit"
+                class="w-full sm:w-auto bg-brand-primary hover:bg-orange-600 text-white px-6 py-2 rounded-md shadow-sm transition font-medium"
+              >
+                Save Preferences
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="font-semibold text-brand-text">Change Password</h2>
+        </div>
+        <div class="p-4">
+          <form id="password-form" class="space-y-4">
+            <div>
+              <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+              <input
+                type="password"
+                id="newPassword"
+                name="newPassword"
+                minlength="6"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                minlength="6"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <button
+                type="submit"
+                class="w-full sm:w-auto bg-brand-primary hover:bg-orange-600 text-white px-6 py-2 rounded-md shadow-sm transition font-medium"
+              >
+                Update Password
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Profile form handler
+    const profileForm = document.getElementById('profile-form');
+    profileForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target as HTMLFormElement);
+
+      try {
+        const res = await fetch('/api/profile/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name: formData.get('fullName'),
+            phone: formData.get('phone'),
+          }),
+        });
+
+        if (res.ok) {
+          alert('Profile updated successfully!');
+        } else {
+          alert('Failed to update profile');
+        }
+      } catch (err) {
+        alert('An error occurred');
+      }
+    });
+
+    // Address form handler
+    const addressForm = document.getElementById('address-form');
+    addressForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target as HTMLFormElement);
+
+      try {
+        const res = await fetch('/api/profile/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            address: formData.get('address'),
+            city: formData.get('city'),
+            zip_code: formData.get('zipCode'),
+            delivery_instructions: formData.get('deliveryInstructions'),
+          }),
+        });
+
+        if (res.ok) {
+          alert('Address saved successfully!');
+        } else {
+          alert('Failed to save address');
+        }
+      } catch (err) {
+        alert('An error occurred');
+      }
+    });
+
+    // Preferences form handler
+    const preferencesForm = document.getElementById('preferences-form');
+    preferencesForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target as HTMLFormElement);
+
+      try {
+        const res = await fetch('/api/profile/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            detergent: formData.get('detergent'),
+            temperature: formData.get('temperature'),
+            drying: formData.get('drying'),
+          }),
+        });
+
+        if (res.ok) {
+          alert('Preferences saved successfully!');
+        } else {
+          alert('Failed to save preferences');
+        }
+      } catch (err) {
+        alert('An error occurred');
+      }
+    });
+
+    // Password form handler
+    const passwordForm = document.getElementById('password-form');
+    passwordForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target as HTMLFormElement);
+      const newPassword = formData.get('newPassword');
+      const confirmPassword = formData.get('confirmPassword');
+
+      if (newPassword !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: newPassword }),
+        });
+
+        if (res.ok) {
+          alert('Password updated successfully!');
+          (e.target as HTMLFormElement).reset();
+        } else {
+          alert('Failed to update password');
+        }
+      } catch (err) {
+        alert('An error occurred');
+      }
+    });
+  </script>
+</Layout>
