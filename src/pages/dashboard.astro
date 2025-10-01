@@ -3,7 +3,6 @@ export const prerender = false;
 
 import Layout from '../layout/Layout.astro';
 import { supabase } from '../lib/supabase';
-import ArticleManager from '../components/dashboard/ArticleManager';
 
 const { cookies } = Astro;
 const accessToken = cookies.get('sb-access-token');
@@ -22,33 +21,34 @@ const { data: { session } } = await supabase.auth.setSession({
 if (!session) {
   return Astro.redirect('/auth/login');
 }
+
+const user = session.user;
 ---
 
 <Layout title="Dashboard">
-  <div class="min-h-screen bg-gray-50">
-    <header class="bg-white shadow">
-      <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-gray-900">Article Management</h1>
-        <div class="space-x-4">
-          <a 
-            href="/" 
-            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
-            Back to Site
-          </a>
-          <a 
-            href="/auth/signout"
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Sign Out
-          </a>
-        </div>
-      </div>
-    </header>
-    
+  <div class="min-h-screen bg-brand-bg">
     <main>
-      <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <ArticleManager client:load />
+      <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+          <h1 class="text-3xl font-bold text-brand-text mb-2">Welcome back!</h1>
+          <p class="text-brand-muted mb-8">{user.email}</p>
+
+          <div class="space-y-6">
+            <div class="border-t border-gray-200 pt-6">
+              <h2 class="text-xl font-semibold text-brand-text mb-4">Quick Actions</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="/start-basic" class="card p-6 hover:shadow-xl transition">
+                  <h3 class="font-semibold text-brand-text mb-2">New Order</h3>
+                  <p class="text-sm text-brand-muted">Schedule a laundry pickup</p>
+                </a>
+                <a href="/pricing" class="card p-6 hover:shadow-xl transition">
+                  <h3 class="font-semibold text-brand-text mb-2">View Pricing</h3>
+                  <p class="text-sm text-brand-muted">See our service rates</p>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>

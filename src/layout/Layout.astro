@@ -1,11 +1,11 @@
 ---
 import SiteHeader from '../components/SiteHeader';
 import '../styles/app.css';
+import { getSession } from '../utils/auth';
 
 export interface Props {
   title?: string;
   description?: string;
-  session?: any;
   ogImage?: string;
   noIndex?: boolean;
 }
@@ -13,10 +13,12 @@ export interface Props {
 const {
   title = "Bags of Laundry",
   description = "Professional laundry and dry cleaning services",
-  session,
   ogImage = "/og-image.jpg",
   noIndex = false
 } = Astro.props;
+
+// Get session automatically in Layout
+const session = await getSession(Astro.cookies);
 
 const currentPath = Astro.url.pathname;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);

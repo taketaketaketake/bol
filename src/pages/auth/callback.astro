@@ -1,0 +1,47 @@
+---
+export const prerender = false;
+import { supabase } from '../../lib/supabase';
+
+const { url, cookies, redirect } = Astro;
+const code = url.searchParams.get('code');
+
+console.log('[Callback] Code received:', code ? 'Yes' : 'No');
+
+if (code) {
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+  console.log('[Callback] Exchange result:', {
+    hasSession: !!data?.session,
+    hasUser: !!data?.user,
+    error: error?.message
+  });
+
+  if (error) {
+    console.error('[Callback] Error exchanging code for session:', error);
+    return redirect(`/auth/login?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (data.session) {
+    console.log('[Callback] Setting session cookies');
+    cookies.set('sb-access-token', data.session.access_token, {
+      path: '/',
+      secure: import.meta.env.PROD,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    cookies.set('sb-refresh-token', data.session.refresh_token, {
+      path: '/',
+      secure: import.meta.env.PROD,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    console.log('[Callback] Redirecting to dashboard');
+    return redirect('/dashboard');
+  }
+}
+
+console.log('[Callback] No code found, redirecting to login');
+return redirect('/auth/login?error=no-code');
+---

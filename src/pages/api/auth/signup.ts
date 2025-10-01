@@ -3,9 +3,9 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 
 const SignupSchema = z.object({
-  email: z.string().email({ message: '請輸入有效的電子郵件' }),
-  password: z.string().min(6, { message: '密碼至少需要 6 個字元' }),
-  fullName: z.string().min(1, { message: '請填寫姓名' }),
+  email: z.string().email({ message: 'Please enter a valid email' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  fullName: z.string().min(1, { message: 'Please enter your full name' }),
 });
 
 export const POST: APIRoute = async ({ request }) => {
@@ -24,7 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
         data: {
           full_name: fullName,
         },
-        emailRedirectTo: new URL('/dashboard', request.url).toString(),
+        emailRedirectTo: new URL('/auth/callback', request.url).toString(),
       },
     });
 
@@ -36,12 +36,23 @@ export const POST: APIRoute = async ({ request }) => {
     console.log('[Signup][POST] Supabase signUp response:', signUpData);
 
     if (signUpData.user?.identities?.length === 0) {
-      console.log('[Signup][POST] User already exists or needs email verification');
+      console.log('[Signup][POST] User already exists');
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: '請檢查您的電子郵件以完成註冊',
-          redirectTo: '/login?message=check-email'
+        JSON.stringify({
+          success: false,
+          error: 'An account with this email already exists'
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if email confirmation is required
+    if (signUpData.session === null) {
+      console.log('[Signup][POST] Email confirmation required');
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Please check your email to complete registration'
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
@@ -49,28 +60,28 @@ export const POST: APIRoute = async ({ request }) => {
 
     console.log('[Signup][POST] Signup successful, redirecting to dashboard');
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         redirectTo: '/dashboard'
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('[Signup][POST] Signup error:', error);
-    let message = '註冊失敗，請稍後再試';
+    let message = 'Registration failed, please try again';
     if (error instanceof z.ZodError) {
       message = error.errors[0]?.message || message;
     } else if (error instanceof Error) {
       message = error.message;
     }
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: false,
         error: message
-      }), 
-      { 
-        status: 400, 
-        headers: { 'Content-Type': 'application/json' } 
+      }),
+      {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
       }
     );
   }

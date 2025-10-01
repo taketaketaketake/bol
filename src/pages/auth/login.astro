@@ -4,10 +4,16 @@ import Layout from '../../layout/Layout.astro';
 import LoginForm from '../../components/auth/LoginForm';
 import { supabase } from '../../lib/supabase';
 
-const { cookies } = Astro;
+const { cookies, url } = Astro;
 
 const accessToken = cookies.get('sb-access-token');
 const refreshToken = cookies.get('sb-refresh-token');
+
+// Check for error message from callback
+const errorParam = url.searchParams.get('error');
+
+// Check for OAuth callback (hash fragment will be handled client-side)
+const hasHashFragment = url.hash && url.hash.includes('access_token');
 
 // Set up Supabase client with cookies
 const { data: { session } } = await supabase.auth.setSession({
@@ -15,23 +21,68 @@ const { data: { session } } = await supabase.auth.setSession({
   refresh_token: refreshToken?.value || ''
 });
 
-if (session) {
+if (session && !hasHashFragment) {
   return Astro.redirect('/dashboard');
 }
 ---
 
 <Layout title="Sign In">
-  <main class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <main class="min-h-screen bg-brand-bg flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      <a href="/" class="flex justify-center mb-6">
+        <div class="text-2xl font-bold text-brand-primary">Bags of Laundry</div>
+      </a>
+      <h2 class="text-center text-3xl font-extrabold text-brand-text">
         Sign in to your account
       </h2>
+      <p class="mt-2 text-center text-sm text-brand-muted">
+        Access your laundry orders and preferences
+      </p>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+    <div class="mt-8 mx-auto w-full" style="max-width: 400px;">
+      {errorParam && (
+        <div class="mb-4 rounded-md bg-red-50 p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-red-800">{errorParam}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      <div class="bg-white py-8 px-8 shadow-lg border border-gray-200 rounded-lg">
         <LoginForm client:only="react" />
       </div>
     </div>
   </main>
+
+  <script>
+    // Handle OAuth callback with hash fragment
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+
+      if (access_token && refresh_token) {
+        // Send tokens to server to set session cookies
+        fetch('/api/auth/set-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token, refresh_token })
+        }).then(res => {
+          if (res.ok) {
+            window.location.href = '/dashboard';
+          }
+        }).catch(err => {
+          console.error('Session error:', err);
+        });
+      }
+    }
+  </script>
 </Layout>

@@ -15,24 +15,28 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {
-        redirectTo: `${new URL(request.url).origin}/api/auth/callback`
+        redirectTo: `${new URL(request.url).origin}/auth/login`,
       },
     });
 
     if (error) {
       return new Response(
-        JSON.stringify({ error: error.message }), 
+        JSON.stringify({ error: error.message }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    return redirect(data.url);
+    // Return the OAuth URL as JSON
+    return new Response(
+      JSON.stringify({ url: data.url }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   // Handle email/password login
   if (!email || !password) {
     return new Response(
-      JSON.stringify({ error: '請輸入電子郵件和密碼' }), 
+      JSON.stringify({ error: 'Please enter email and password' }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -65,12 +69,12 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
     return redirect("/dashboard");
   } catch (error) {
-    const errorMessage = error instanceof Error ? 
-      (error.message.includes('Invalid login credentials') ? '電子郵件或密碼不正確' : error.message) : 
-      '登入失敗，請稍後再試';
-    
+    const errorMessage = error instanceof Error ?
+      (error.message.includes('Invalid login credentials') ? 'Email or password is incorrect' : error.message) :
+      'Login failed, please try again';
+
     return new Response(
-      JSON.stringify({ error: errorMessage }), 
+      JSON.stringify({ error: errorMessage }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
   }

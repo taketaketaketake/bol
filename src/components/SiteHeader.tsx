@@ -60,9 +60,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
                     Hi, {session.user?.user_metadata?.first_name || session.user?.email?.split("@")[0]}!
                   </span>
                 </div>
-                <form action="/auth/logout" method="post">
-                  <button type="submit" className="btn-ghost text-sm">Sign Out</button>
-                </form>
+                <a href="/api/auth/signout" className="btn-ghost text-sm">Sign Out</a>
               </>
             ) : (
               <>
@@ -116,9 +114,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
                 <div className="text-sm text-brand-text">
                   Hi, {session.user?.user_metadata?.first_name || session.user?.email?.split("@")[0]}!
                 </div>
-                <form action="/auth/logout" method="post">
-                  <button type="submit" className="btn-ghost text-sm w-full text-left">Sign Out</button>
-                </form>
+                <a href="/api/auth/signout" className="btn-ghost text-sm w-full text-left">Sign Out</a>
               </>
             ) : (
               <>

@@ -51,14 +51,14 @@ export default function ArticleManager() {
   }, []);
 
   const handleDelete = useCallback(async (id: number) => {
-    if (!window.confirm('確定要刪除這篇文章嗎？此操作無法復原。')) return;
+    if (!window.confirm('Are you sure you want to delete this article? This action cannot be undone.')) return;
     try {
       const { error } = await deleteArticle(id);
       if (error) throw new Error(error);
       await loadArticles();
     } catch (err) {
       console.error('Error deleting article:', err);
-      alert('刪除文章時發生錯誤');
+      alert('Error deleting article');
     }
   }, [loadArticles]);
 
@@ -73,12 +73,12 @@ export default function ArticleManager() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">文章管理 ({articles.length})</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Articles ({articles.length})</h2>
         <a
           href="/dashboard/article/new"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          新增文章
+          New Article
         </a>
       </div>
 
