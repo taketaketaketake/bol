@@ -1,11 +1,33 @@
 ---
 import Layout from '../layout/Layout.astro';
 import ZipChecker from '../components/ZipChecker';
+import { supabase } from '../lib/supabase';
 
 // Environment variables - Astro way
 const mapboxToken = import.meta.env.PUBLIC_MAPBOX_ACCESS_TOKEN;
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const imageBaseUrl = `${supabaseUrl}/storage/v1/object/public/bol-images`;
+
+// Check if user is logged in and get their profile data
+const { cookies } = Astro;
+const accessToken = cookies.get('sb-access-token');
+const refreshToken = cookies.get('sb-refresh-token');
+
+let userAddress = '';
+let userPhone = '';
+
+if (accessToken && refreshToken) {
+  const { data: { session } } = await supabase.auth.setSession({
+    access_token: accessToken.value,
+    refresh_token: refreshToken.value
+  });
+
+  if (session?.user) {
+    const metadata = session.user.user_metadata || {};
+    userAddress = metadata.address || '';
+    userPhone = metadata.phone || '';
+  }
+}
 
 // Date calculations
 const today = new Date();
@@ -92,6 +114,7 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
                     name="line1"
                     type="text"
                     placeholder="e.g., 123 Main St or 48226"
+                    value={userAddress}
                     required
                     class="input text-base sm:text-sm h-12 sm:h-10"
                     autocomplete="off"
@@ -109,6 +132,7 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
                     name="phone"
                     type="tel"
                     placeholder="(313) 555-0123"
+                    value={userPhone}
                     required
                     pattern="^\(\d{3}\) \d{3}-\d{4}$"
                     title="Please enter a valid 10-digit phone number"
@@ -143,6 +167,7 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
                       name="phone"
                       type="tel"
                       placeholder="(313) 555-0123"
+                      value={userPhone}
                       required
                       pattern="^\(\d{3}\) \d{3}-\d{4}$"
                       title="Please enter a valid 10-digit phone number"

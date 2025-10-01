@@ -45,28 +45,49 @@ const formatOrderType = (orderType: string) => {
   }
 };
 
-// Calculate total
+// Calculate itemized total
 const calculateTotal = () => {
-  let total = 3375; // Default $33.75 in cents
+  let baseTotal = 3375; // Default $33.75 in cents
 
   // Base service pricing
   if (w.orderType === 'per_pound') {
-    total = 20 * 249; // 20 lbs * $2.49
+    baseTotal = 20 * 249; // 20 lbs * $2.49
   } else if (w.orderType === 'small_bag') {
-    total = 3500; // $35
+    baseTotal = 3500; // $35
   } else if (w.orderType === 'medium_bag') {
-    total = 5500; // $55
+    baseTotal = 5500; // $55
   } else if (w.orderType === 'large_bag') {
-    total = 8500; // $85
+    baseTotal = 8500; // $85
   }
 
-  // Add rush fee
-  if (w.addonPrefs?.rush) {
-    total += 1000; // $10
+  // Calculate add-on fees
+  const estimatedLbs = 20; // For per-pound orders
+  const ecoFee = (w.addonPrefs?.eco && w.orderType === 'per_pound') ? estimatedLbs * 10 : 0; // $0.10/lb in cents
+  const hangDryFee = (w.addonPrefs?.hangDry && w.orderType === 'per_pound') ? estimatedLbs * 25 : 0; // $0.25/lb in cents
+  const rushFee = w.addonPrefs?.rush ? 1000 : 0; // $10 in cents
+
+  // Calculate specialty items total
+  let specialtyTotal = 0;
+  if (w.addons) {
+    if (w.addons.comforter) specialtyTotal += w.addons.comforter * 2000; // $20 each
+    if (w.addons.bedding_bundle) specialtyTotal += w.addons.bedding_bundle * 2500; // $25 each
+    if (w.addons.dry_cleaning) specialtyTotal += w.addons.dry_cleaning * 800; // $8 each
   }
 
-  return (total / 100).toFixed(2);
+  const grandTotal = baseTotal + ecoFee + hangDryFee + rushFee + specialtyTotal;
+
+  return {
+    baseTotal: (baseTotal / 100).toFixed(2),
+    ecoFee: (ecoFee / 100).toFixed(2),
+    hangDryFee: (hangDryFee / 100).toFixed(2),
+    rushFee: (rushFee / 100).toFixed(2),
+    specialtyTotal: (specialtyTotal / 100).toFixed(2),
+    grandTotal: (grandTotal / 100).toFixed(2),
+    grandTotalCents: grandTotal
+  };
 };
+
+const totals = calculateTotal();
 
 // SEO
 const title = "Review & Confirm Order | Bags of Laundry";
@@ -153,31 +174,35 @@ const description = "Review your laundry service order and complete your booking
             </div>
 
             <!-- Specialty Items -->
-            {w.addons && Object.keys(w.addons).length > 0 && (
-              <div class="mt-4 pt-4 border-t border-gray-200">
-                <h4 class="font-medium text-gray-900 mb-2">Specialty Items</h4>
-                <div class="space-y-1">
-                  {w.addons.comforter && w.addons.comforter > 0 && (
-                    <div class="flex justify-between text-sm">
-                      <span>Comforter × {w.addons.comforter}</span>
-                      <span>${(20 * w.addons.comforter).toFixed(2)}</span>
-                    </div>
-                  )}
-                  {w.addons.bedding_bundle && w.addons.bedding_bundle > 0 && (
-                    <div class="flex justify-between text-sm">
-                      <span>Bedding Bundle × {w.addons.bedding_bundle}</span>
-                      <span>${(25 * w.addons.bedding_bundle).toFixed(2)}</span>
-                    </div>
-                  )}
-                  {w.addons.dry_cleaning && w.addons.dry_cleaning > 0 && (
-                    <div class="flex justify-between text-sm">
-                      <span>Dry Cleaning × {w.addons.dry_cleaning}</span>
-                      <span>${(8 * w.addons.dry_cleaning).toFixed(2)}</span>
-                    </div>
-                  )}
-                </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+              <h4 class="font-medium text-gray-900 mb-2">Specialty Items</h4>
+              <div class="space-y-1">
+                {w.addons && (w.addons.comforter > 0 || w.addons.bedding_bundle > 0 || w.addons.dry_cleaning > 0) ? (
+                  <>
+                    {w.addons.comforter > 0 && (
+                      <div class="flex justify-between text-sm">
+                        <span>Comforter × {w.addons.comforter}</span>
+                        <span>${(20 * w.addons.comforter).toFixed(2)}</span>
+                      </div>
+                    )}
+                    {w.addons.bedding_bundle > 0 && (
+                      <div class="flex justify-between text-sm">
+                        <span>Bedding Bundle × {w.addons.bedding_bundle}</span>
+                        <span>${(25 * w.addons.bedding_bundle).toFixed(2)}</span>
+                      </div>
+                    )}
+                    {w.addons.dry_cleaning > 0 && (
+                      <div class="flex justify-between text-sm">
+                        <span>Dry Cleaning × {w.addons.dry_cleaning}</span>
+                        <span>${(8 * w.addons.dry_cleaning).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p class="text-sm text-gray-500 italic">No specialty items selected</p>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           <!-- Add-ons -->
@@ -254,6 +279,9 @@ const description = "Review your laundry service order and complete your booking
                   </svg>
                 </div>
                 <h2 class="text-xl font-semibold text-gray-900">Special Instructions</h2>
+                <a href="/addons" class="ml-auto text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  Edit
+                </a>
               </div>
               <p class="text-gray-600 bg-gray-50 rounded-lg p-3">{w.addonPrefs.notes}</p>
             </div>
@@ -269,12 +297,59 @@ const description = "Review your laundry service order and complete your booking
               <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
 
               <div class="space-y-3 pb-4 border-b border-gray-200">
+                <!-- Base service -->
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-600">
-                    {w.orderType === 'per_pound' ? 'Estimated subtotal (20 lbs)' : formatOrderType(w.orderType)}
+                    {w.orderType === 'per_pound' ? 'Base service (20 lbs)' : formatOrderType(w.orderType)}
                   </span>
-                  <span class="text-gray-900">${calculateTotal()}</span>
+                  <span class="text-gray-900">${totals.baseTotal}</span>
                 </div>
+
+                <!-- Specialty items -->
+                {w.addons && (w.addons.comforter > 0 || w.addons.bedding_bundle > 0 || w.addons.dry_cleaning > 0) && (
+                  <>
+                    {w.addons.comforter > 0 && (
+                      <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Comforter × {w.addons.comforter}</span>
+                        <span class="text-gray-900">${(20 * w.addons.comforter).toFixed(2)}</span>
+                      </div>
+                    )}
+                    {w.addons.bedding_bundle > 0 && (
+                      <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Bedding Bundle × {w.addons.bedding_bundle}</span>
+                        <span class="text-gray-900">${(25 * w.addons.bedding_bundle).toFixed(2)}</span>
+                      </div>
+                    )}
+                    {w.addons.dry_cleaning > 0 && (
+                      <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Dry Cleaning × {w.addons.dry_cleaning}</span>
+                        <span class="text-gray-900">${(8 * w.addons.dry_cleaning).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                <!-- Add-on services -->
+                {w.addonPrefs?.eco && w.orderType === 'per_pound' && parseFloat(totals.ecoFee) > 0 && (
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Eco-friendly detergent (20 lbs)</span>
+                    <span class="text-gray-900">${totals.ecoFee}</span>
+                  </div>
+                )}
+                {w.addonPrefs?.hangDry && w.orderType === 'per_pound' && parseFloat(totals.hangDryFee) > 0 && (
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Hang-dry delicates (20 lbs)</span>
+                    <span class="text-gray-900">${totals.hangDryFee}</span>
+                  </div>
+                )}
+                {w.addonPrefs?.rush && parseFloat(totals.rushFee) > 0 && (
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Same-day rush service</span>
+                    <span class="text-gray-900">${totals.rushFee}</span>
+                  </div>
+                )}
+
+                <!-- Free pickup & delivery -->
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-600">Pickup & delivery</span>
                   <span class="text-green-600 font-medium">Free</span>
@@ -283,7 +358,7 @@ const description = "Review your laundry service order and complete your booking
 
               <div class="flex justify-between items-center mt-4">
                 <span class="text-lg font-semibold text-gray-900">Total</span>
-                <span class="text-2xl font-bold text-gray-900">${calculateTotal()}</span>
+                <span class="text-2xl font-bold text-gray-900">${totals.grandTotal}</span>
               </div>
 
               <p class="text-xs text-gray-500 mt-2">
@@ -298,7 +373,7 @@ const description = "Review your laundry service order and complete your booking
               <!-- Stripe Elements -->
               <StripeElements
                 client:load
-                amount={Math.round(parseFloat(calculateTotal()) * 100)}
+                amount={totals.grandTotalCents}
                 addMembership={false}
                 orderDetails={{
                   orderType: w.orderType,
@@ -311,7 +386,7 @@ const description = "Review your laundry service order and complete your booking
                   preferences: w.addonPrefs || {},
                   addons: w.addons || [],
                   serviceType: 'wash_fold',
-                  estimatedAmount: Math.round(parseFloat(calculateTotal()) * 100)
+                  estimatedAmount: totals.grandTotalCents
                 }}
                 onPaymentSuccess={(paymentIntent) => {
                   console.log('Payment successful:', paymentIntent);
@@ -446,7 +521,7 @@ const description = "Review your laundry service order and complete your booking
 
       // Get current order total from the displayed value
       const totalElement = document.querySelector('.text-2xl.font-bold.text-gray-900');
-      const currentTotal = parseFloat(totalElement?.textContent?.replace('$', '') || '33.75');
+      const currentTotal = parseFloat(totalElement?.textContent?.replace('$', '') || '0');
       const membershipFee = 99.00;
 
       // Calculate potential savings based on current order

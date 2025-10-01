@@ -156,32 +156,42 @@ const description = "Enter your contact information to complete your laundry ser
             </div>
 
             <!-- Drop-off Information -->
-            {w.dropoffAddress && (
-              <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div class="flex items-center gap-3 mb-4">
-                  <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                    <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2" />
-                    </svg>
-                  </div>
-                  <h2 class="text-xl font-semibold text-gray-900">Drop-off Details</h2>
-                  <a href="/start-basic" class="ml-auto text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    Edit
-                  </a>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                  <svg class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 8a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V8z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2" />
+                  </svg>
                 </div>
-                <div class="grid md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span class="font-medium text-gray-900">Address:</span>
-                    <p class="text-gray-600 mt-1">{w.dropoffAddress.line1}</p>
-                  </div>
-                  <div>
-                    <span class="font-medium text-gray-900">Delivery Date:</span>
-                    <p class="text-gray-600 mt-1">{w.dropoffAddress.date}</p>
-                  </div>
+                <h2 class="text-xl font-semibold text-gray-900">Drop-off Details</h2>
+                {!w.dropoffAddress && (
+                  <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                    Same as pickup
+                  </span>
+                )}
+                <a href="/start-basic" class="ml-auto text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  Edit
+                </a>
+              </div>
+              <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="font-medium text-gray-900">Delivery Address:</span>
+                  <p class="text-gray-600 mt-1">
+                    {w.dropoffAddress ? w.dropoffAddress.line1 : w.address?.line1}
+                  </p>
+                  {w.address?.postal && !w.dropoffAddress && (
+                    <p class="text-gray-600">{w.address.postal}</p>
+                  )}
+                </div>
+                <div>
+                  <span class="font-medium text-gray-900">Delivery Date:</span>
+                  <p class="text-gray-600 mt-1">
+                    {w.dropoffAddress ? w.dropoffAddress.date : 'Same day as pickup'}
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
 
             <!-- Service Selection -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -220,19 +230,19 @@ const description = "Enter your contact information to complete your laundry ser
                 <div class="space-y-1">
                   {w.addons && (w.addons.comforter > 0 || w.addons.bedding_bundle > 0 || w.addons.dry_cleaning > 0) ? (
                     <>
-                      {w.addons.comforter && w.addons.comforter > 0 && (
+                      {w.addons.comforter > 0 && (
                         <div class="flex justify-between text-sm">
                           <span>Comforter × {w.addons.comforter}</span>
                           <span>${(20 * w.addons.comforter).toFixed(2)}</span>
                         </div>
                       )}
-                      {w.addons.bedding_bundle && w.addons.bedding_bundle > 0 && (
+                      {w.addons.bedding_bundle > 0 && (
                         <div class="flex justify-between text-sm">
                           <span>Bedding Bundle × {w.addons.bedding_bundle}</span>
                           <span>${(25 * w.addons.bedding_bundle).toFixed(2)}</span>
                         </div>
                       )}
-                      {w.addons.dry_cleaning && w.addons.dry_cleaning > 0 && (
+                      {w.addons.dry_cleaning > 0 && (
                         <div class="flex justify-between text-sm">
                           <span>Dry Cleaning × {w.addons.dry_cleaning}</span>
                           <span>${(8 * w.addons.dry_cleaning).toFixed(2)}</span>

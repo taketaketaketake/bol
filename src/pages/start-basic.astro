@@ -3,6 +3,7 @@ import Layout from '../layout/Layout.astro';
 import ProgressSteps from '../components/ProgressSteps';
 import { z } from "zod";
 import { readWizard, writeWizard } from "../utils/wizard.server";
+import { supabase } from '../lib/supabase';
 
 const Schema = z.object({
   line1: z.string().min(3),
@@ -38,6 +39,10 @@ const Schema = z.object({
 // Server-side handling
 let w = {};
 let actionError = "";
+
+// Check if user wants to start fresh
+const url = new URL(Astro.request.url);
+const startFresh = url.searchParams.get('fresh') === 'true';
 
 if (Astro.request.method === "POST") {
   try {
@@ -86,8 +91,39 @@ if (Astro.request.method === "POST") {
     actionError = "An error occurred processing your request.";
   }
 } else {
-  // GET request: Load existing wizard state
-  w = await readWizard(Astro.request);
+  // GET request: Load existing wizard state (unless starting fresh)
+  if (!startFresh) {
+    w = await readWizard(Astro.request);
+  }
+
+  // If no wizard data exists OR if it's just basic address/phone (from previous session),
+  // OR if user requested fresh start, try to prefill from logged-in user's profile
+  const hasOnlyBasicData = w && Object.keys(w).length <= 2 && (w.address || w.phone);
+  const hasNoData = !w || Object.keys(w).length === 0;
+
+  if (hasNoData || hasOnlyBasicData || startFresh) {
+    const { cookies } = Astro;
+    const accessToken = cookies.get('sb-access-token');
+    const refreshToken = cookies.get('sb-refresh-token');
+
+    if (accessToken && refreshToken) {
+      const { data: { session } } = await supabase.auth.setSession({
+        access_token: accessToken.value,
+        refresh_token: refreshToken.value
+      });
+
+      if (session?.user) {
+        const metadata = session.user.user_metadata || {};
+        // Only override if we have profile data
+        if (metadata.address || metadata.phone) {
+          w = {
+            address: metadata.address ? { line1: metadata.address } : w?.address,
+            phone: metadata.phone || w?.phone
+          };
+        }
+      }
+    }
+  }
 }
 
 // Get today's date as minimum
@@ -221,7 +257,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
                 </div>
               </button>
             </div>
-            <input type="hidden" name="timeWindow" id="selected-time-window" required />
+            <input type="hidden" name="timeWindow" id="selected-time-window" value={w.timeWindow || ""} required />
           </div>
         </div>
 
@@ -591,6 +627,17 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
 
       // Time window selection
       const timeWindowButtons = document.querySelectorAll('.time-window-btn');
+
+      // Pre-select saved time window on page load
+      const savedTimeWindow = selectedTimeWindow?.value;
+      if (savedTimeWindow) {
+        timeWindowButtons.forEach(btn => {
+          if (btn.getAttribute('data-window') === savedTimeWindow) {
+            btn.classList.add('border-blue-500', 'bg-blue-50');
+          }
+        });
+      }
+
       timeWindowButtons.forEach(btn => {
         btn.addEventListener('click', function() {
           // Clear previous selections
