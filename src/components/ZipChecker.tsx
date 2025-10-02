@@ -189,19 +189,7 @@ export default function ZipChecker({ mapboxToken }: ZipCheckerProps) {
               {serviceAreaResult.isServiced ? (
                 <div className="flex flex-col sm:flex-row gap-2">
                   <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // Scroll to form
-                      const form = document.querySelector('form[action="/start-basic"]');
-                      if (form) {
-                        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        const firstInput = form.querySelector('input');
-                        if (firstInput) {
-                          setTimeout(() => firstInput.focus(), 500);
-                        }
-                      }
-                    }}
+                    href="/start-basic"
                     className="inline-block bg-brand-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-primaryDeep transition-all touch-manipulation text-center"
                   >
                     Start Order →
