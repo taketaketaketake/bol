@@ -100,70 +100,37 @@ const ogImage = "https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/publ
                   <p class="text-xs sub mt-1">We serve ~30 miles from Downtown Detroit</p>
                 </div>
 
-                <!-- Phone - Full width on mobile, split on larger screens -->
-                <div class="sm:hidden">
-                  <label for="phone" class="block text-sm font-semibold text-brand-text mb-2">
-                    Mobile*
-                  </label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    placeholder="(313) 555-0123"
-                    value={userPhone}
-                    required
-                    pattern="^\(\d{3}\) \d{3}-\d{4}$"
-                    title="Please enter a valid 10-digit phone number"
-                    maxlength="14"
-                    class="input text-base h-12 w-full"
-                  />
-                </div>
-
-                <!-- Date - Full width on mobile -->
-                <div class="sm:hidden">
-                  <label for="date" class="block text-sm font-semibold text-brand-text mb-2">
-                    Pickup Date (optional)
-                  </label>
-                  <input
-                    id="date"
-                    name="date"
-                    type="date"
-                    min={minDate}
-                    max={maxDateString}
-                    class="input text-base h-12 w-full"
-                  />
-                </div>
-
-                <!-- Desktop: Phone and Date side by side -->
-                <div class="hidden sm:grid sm:grid-cols-2 gap-4">
+                <!-- Phone and Date - Responsive layout -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
                   <div>
-                    <label for="phone-desktop" class="block text-sm font-semibold text-brand-text mb-2">
+                    <label for="phone" class="block text-sm font-semibold text-brand-text mb-2">
                       Mobile*
                     </label>
                     <input
-                      id="phone-desktop"
+                      id="phone"
                       name="phone"
                       type="tel"
                       placeholder="(313) 555-0123"
                       value={userPhone}
                       required
-                      pattern="^\(\d{3}\) \d{3}-\d{4}$"
-                      title="Please enter a valid 10-digit phone number"
+                      pattern="[0-9\s\(\)\-]{10,14}"
+                      title="Please enter a valid phone number"
                       maxlength="14"
-                      class="input"
+                      class="input text-base sm:text-sm h-12 sm:h-10"
                     />
                   </div>
                   <div>
-                    <label for="date-desktop" class="block text-sm font-semibold text-brand-text mb-2">
-                      Pickup Date (optional)
+                    <label for="date" class="block text-sm font-semibold text-brand-text mb-2">
+                      Pickup Date*
                     </label>
                     <input
-                      id="date-desktop"
+                      id="date"
                       name="date"
                       type="date"
                       min={minDate}
                       max={maxDateString}
-                      class="input"
+                      required
+                      class="input text-base sm:text-sm h-12 sm:h-10"
                     />
                   </div>
                 </div>
@@ -626,13 +593,7 @@ const ogImage = "https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/publ
 
       phoneInput.addEventListener('blur', (e) => {
         const target = e.target;
-        const phoneNumber = target.value.replace(/\D/g, '');
-
-        if (target.value && phoneNumber.length !== 10) {
-          target.setCustomValidity('Please enter a valid 10-digit phone number');
-        } else {
-          target.setCustomValidity('');
-        }
+        target.setCustomValidity('');
       });
     });
   }
