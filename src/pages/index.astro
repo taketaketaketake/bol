@@ -247,9 +247,9 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
           <article class="card overflow-hidden">
             <div class="w-full overflow-hidden" style="aspect-ratio: 1 / 1;">
               <img
-                src={`${imageBaseUrl}/wash%20and%20fold.avif`}
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/bags_of_laundry_folded_laundry_square.jpg"
                 alt="Wash and fold laundry neatly folded"
-                class="w-full h-full object-cover"
+                class="w-full h-full object-cover object-top"
               />
             </div>
             <div class="p-4 sm:p-6">
@@ -262,13 +262,13 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
           <article class="card overflow-hidden">
             <div class="w-full overflow-hidden" style="aspect-ratio: 1 / 1;">
               <img
-                src={`${imageBaseUrl}/folded%20laundry%20at%20dropoff.png`}
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/spirit_of_detroit_laundry%20(1).png"
                 alt="Dry cleaning garments on hangers"
                 class="w-full h-full object-cover"
               />
             </div>
             <div class="p-4 sm:p-6">
-              <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2 sm:mb-3">Dry Cleaning</h3>
+              <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2 sm:mb-3">Laundry Pickup & Delivery</h3>
               <p class="sub mb-3 sm:mb-4 text-sm sm:text-base">Professional care for suits, dresses, uniforms, and delicates—pickup & delivery included.</p>
               <a class="btn-alt w-full sm:w-auto" href="/services#drycleaning">Learn more</a>
             </div>
@@ -277,7 +277,7 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
           <article class="card overflow-hidden">
             <div class="w-full overflow-hidden" style="aspect-ratio: 1 / 1;">
               <img
-                src={`${imageBaseUrl}/commercial%20laundry.avif`}
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/bags_of_laundry_manager_in_commercial_facility.png"
                 alt="Commercial client towels and linens"
                 class="w-full h-full object-cover"
               />
@@ -299,7 +299,7 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
         <div class="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
           <div>
             <img
-              src={`${imageBaseUrl}/folded%20laundry%20at%20dropoff.png`}
+              src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/bags_of_laundry_vehicle%20(1).png"
               alt="Driver picking up laundry bags from customer doorstep"
               class="rounded-xl border border-brand-line w-full shadow-soft"
             />
@@ -420,19 +420,67 @@ const description = "Detroit's fast, reliable laundry pickup & delivery. Start y
         <h2 class="section-title text-center text-brand-text mb-8 sm:mb-12">What customers say</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
 
-          <blockquote class="card p-4 sm:p-6">
+          <blockquote class="card p-4 sm:p-6 relative">
+            <svg class="absolute top-4 right-4 w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            <div class="flex gap-1 mb-3">
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+            </div>
             <p class="text-brand-text mb-3 sm:mb-4 text-sm sm:text-base">"Pickup right on time and everything came back perfectly folded. Huge time saver."</p>
-            <p class="sub text-xs sm:text-sm">— Samantha L., Detroit</p>
+            <div class="flex items-center gap-3">
+              <img src="https://ui-avatars.com/api/?name=Samantha+L&background=4F46E5&color=fff&size=40" alt="Samantha L." class="w-10 h-10 rounded-full" />
+              <div>
+                <p class="text-brand-text font-semibold text-xs sm:text-sm">Samantha L.</p>
+                <p class="sub text-xs">Detroit</p>
+              </div>
+            </div>
           </blockquote>
 
-          <blockquote class="card p-4 sm:p-6">
+          <blockquote class="card p-4 sm:p-6 relative">
+            <svg class="absolute top-4 right-4 w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            <div class="flex gap-1 mb-3">
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+            </div>
             <p class="text-brand-text mb-3 sm:mb-4 text-sm sm:text-base">"We run an Airbnb and rely on them weekly. Zero misses and excellent communication."</p>
-            <p class="sub text-xs sm:text-sm">— James R., Host</p>
+            <div class="flex items-center gap-3">
+              <img src="https://ui-avatars.com/api/?name=James+R&background=4F46E5&color=fff&size=40" alt="James R." class="w-10 h-10 rounded-full" />
+              <div>
+                <p class="text-brand-text font-semibold text-xs sm:text-sm">James R.</p>
+                <p class="sub text-xs">Host</p>
+              </div>
+            </div>
           </blockquote>
 
-          <blockquote class="card p-4 sm:p-6">
+          <blockquote class="card p-4 sm:p-6 relative">
+            <svg class="absolute top-4 right-4 w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            <div class="flex gap-1 mb-3">
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+              <span style="color: #FBBF24; font-size: 1.25rem;">★</span>
+            </div>
             <p class="text-brand-text mb-3 sm:mb-4 text-sm sm:text-base">"Fair pricing, eco-friendly options, and next-day delivery—five stars."</p>
-            <p class="sub text-xs sm:text-sm">— Melissa H., Warren</p>
+            <div class="flex items-center gap-3">
+              <img src="https://ui-avatars.com/api/?name=Melissa+H&background=4F46E5&color=fff&size=40" alt="Melissa H." class="w-10 h-10 rounded-full" />
+              <div>
+                <p class="text-brand-text font-semibold text-xs sm:text-sm">Melissa H.</p>
+                <p class="sub text-xs">Warren</p>
+              </div>
+            </div>
           </blockquote>
         </div>
       </div>
