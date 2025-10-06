@@ -1,5 +1,6 @@
 ---
 import SiteHeader from '../components/SiteHeader';
+import SiteFooter from '../components/SiteFooter';
 import '../styles/app.css';
 import { getSession } from '../utils/auth';
 
@@ -131,5 +132,6 @@ const structuredData = {
   <body>
     <SiteHeader session={session} currentPath={currentPath} client:load />
     <slot />
+    <SiteFooter client:load />
   </body>
 </html>

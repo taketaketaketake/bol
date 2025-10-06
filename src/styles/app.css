@@ -2401,7 +2401,7 @@
   }
   
   .hero {
-    background: linear-gradient(180deg, #FFF1E3 0%, rgba(255,241,227,0) 100%);
+    background-color: #FFF1E3 !important;
   }
   
   html,

@@ -20,8 +20,9 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3 hover:no-underline">
-            <img src="/app/welcome/bol.png" alt="Bags of Laundry Logo" className="h-10 w-auto" />
+          <a href="/" className="flex items-center gap-2 hover:no-underline">
+            <img src="/images/t shirt.PNG" alt="Bags of Laundry" className="h-10 w-auto" />
+            <img src="/images/bags of laundry logo - Copy.png" alt="Bags of Laundry Logo" className="h-10 w-auto" />
           </a>
 
           {/* Desktop nav */}
