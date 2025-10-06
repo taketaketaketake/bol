@@ -1,6 +1,7 @@
 ---
 import Layout from '../layout/Layout.astro';
 import ZipChecker from '../components/ZipChecker';
+import WelcomeDiscount from '../components/WelcomeDiscount';
 import { supabase } from '../lib/supabase';
 
 // Environment variables - Astro way
@@ -43,6 +44,9 @@ const ogImage = "https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/publ
 ---
 
 <Layout title={title} description={description} ogImage={ogImage}>
+  <!-- Welcome Discount Modal -->
+  <WelcomeDiscount client:load />
+
   <div class="min-h-screen bg-brand-bg">
 
     <!-- HERO SECTION -->
