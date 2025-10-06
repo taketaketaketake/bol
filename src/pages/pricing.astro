@@ -10,30 +10,251 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
 
 <Layout title={title} description={description}>
   <main>
-    {/* CORE PRICING */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
+    {/* HOW IT WORKS */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-white">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Per-pound pricing</h2>
+        <h1 class="section-title text-center text-brand-text mb-4 sm:mb-6">Simple, Transparent Pricing</h1>
+        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-base sm:text-lg max-w-3xl mx-auto">
+          Choose the pricing option that works best for you—per-pound flexibility or fixed bag pricing.
+        </p>
 
-        <MemberToggle client:load onToggle={(isMember) => {}} />
-
-        <div class="text-center">
-          <div class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent px-6 py-3 rounded-2xl mb-6 shadow-lg">
-            <h3 class="font-bold text-lg text-black">✨ All per-pound orders include:</h3>
+        <div class="grid md:grid-cols-2 gap-8 sm:gap-12 max-w-5xl mx-auto">
+          {/* Non-Members */}
+          <div class="card p-6 sm:p-8">
+            <div class="inline-block bg-gray-100 text-gray-700 border border-gray-200 rounded-full px-4 py-1.5 text-sm font-bold mb-4">
+              Non-Members
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-brand-text mb-4">Pay As You Go</h2>
+            <p class="text-gray-500 mb-6 text-sm sm:text-base">
+              Simple per-pound pricing with no commitment. Perfect for occasional laundry needs.
+            </p>
+            <div class="bg-brand-bg rounded-xl p-6 mb-6">
+              <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-black text-brand-text mb-2">$2.25<span class="text-xl text-gray-500">/lb</span></div>
+                <p class="text-sm text-gray-500">Standard rate</p>
+              </div>
+            </div>
+            <ul class="space-y-3 text-sm sm:text-base text-gray-500">
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span>Per-pound pricing only</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span>No membership required</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span>$35 minimum order</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span>Free pickup & delivery</span>
+              </li>
+            </ul>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
-            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div class="text-2xl mb-2">🚚</div>
-              <div class="font-semibold text-brand-text text-sm sm:text-base">Free pickup & delivery</div>
+
+          {/* Members */}
+          <div class="card p-6 sm:p-8 border-2 border-brand-primary relative">
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <div class="bg-orange-100 text-brand-primaryDeep border border-orange-200 rounded-full px-4 py-1.5 text-sm font-bold">
+                Best Value
+              </div>
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div class="text-2xl mb-2">👕</div>
-              <div class="font-semibold text-brand-text text-sm sm:text-base">Professional wash & fold</div>
+            <div class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent text-black border border-orange-200 rounded-full px-4 py-1.5 text-sm font-bold mb-4">
+              Members
             </div>
-            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div class="text-2xl mb-2">💰</div>
-              <div class="font-semibold text-brand-text text-sm sm:text-base">$35 minimum order</div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-brand-text mb-4">Membership Benefits</h2>
+            <p class="text-gray-500 mb-6 text-sm sm:text-base">
+              Save money with lower rates and unlock flexible bag pricing options.
+            </p>
+            <div class="bg-brand-bg rounded-xl p-6 mb-6">
+              <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-black text-brand-text mb-2">$1.75<span class="text-xl text-gray-500">/lb</span></div>
+                <p class="text-sm text-gray-500">Member rate • Save $0.50/lb</p>
+              </div>
             </div>
+            <ul class="space-y-3 text-sm sm:text-base text-gray-500">
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span><strong class="text-brand-text">Discounted per-pound pricing</strong> at $1.75/lb</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span><strong class="text-brand-text">Per-bag pricing</strong> option available</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span><strong class="text-brand-text">Priority scheduling</strong> - get first pick of time slots</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span><strong class="text-brand-text">One free rush service per month</strong> ($10 value)</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span>Free branded laundry bag</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-brand-primary mr-2 font-bold">✓</span>
+                <span>Valid for 6 months from signup</span>
+              </li>
+            </ul>
+            <div class="mt-6">
+              <a href="/membership" class="btn w-full text-center">Become a Member</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* MEMBERSHIP ROI */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-gradient-to-br from-orange-50 to-amber-50">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="section-title text-brand-text mb-4">Membership Pays for Itself</h2>
+          <p class="text-gray-600 text-sm sm:text-base">See how quickly you'll recover your $49.99 membership fee and start saving</p>
+          <div class="inline-block bg-orange-100 border border-orange-200 rounded-xl px-6 py-3 mt-4">
+            <p class="text-brand-primaryDeep font-semibold text-sm">
+              💎 Plus get up to $60 in free rush services (6 months × $10/month)
+            </p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 sm:gap-8 mb-8">
+          {/* Break-even Calculator */}
+          <div class="card p-6 sm:p-8">
+            <h3 class="text-xl font-bold text-brand-text mb-4">💰 Break-Even Point</h3>
+            <div class="bg-brand-bg rounded-xl p-6 mb-4 text-center">
+              <div class="text-5xl sm:text-6xl font-black text-brand-primaryDeep mb-2">100</div>
+              <p class="text-sm text-gray-600">pounds to break even</p>
+              <p class="text-xs text-gray-500 mt-2">That's just ~17 lbs/month</p>
+            </div>
+            <p class="text-sm text-gray-600 text-center">
+              At $0.50 savings per pound, your membership pays for itself after just 100 lbs of laundry
+            </p>
+          </div>
+
+          {/* Total Value Breakdown */}
+          <div class="card p-6 sm:p-8">
+            <h3 class="text-xl font-bold text-brand-text mb-6">💎 Total Membership Value</h3>
+            <div class="space-y-4">
+              <div class="bg-brand-bg rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-semibold text-gray-700">Per-pound discount</span>
+                  <span class="text-lg font-bold text-brand-primaryDeep">$0.50/lb</span>
+                </div>
+                <p class="text-xs text-gray-500">Save on every pound vs. non-members</p>
+              </div>
+
+              <div class="bg-brand-bg rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-semibold text-gray-700">Free rush services</span>
+                  <span class="text-lg font-bold text-brand-primaryDeep">$60</span>
+                </div>
+                <p class="text-xs text-gray-500">6 months × $10/month value</p>
+              </div>
+
+              <div class="bg-brand-bg rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-semibold text-gray-700">Priority scheduling</span>
+                  <span class="text-lg font-bold text-brand-primaryDeep">Included</span>
+                </div>
+                <p class="text-xs text-gray-500">First pick of available time slots</p>
+              </div>
+
+              <div class="bg-brand-bg rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-semibold text-gray-700">Per-bag pricing access</span>
+                  <span class="text-lg font-bold text-brand-primaryDeep">Included</span>
+                </div>
+                <p class="text-xs text-gray-500">Predictable, flat-rate options</p>
+              </div>
+
+              <div class="border-t-2 border-orange-300 pt-4 mt-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-base font-bold text-brand-text">Membership Cost</span>
+                  <span class="text-2xl font-black text-brand-text">$49.99</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Just $8.33/month for 6 months of savings</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Comparison Table */}
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-brand-bg">
+                  <th class="p-4 text-left text-sm font-bold text-brand-text">Usage Level</th>
+                  <th class="p-4 text-center text-sm font-bold text-brand-text">Lbs/Month</th>
+                  <th class="p-4 text-right text-sm font-bold text-brand-text">Non-Member</th>
+                  <th class="p-4 text-right text-sm font-bold text-brand-text">Member**</th>
+                  <th class="p-4 text-right text-sm font-bold text-brand-primaryDeep">Total Savings</th>
+                </tr>
+              </thead>
+              <tbody class="text-sm">
+                <tr class="border-t border-gray-200">
+                  <td class="p-4 text-gray-600">Light User</td>
+                  <td class="p-4 text-center text-gray-600">20 lbs</td>
+                  <td class="p-4 text-right text-gray-600">$270.00</td>
+                  <td class="p-4 text-right text-gray-600">$259.99*</td>
+                  <td class="p-4 text-right font-bold text-green-600">$70.01</td>
+                </tr>
+                <tr class="border-t border-gray-200 bg-orange-50">
+                  <td class="p-4 font-semibold text-brand-text">Regular User</td>
+                  <td class="p-4 text-center font-semibold text-brand-text">40 lbs</td>
+                  <td class="p-4 text-right text-gray-600">$540.00</td>
+                  <td class="p-4 text-right text-gray-600">$469.99*</td>
+                  <td class="p-4 text-right font-bold text-green-600">$130.01</td>
+                </tr>
+                <tr class="border-t border-gray-200">
+                  <td class="p-4 font-semibold text-brand-text">Heavy User</td>
+                  <td class="p-4 text-center font-semibold text-brand-text">60 lbs</td>
+                  <td class="p-4 text-right text-gray-600">$810.00</td>
+                  <td class="p-4 text-right text-gray-600">$679.99*</td>
+                  <td class="p-4 text-right font-bold text-green-600">$190.01</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-gray-500 p-4 bg-gray-50 border-t border-gray-200">
+            * Includes $49.99 membership fee. All calculations based on 6-month period.<br>
+            ** Savings include per-pound discount + $60 value from 6 free rush services ($10/month × 6 months)
+          </p>
+        </div>
+
+        <div class="text-center mt-8">
+          <a href="/membership" class="btn inline-block">Join Now & Start Saving</a>
+        </div>
+      </div>
+    </section>
+
+    {/* WHAT'S INCLUDED */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-12">
+          <div class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent px-6 py-3 rounded-2xl mb-4 shadow-lg">
+            <h2 class="font-bold text-xl sm:text-2xl text-black">✨ All per-pound orders include:</h2>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">🚚</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Free pickup & delivery</h3>
+            <p class="text-sm text-gray-500">Convenient door-to-door service with no extra fees</p>
+          </div>
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">👕</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Professional wash & fold</h3>
+            <p class="text-sm text-gray-500">Expert care for all your everyday clothing</p>
+          </div>
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">💰</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">$35 minimum order</h3>
+            <p class="text-sm text-gray-500">Fair pricing that covers our quality service</p>
           </div>
         </div>
       </div>
@@ -42,8 +263,16 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
     {/* BAG PRICING */}
     <section class="py-8 sm:py-12 lg:py-20 bg-white">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Per bag pricing</h2>
-        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">Fixed pricing regardless of weight within capacity limits—<strong class="text-brand-text">bags must close</strong> for fair pricing.</p>
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Per bag pricing</h2>
+          <div class="inline-block bg-orange-50 border border-orange-200 rounded-xl px-6 py-3 mb-4">
+            <p class="text-brand-primaryDeep font-semibold text-sm sm:text-base">
+              🎁 Members Only Feature
+            </p>
+          </div>
+          <p class="text-center text-gray-500 text-sm sm:text-base">Fixed pricing regardless of weight within capacity limits—<strong class="text-brand-text">bags must close</strong> for fair pricing.</p>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
 
           <article class="card overflow-hidden">
@@ -109,6 +338,25 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
           </article>
         </div>
         <p class="text-xs text-gray-500 text-center mt-8">Open-bag / overstuffed fee: $10 (we'll text first). Bag capacity estimates vary by fabric and size.</p>
+      </div>
+    </section>
+
+    {/* PRICE CALCULATOR */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Quick estimate</h2>
+        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">Enter your best guess in pounds — an average family load is ~8–12 lb. This isn't a quote; exact totals show at checkout.</p>
+
+        <PriceCalculator client:load isMember={false} />
+      </div>
+    </section>
+
+    {/* CORE PRICING */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Per-pound pricing</h2>
+
+        <MemberToggle client:load onToggle={(isMember) => {}} />
       </div>
     </section>
 
@@ -181,16 +429,6 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
       </div>
     </section>
 
-    {/* PRICE CALCULATOR */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Quick estimate</h2>
-        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">Enter your best guess in pounds — an average family load is ~8–12 lb. This isn't a quote; exact totals show at checkout.</p>
-
-        <PriceCalculator client:load isMember={false} />
-      </div>
-    </section>
-
     {/* COMMERCIAL PRICING */}
     <section class="py-8 sm:py-12 lg:py-20 bg-white">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -255,17 +493,17 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
 
           <div class="card p-4 sm:p-6">
             <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">How does membership work?</h3>
-            <p class="text-gray-500 text-sm sm:text-base">Members get $1.99/lb pricing (vs $2.25/lb standard) with weekly or bi-weekly recurring pickups. Save $0.26 per pound on every order.</p>
+            <p class="text-gray-500 text-sm sm:text-base">Members get $1.99/lb pricing (vs $2.25/lb standard) and unlock per-bag pricing options. Choose your preferred pricing method for each order.</p>
+          </div>
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">Can non-members use bag pricing?</h3>
+            <p class="text-gray-500 text-sm sm:text-base">Bag pricing is a members-only feature. Non-members can use our simple per-pound pricing at $2.25/lb with no membership required.</p>
           </div>
 
           <div class="card p-4 sm:p-6">
             <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">Why do you have a $35 minimum?</h3>
             <p class="text-gray-500 text-sm sm:text-base">Each pickup has fixed costs (driver time, routing, supplies). The minimum keeps pricing fair for small loads while maintaining quality service.</p>
-          </div>
-
-          <div class="card p-4 sm:p-6">
-            <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">Can I switch between per-pound and bag pricing?</h3>
-            <p class="text-gray-500 text-sm sm:text-base">Absolutely—choose whatever pricing works better for your load that day. No commitment required.</p>
           </div>
 
           <div class="card p-4 sm:p-6">

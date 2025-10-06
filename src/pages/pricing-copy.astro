@@ -1,0 +1,293 @@
+---
+import Layout from '../layout/Layout.astro';
+import MemberToggle from '../components/MemberToggle';
+import PriceCalculator from '../components/PriceCalculator';
+
+// SEO Meta
+const title = "Pricing | Laundry Pickup & Delivery in Detroit | Bags of Laundry";
+const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb standard, $1.99/lb with membership. $35 minimum, rush & add-ons available. Start your order today.";
+---
+
+<Layout title={title} description={description}>
+  <main>
+    {/* CORE PRICING */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Per-pound pricing</h2>
+
+        <MemberToggle client:load onToggle={(isMember) => {}} />
+
+        <div class="text-center">
+          <div class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent px-6 py-3 rounded-2xl mb-6 shadow-lg">
+            <h3 class="font-bold text-lg text-black">✨ All per-pound orders include:</h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div class="text-2xl mb-2">🚚</div>
+              <div class="font-semibold text-brand-text text-sm sm:text-base">Free pickup & delivery</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div class="text-2xl mb-2">👕</div>
+              <div class="font-semibold text-brand-text text-sm sm:text-base">Professional wash & fold</div>
+            </div>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div class="text-2xl mb-2">💰</div>
+              <div class="font-semibold text-brand-text text-sm sm:text-base">$35 minimum order</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* BAG PRICING */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Per bag pricing</h2>
+        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">Fixed pricing regardless of weight within capacity limits—<strong class="text-brand-text">bags must close</strong> for fair pricing.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
+          <article class="card overflow-hidden">
+            <div class="w-full h-48 overflow-hidden" style="aspect-ratio: 1 / 1;">
+              <img
+                src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=600&auto=format&fit=crop"
+                alt="Small laundry bag"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="p-4 sm:p-6 text-center">
+            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2">Small Bag</h3>
+            <p class="mb-2">
+              <span class="text-3xl sm:text-4xl font-black text-brand-text">$35</span>
+            </p>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits 12–18 lbs</p>
+            <p class="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6">Perfect for individuals or light loads. One fixed price regardless of actual weight within limits.</p>
+            <a href="/schedule?bag=small" class="btn-alt w-full text-center">Choose Small Bag</a>
+            </div>
+          </article>
+
+          <article class="card overflow-hidden">
+            <div class="relative">
+              <div class="w-full h-48 overflow-hidden" style="aspect-ratio: 1 / 1;">
+                <img
+                  src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?q=80&w=600&auto=format&fit=crop"
+                  alt="Medium laundry bag"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div class="absolute top-4 left-4 bg-orange-100 text-brand-primaryDeep border border-orange-200 rounded-full px-3 py-1 text-xs font-bold">
+                Most Popular
+              </div>
+            </div>
+            <div class="p-4 sm:p-6 text-center">
+            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2">Medium Bag</h3>
+            <p class="mb-2">
+              <span class="text-3xl sm:text-4xl font-black text-brand-text">$55</span>
+            </p>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits 20–30 lbs</p>
+            <p class="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6">Great for families and regular laundry loads. Fixed pricing with generous capacity limits.</p>
+            <a href="/schedule?bag=medium" class="btn-alt w-full text-center">Choose Medium Bag</a>
+            </div>
+          </article>
+
+          <article class="card overflow-hidden">
+            <div class="w-full h-48 overflow-hidden" style="aspect-ratio: 1 / 1;">
+              <img
+                src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?q=80&w=600&auto=format&fit=crop"
+                alt="Large laundry bag"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="p-4 sm:p-6 text-center">
+            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2">Large Bag</h3>
+            <p class="mb-2">
+              <span class="text-3xl sm:text-4xl font-black text-brand-text">$85</span>
+            </p>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits 35–45 lbs</p>
+            <p class="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6">Best for large households or bulk loads. Fixed price with our largest capacity allowance.</p>
+            <a href="/schedule?bag=large" class="btn-alt w-full text-center">Choose Large Bag</a>
+            </div>
+          </article>
+        </div>
+        <p class="text-xs text-gray-500 text-center mt-8">Open-bag / overstuffed fee: $10 (we'll text first). Bag capacity estimates vary by fabric and size.</p>
+      </div>
+    </section>
+
+    {/* SPECIALTY SERVICES */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Specialty services</h2>
+        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">Professional care for special items and fabrics</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+          <article class="card p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2">Dry Cleaning</h3>
+            <p class="mb-2">
+              <span class="text-2xl sm:text-3xl font-black text-brand-text">From $8</span>
+              <span class="text-xs sm:text-sm font-semibold text-gray-500 ml-1">per item</span>
+            </p>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Expert care for suits, dresses, coats, delicates, and special fabrics requiring dry cleaning.</p>
+            <p class="text-xs sm:text-sm text-gray-500">24-48 hour turnaround • $35 minimum order</p>
+          </article>
+
+          <article class="card p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2">Bedding Bundle</h3>
+            <p class="mb-2">
+              <span class="text-2xl sm:text-3xl font-black text-brand-text">From $20</span>
+              <span class="text-xs sm:text-sm font-semibold text-gray-500 ml-1">per bundle</span>
+            </p>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Complete bedding sets, comforters, and bulky items. Specialized care for your bedding.</p>
+            <p class="text-xs sm:text-sm text-gray-500">24 hour turnaround • $35 minimum order</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    {/* ADD-ONS & FEES */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-8 sm:mb-12">Pricing details</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-3 sm:mb-4">Add-ons</h3>
+            <ul class="text-gray-500 space-y-2 text-sm sm:text-base">
+              <li>• Eco-friendly detergent <strong class="text-brand-text">+$0.10/lb</strong></li>
+              <li>• Hang-dry delicates <strong class="text-brand-text">+$0.25/lb</strong></li>
+              <li>• Same-day rush <strong class="text-brand-text">+$10 or +$0.25/lb</strong></li>
+            </ul>
+          </div>
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-3 sm:mb-4">Minimums & fees</h3>
+            <ul class="text-gray-500 space-y-2 text-sm sm:text-base">
+              <li>• Order minimum <strong class="text-brand-text">$35</strong></li>
+              <li>• Missed pickup window <strong class="text-brand-text">$7</strong></li>
+              <li>• Open-bag / overstuffed <strong class="text-brand-text">$10</strong></li>
+              <li>• Extended zone (if applicable) <strong class="text-brand-text">$3–5</strong></li>
+            </ul>
+          </div>
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-3 sm:mb-4">What's included</h3>
+            <ul class="text-gray-500 space-y-2 text-sm sm:text-base">
+              <li>• Free pickup & delivery</li>
+              <li>• Sorting by color/fabric</li>
+              <li>• Visible stain pretreat</li>
+              <li>• Neat fold or garment press</li>
+              <li>• Text updates & photo proof</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* PRICE CALCULATOR */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Quick estimate</h2>
+        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">Enter your best guess in pounds — an average family load is ~8–12 lb. This isn't a quote; exact totals show at checkout.</p>
+
+        <PriceCalculator client:load isMember={false} />
+      </div>
+    </section>
+
+    {/* COMMERCIAL PRICING */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-8 sm:gap-12 items-start">
+
+          <div>
+            <h2 class="section-title text-brand-text mb-4 sm:mb-6">Commercial pricing</h2>
+            <p class="text-gray-500 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
+              Running an Airbnb portfolio, gym, spa, restaurant, or clinic? We build simple, volume-based quotes with dedicated pickup windows and delivery manifests.
+            </p>
+            <ul class="text-gray-500 mb-6 sm:mb-8 space-y-2 pl-4 text-sm sm:text-base">
+              <li>• Recurring routes (weekly or multi-week)</li>
+              <li>• Inventory counts & bag barcodes</li>
+              <li>• Preferred turnaround & rush capacity</li>
+            </ul>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <a href="/contact" class="btn w-full sm:w-auto">Talk to Sales</a>
+              <a href="/service-areas" class="btn-alt w-full sm:w-auto">Check Coverage</a>
+            </div>
+          </div>
+
+          <div>
+            <div class="overflow-x-auto">
+              <table class="w-full border border-gray-200 rounded-xl overflow-hidden">
+                <thead>
+                  <tr class="bg-orange-50">
+                    <th class="p-2 sm:p-4 text-left text-xs sm:text-sm font-bold text-brand-text">Approx. weekly volume</th>
+                    <th class="p-2 sm:p-4 text-left text-xs sm:text-sm font-bold text-brand-text">Indicative rate</th>
+                    <th class="p-2 sm:p-4 text-left text-xs sm:text-sm font-bold text-brand-text">Notes</th>
+                  </tr>
+                </thead>
+                <tbody class="text-xs sm:text-sm">
+                  <tr class="border-t border-gray-200">
+                    <td class="p-2 sm:p-4 text-brand-text">50–100 lb</td>
+                    <td class="p-2 sm:p-4 text-brand-text">$2.05–$2.15/lb</td>
+                    <td class="p-2 sm:p-4 text-gray-500">Standard next-day</td>
+                  </tr>
+                  <tr class="border-t border-gray-200">
+                    <td class="p-2 sm:p-4 text-brand-text">100–250 lb</td>
+                    <td class="p-2 sm:p-4 text-brand-text">$1.90–$2.05/lb</td>
+                    <td class="p-2 sm:p-4 text-gray-500">Route day required</td>
+                  </tr>
+                  <tr class="border-t border-gray-200">
+                    <td class="p-2 sm:p-4 text-brand-text">250+ lb</td>
+                    <td class="p-2 sm:p-4 text-brand-text">Custom</td>
+                    <td class="p-2 sm:p-4 text-gray-500">Dedicated windows</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-xs text-gray-500 mt-3 sm:mt-4">Final pricing depends on mix (towels/linens), bagging, and turnaround needs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* FAQ */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-8 sm:mb-12">Pricing FAQ</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">How does membership work?</h3>
+            <p class="text-gray-500 text-sm sm:text-base">Members get $1.99/lb pricing (vs $2.25/lb standard) with weekly or bi-weekly recurring pickups. Save $0.26 per pound on every order.</p>
+          </div>
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">Why do you have a $35 minimum?</h3>
+            <p class="text-gray-500 text-sm sm:text-base">Each pickup has fixed costs (driver time, routing, supplies). The minimum keeps pricing fair for small loads while maintaining quality service.</p>
+          </div>
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">Can I switch between per-pound and bag pricing?</h3>
+            <p class="text-gray-500 text-sm sm:text-base">Absolutely—choose whatever pricing works better for your load that day. No commitment required.</p>
+          </div>
+
+          <div class="card p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-bold text-brand-text mb-2 sm:mb-3">How accurate is the estimator?</h3>
+            <p class="text-gray-500 text-sm sm:text-base">It's designed to help you budget. Your final total is based on actual weight and options chosen at checkout.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* FINAL CTA */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="card p-6 sm:p-8 lg:p-12 text-center">
+          <h2 class="section-title text-brand-text mb-3 sm:mb-4">Ready to skip laundry day?</h2>
+          <p class="text-gray-500 mb-6 sm:mb-8 text-sm sm:text-base">Book a pickup in minutes. We'll handle the rest.</p>
+          <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+            <a href="/start-basic" class="btn w-full sm:w-auto">Schedule Pickup</a>
+            <a href="/services" class="btn-alt w-full sm:w-auto">Explore Services</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

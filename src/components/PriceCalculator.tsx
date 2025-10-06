@@ -5,7 +5,7 @@ interface PriceCalculatorProps {
 }
 
 export default function PriceCalculator({ isMember }: PriceCalculatorProps) {
-  const memberRate = 1.99;
+  const memberRate = 1.75;
   const standardRate = 2.25;
   const [selectedRate, setSelectedRate] = useState(standardRate);
   const [estimate, setEstimate] = useState('$45.00');
@@ -54,7 +54,7 @@ export default function PriceCalculator({ isMember }: PriceCalculatorProps) {
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-brand-primary/20 focus:border-brand-primary bg-white"
             >
               <option value={standardRate}>Standard - ${standardRate}/lb</option>
-              <option value={memberRate}>Member - ${memberRate}/lb (Save $0.26/lb!)</option>
+              <option value={memberRate}>Member - ${memberRate}/lb (Save $0.50/lb!)</option>
             </select>
           </div>
 
