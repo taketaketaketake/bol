@@ -109,7 +109,7 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
     </section>
 
     {/* MEMBERSHIP ROI */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-gradient-to-br from-orange-50 to-amber-50">
+    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8 sm:mb-12">
           <h2 class="section-title text-brand-text mb-4">Membership Pays for Itself</h2>
@@ -232,34 +232,6 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
       </div>
     </section>
 
-    {/* WHAT'S INCLUDED */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-white">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8 sm:mb-12">
-          <div class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent px-6 py-3 rounded-2xl mb-4 shadow-lg">
-            <h2 class="font-bold text-xl sm:text-2xl text-black">✨ All per-pound orders include:</h2>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
-          <div class="card p-6 sm:p-8 text-center">
-            <div class="text-4xl sm:text-5xl mb-4">🚚</div>
-            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Free pickup & delivery</h3>
-            <p class="text-sm text-gray-500">Convenient door-to-door service with no extra fees</p>
-          </div>
-          <div class="card p-6 sm:p-8 text-center">
-            <div class="text-4xl sm:text-5xl mb-4">👕</div>
-            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Professional wash & fold</h3>
-            <p class="text-sm text-gray-500">Expert care for all your everyday clothing</p>
-          </div>
-          <div class="card p-6 sm:p-8 text-center">
-            <div class="text-4xl sm:text-5xl mb-4">💰</div>
-            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">$35 minimum order</h3>
-            <p class="text-sm text-gray-500">Fair pricing that covers our quality service</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     {/* BAG PRICING */}
     <section class="py-8 sm:py-12 lg:py-20 bg-white">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -288,7 +260,7 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
             <p class="mb-2">
               <span class="text-3xl sm:text-4xl font-black text-brand-text">$35</span>
             </p>
-            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits 12–18 lbs</p>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits up to 20 lbs</p>
             <p class="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6">Perfect for individuals or light loads. One fixed price regardless of actual weight within limits.</p>
             <a href="/schedule?bag=small" class="btn-alt w-full text-center">Choose Small Bag</a>
             </div>
@@ -312,7 +284,7 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
             <p class="mb-2">
               <span class="text-3xl sm:text-4xl font-black text-brand-text">$55</span>
             </p>
-            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits 20–30 lbs</p>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits up to 31 lbs</p>
             <p class="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6">Great for families and regular laundry loads. Fixed pricing with generous capacity limits.</p>
             <a href="/schedule?bag=medium" class="btn-alt w-full text-center">Choose Medium Bag</a>
             </div>
@@ -331,7 +303,7 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
             <p class="mb-2">
               <span class="text-3xl sm:text-4xl font-black text-brand-text">$85</span>
             </p>
-            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits 35–45 lbs</p>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Fits up to 48 lbs</p>
             <p class="text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6">Best for large households or bulk loads. Fixed price with our largest capacity allowance.</p>
             <a href="/schedule?bag=large" class="btn-alt w-full text-center">Choose Large Bag</a>
             </div>
@@ -353,84 +325,74 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
 
     {/* CORE PRICING */}
     <section class="py-8 sm:py-12 lg:py-20 bg-white">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Per-pound pricing</h2>
+        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">
+          Simple, transparent pricing based on the actual weight of your laundry
+        </p>
 
-        <MemberToggle client:load onToggle={(isMember) => {}} />
-      </div>
-    </section>
-
-    {/* SPECIALTY SERVICES */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Specialty services</h2>
-        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">Professional care for special items and fabrics</p>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
-          <article class="card p-4 sm:p-6">
-            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2">Dry Cleaning</h3>
-            <p class="mb-2">
-              <span class="text-2xl sm:text-3xl font-black text-brand-text">From $8</span>
-              <span class="text-xs sm:text-sm font-semibold text-gray-500 ml-1">per item</span>
-            </p>
-            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Expert care for suits, dresses, coats, delicates, and special fabrics requiring dry cleaning.</p>
-            <p class="text-xs sm:text-sm text-gray-500">24-48 hour turnaround • $35 minimum order</p>
-          </article>
-
-          <article class="card p-4 sm:p-6">
-            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-2">Bedding Bundle</h3>
-            <p class="mb-2">
-              <span class="text-2xl sm:text-3xl font-black text-brand-text">From $20</span>
-              <span class="text-xs sm:text-sm font-semibold text-gray-500 ml-1">per bundle</span>
-            </p>
-            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Complete bedding sets, comforters, and bulky items. Specialized care for your bedding.</p>
-            <p class="text-xs sm:text-sm text-gray-500">24 hour turnaround • $35 minimum order</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    {/* ADD-ONS & FEES */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-white">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="section-title text-center text-brand-text mb-8 sm:mb-12">Pricing details</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-
-          <div class="card p-4 sm:p-6">
-            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-3 sm:mb-4">Add-ons</h3>
-            <ul class="text-gray-500 space-y-2 text-sm sm:text-base">
-              <li>• Eco-friendly detergent <strong class="text-brand-text">+$0.10/lb</strong></li>
-              <li>• Hang-dry delicates <strong class="text-brand-text">+$0.25/lb</strong></li>
-              <li>• Same-day rush <strong class="text-brand-text">+$10 or +$0.25/lb</strong></li>
-            </ul>
+        <div class="card p-8 sm:p-12 text-center mb-8">
+          <div class="mb-8">
+            <div class="text-6xl sm:text-7xl font-black text-brand-text mb-4">
+              $2.25<span class="text-3xl text-gray-500">/lb</span>
+            </div>
+            <p class="text-lg text-gray-600">Standard per-pound rate</p>
           </div>
 
-          <div class="card p-4 sm:p-6">
-            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-3 sm:mb-4">Minimums & fees</h3>
-            <ul class="text-gray-500 space-y-2 text-sm sm:text-base">
-              <li>• Order minimum <strong class="text-brand-text">$35</strong></li>
-              <li>• Missed pickup window <strong class="text-brand-text">$7</strong></li>
-              <li>• Open-bag / overstuffed <strong class="text-brand-text">$10</strong></li>
-              <li>• Extended zone (if applicable) <strong class="text-brand-text">$3–5</strong></li>
-            </ul>
-          </div>
+          <div class="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
+              <p class="text-sm font-semibold text-gray-600 mb-3">15 lbs</p>
+              <p class="text-3xl font-bold text-brand-text mb-2">$35.00</p>
+              <p class="text-xs text-gray-500">$35 minimum applies</p>
+            </div>
 
-          <div class="card p-4 sm:p-6">
-            <h3 class="text-lg sm:text-xl font-bold text-brand-text mb-3 sm:mb-4">What's included</h3>
-            <ul class="text-gray-500 space-y-2 text-sm sm:text-base">
-              <li>• Free pickup & delivery</li>
-              <li>• Sorting by color/fabric</li>
-              <li>• Visible stain pretreat</li>
-              <li>• Neat fold or garment press</li>
-              <li>• Text updates & photo proof</li>
-            </ul>
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 ring-2 ring-brand-primary">
+              <p class="text-sm font-semibold text-gray-600 mb-3">20 lbs</p>
+              <p class="text-3xl font-bold text-brand-text mb-2">$45.00</p>
+              <p class="text-xs text-gray-500">Average load size</p>
+            </div>
+
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
+              <p class="text-sm font-semibold text-gray-600 mb-3">30 lbs</p>
+              <p class="text-3xl font-bold text-brand-text mb-2">$67.50</p>
+              <p class="text-xs text-gray-500">Family load</p>
+            </div>
           </div>
         </div>
+
+        <div class="bg-white border-2 border-brand-primary rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="text-3xl">💡</div>
+            <h3 class="text-xl font-bold text-brand-text">How it works</h3>
+          </div>
+          <ul class="space-y-3 text-sm sm:text-base text-gray-600">
+            <li class="flex items-start gap-3">
+              <span class="text-brand-primary font-bold">1.</span>
+              <span>We pick up your laundry at your door</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-brand-primary font-bold">2.</span>
+              <span>Your items are weighed at our facility</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-brand-primary font-bold">3.</span>
+              <span>You're charged $2.25 per pound (minimum $35)</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-brand-primary font-bold">4.</span>
+              <span>Clean, folded laundry delivered back to you</span>
+            </li>
+          </ul>
+        </div>
+
+        <p class="text-center text-gray-500 text-sm mt-8 max-w-2xl mx-auto">
+          The $35 minimum helps cover pickup & delivery costs for smaller loads. Most customers exceed this with a typical week's laundry.
+        </p>
       </div>
     </section>
 
     {/* COMMERCIAL PRICING */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-white">
+    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-8 sm:gap-12 items-start">
 
@@ -486,7 +448,7 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
     </section>
 
     {/* FAQ */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
+    <section class="py-8 sm:py-12 lg:py-20 bg-white">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="section-title text-center text-brand-text mb-8 sm:mb-12">Pricing FAQ</h2>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -514,15 +476,29 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
       </div>
     </section>
 
-    {/* FINAL CTA */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-white">
+    {/* WHAT'S INCLUDED */}
+    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="card p-6 sm:p-8 lg:p-12 text-center">
-          <h2 class="section-title text-brand-text mb-3 sm:mb-4">Ready to skip laundry day?</h2>
-          <p class="text-gray-500 mb-6 sm:mb-8 text-sm sm:text-base">Book a pickup in minutes. We'll handle the rest.</p>
-          <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-            <a href="/start-basic" class="btn w-full sm:w-auto">Schedule Pickup</a>
-            <a href="/services" class="btn-alt w-full sm:w-auto">Explore Services</a>
+        <div class="text-center mb-8 sm:mb-12">
+          <div class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent px-6 py-3 rounded-2xl mb-4 shadow-lg">
+            <h2 class="font-bold text-xl sm:text-2xl text-black">✨ All orders include:</h2>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">🚚</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Free pickup & delivery</h3>
+            <p class="text-sm text-gray-500">Convenient door-to-door service with no extra fees</p>
+          </div>
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">👕</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Professional wash & fold</h3>
+            <p class="text-sm text-gray-500">Expert care for all your everyday clothing</p>
+          </div>
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">💰</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">$35 minimum order</h3>
+            <p class="text-sm text-gray-500">Fair pricing that covers our quality service</p>
           </div>
         </div>
       </div>
