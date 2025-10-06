@@ -4,15 +4,21 @@ export default function WelcomeDiscount() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const hasSeenDiscount = localStorage.getItem('seen-first-time-discount');
-    if (!hasSeenDiscount) {
+    // Check if user has already converted (permanent)
+    const hasConverted = localStorage.getItem('user-converted');
+    // Check if shown this session (temporary)
+    const shownThisSession = sessionStorage.getItem('discount-shown-this-session');
+    
+    // Show popup if user hasn't converted AND hasn't seen it this session
+    if (!hasConverted && !shownThisSession) {
       setTimeout(() => setShow(true), 3000); // Show after 3 seconds
+      // Mark as shown this session
+      sessionStorage.setItem('discount-shown-this-session', 'true');
     }
   }, []);
 
   const handleClose = () => {
     setShow(false);
-    localStorage.setItem('seen-first-time-discount', 'true');
   };
 
   if (!show) return null;
