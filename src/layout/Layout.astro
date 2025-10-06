@@ -31,8 +31,8 @@ const structuredData = {
   "name": "Bags of Laundry",
   "description": "Professional laundry pickup and delivery service in Detroit and Metro suburbs",
   "url": siteUrl,
-  "telephone": "+1-313-555-0123", // Replace with real number
-  "email": "hello@bagsoflaundry.com", // Replace with real email
+  "telephone": "+1-855-927-4224",
+  "email": "bagsoflaundry@gmail.com",
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "Detroit",
@@ -60,7 +60,7 @@ const structuredData = {
     "Commercial laundry",
     "Same-day rush service"
   ],
-  "priceRange": "$2.49 per pound",
+  "priceRange": "$1.99 per pound",
   "openingHours": "Mo-Su 06:00-22:00",
   "areaServed": [
     "Detroit, MI",
@@ -99,7 +99,7 @@ const structuredData = {
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(ogImage, siteUrl)} />
+    <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : new URL(ogImage, siteUrl)} />
     <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="Bags of Laundry" />
 
@@ -108,7 +108,7 @@ const structuredData = {
     <meta name="twitter:url" content={canonicalURL} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(ogImage, siteUrl)} />
+    <meta name="twitter:image" content={ogImage.startsWith('http') ? ogImage : new URL(ogImage, siteUrl)} />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
