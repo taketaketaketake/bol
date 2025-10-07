@@ -37,6 +37,7 @@ export default function SiteFooter() {
               <li><a href="/service-areas" className="text-gray-400 hover:text-white">Service Areas</a></li>
               <li><a href="/how-it-works" className="text-gray-400 hover:text-white">How It Works</a></li>
               <li><a href="/start-basic" className="text-gray-400 hover:text-white">Start Order</a></li>
+              <li><a href="/laundromat-partners" className="text-gray-400 hover:text-white">Partner With Us</a></li>
             </ul>
           </div>
 

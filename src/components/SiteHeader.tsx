@@ -13,6 +13,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
     { href: "/pricing", label: "Pricing" },
     { href: "/service-areas", label: "Service Areas" },
     { href: "/how-it-works", label: "How It Works" },
+    { href: "/laundromat-partners", label: "Partners" },
   ];
 
   return (
