@@ -1,0 +1,384 @@
+---
+import Layout from '../layout/Layout.astro';
+
+// SEO Meta
+const title = "Specialty Laundry Services Detroit | Alterations, Shoe Repair & More | Bags of Laundry";
+const description = "Specialty services with pickup & delivery: alterations and repairs, shoe cleaning and repair, comforter cleaning, wedding dress preservation. Expert partner services across Detroit.";
+---
+
+<Layout title={title} description={description}>
+  <main>
+    <!-- HERO -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div class="inline-block bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-full px-3 py-1 text-xs font-bold mb-4">
+              Premium Services
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black text-brand-text mb-6">Specialty Services</h1>
+            <p class="sub text-lg leading-relaxed mb-6">
+              Beyond laundry and dry cleaning, we connect you with expert partners for alterations, shoe repair, bedding cleaning, and wedding dress preservation. Convenient pickup and delivery for every service.
+            </p>
+            <ul class="space-y-3 mb-8">
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Free pickup & delivery across Detroit</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Expert specialist partners</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Quality guaranteed</span>
+              </li>
+            </ul>
+            <div class="flex flex-wrap gap-3">
+              <a href="/contact" class="btn">Request Quote</a>
+              <a href="/pricing" class="btn-alt">See Pricing</a>
+            </div>
+          </div>
+
+          <!-- Image -->
+          <div class="relative">
+            <div class="card overflow-hidden">
+              <img
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/commercial-laundry.png"
+                alt="Specialty laundry services"
+                class="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES WE OFFER -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Specialty Services We Offer</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Alterations & Repairs</h3>
+            <p class="sub text-sm">Professional tailoring and garment repairs</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-amber-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Shoe Cleaning & Repair</h3>
+            <p class="sub text-sm">Expert cobbler services for all footwear</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-blue-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Comforter Cleaning</h3>
+            <p class="sub text-sm">Large bedding items professionally cleaned</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-pink-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Wedding Dress Preservation</h3>
+            <p class="sub text-sm">Museum-quality preservation & storage</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">How Specialty Services Work</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">1</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Request Quote</h3>
+            <p class="sub text-sm">
+              Contact us with details about your item and the service you need.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">2</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Pickup Scheduled</h3>
+            <p class="sub text-sm">
+              Once approved, we schedule a pickup at your convenience.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">3</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Expert Work</h3>
+            <p class="sub text-sm">
+              Our specialist partners handle your items with professional care.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">4</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Delivery</h3>
+            <p class="sub text-sm">
+              Completed items delivered back to your door with care.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICE DETAILS -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Service Details</h2>
+
+        <div class="space-y-8">
+          <!-- Alterations & Repairs -->
+          <div class="card p-8">
+            <div class="grid lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="inline-block bg-purple-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-2xl font-bold text-brand-text">Alterations & Repairs</h3>
+                </div>
+                <p class="sub mb-4">
+                  Professional tailoring and garment repairs. We pick up your items, our partner tailors handle the work, and we deliver them back perfectly fitted.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 class="font-bold text-brand-text text-sm mb-2">Common Services:</h4>
+                    <ul class="sub text-sm space-y-1">
+                      <li>• Hemming pants, skirts, dresses</li>
+                      <li>• Taking in or letting out garments</li>
+                      <li>• Zipper replacement & repairs</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-brand-text text-sm mb-2">Also Available:</h4>
+                    <ul class="sub text-sm space-y-1">
+                      <li>• Button replacement & stitching</li>
+                      <li>• Suit jacket alterations</li>
+                      <li>• Wedding dress alterations</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-purple-50 border border-purple-200 rounded-xl p-6">
+                <p class="text-sm text-gray-600 mb-2">Typical turnaround</p>
+                <p class="text-3xl font-black text-brand-text mb-4">5-10 days</p>
+                <p class="sub text-sm">Depending on complexity. Wedding dress alterations may require more time.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shoe Cleaning & Repair -->
+          <div class="card p-8">
+            <div class="grid lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="inline-block bg-amber-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-2xl font-bold text-brand-text">Shoe Cleaning & Repair</h3>
+                </div>
+                <p class="sub mb-4">
+                  Expert shoe care from professional cobblers. Cleaning, polishing, repairs, and restoration—all with convenient pickup and delivery.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 class="font-bold text-brand-text text-sm mb-2">Cleaning Services:</h4>
+                    <ul class="sub text-sm space-y-1">
+                      <li>• Deep cleaning & conditioning</li>
+                      <li>• Shoe polishing & shine</li>
+                      <li>• Sneaker cleaning & restoration</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-brand-text text-sm mb-2">Repair Services:</h4>
+                    <ul class="sub text-sm space-y-1">
+                      <li>• Heel & sole replacement</li>
+                      <li>• Leather restoration</li>
+                      <li>• Stretching & waterproofing</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-6">
+                <p class="text-sm text-gray-600 mb-2">Typical turnaround</p>
+                <p class="text-3xl font-black text-brand-text mb-4">7-14 days</p>
+                <p class="sub text-sm">Depending on service type. Rush service may be available.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comforter & Bedding -->
+          <div class="card p-8">
+            <div class="grid lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="inline-block bg-blue-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-2xl font-bold text-brand-text">Comforter & Bedding Cleaning</h3>
+                </div>
+                <p class="sub mb-4">
+                  Professional cleaning for oversized bedding items. Our partners have commercial equipment to handle large comforters, duvets, and blankets.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 class="font-bold text-brand-text text-sm mb-2">We Clean:</h4>
+                    <ul class="sub text-sm space-y-1">
+                      <li>• Comforters & duvets (all sizes)</li>
+                      <li>• Down & feather bedding</li>
+                      <li>• Quilts & bedspreads</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-brand-text text-sm mb-2">Also Available:</h4>
+                    <ul class="sub text-sm space-y-1">
+                      <li>• Weighted blankets</li>
+                      <li>• Mattress covers & toppers</li>
+                      <li>• Throw blankets & afghans</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <p class="text-sm text-gray-600 mb-2">Typical turnaround</p>
+                <p class="text-3xl font-black text-brand-text mb-4">3-5 days</p>
+                <p class="sub text-sm">Most bedding items ready within 5 business days.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Wedding Dress Preservation -->
+          <div class="card p-8">
+            <div class="grid lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="inline-block bg-pink-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-2xl font-bold text-brand-text">Wedding Dress Preservation</h3>
+                </div>
+                <p class="sub mb-4">
+                  Expert cleaning and archival preservation for your wedding gown. Our specialist partners use museum-quality techniques to protect your dress for generations.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 class="font-bold text-brand-text text-sm mb-2">Process Includes:</h4>
+                    <ul class="sub text-sm space-y-1">
+                      <li>• Detailed inspection & photography</li>
+                      <li>• Gentle cleaning & stain removal</li>
+                      <li>• Acid-free tissue wrapping</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-brand-text text-sm mb-2">Premium Protection:</h4>
+                    <ul class="sub text-sm space-y-1">
+                      <li>• Museum-quality preservation box</li>
+                      <li>• UV-protected storage packaging</li>
+                      <li>• Detailed care instructions</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-pink-50 border border-pink-200 rounded-xl p-6">
+                <p class="text-sm text-gray-600 mb-2">Typical turnaround</p>
+                <p class="text-3xl font-black text-brand-text mb-4">2-4 weeks</p>
+                <p class="sub text-sm">Full preservation process with museum-quality packaging.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Specialty Services FAQ</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How do I get a quote?</h3>
+            <p class="sub">
+              Contact us with photos and details about your item. We'll consult with our partners and provide a quote within 1 business day.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Can you combine services?</h3>
+            <p class="sub">
+              Yes! We can pick up your dry cleaning, alterations, and specialty items all at once for maximum convenience.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How long do alterations take?</h3>
+            <p class="sub">
+              Simple alterations take 5-7 days, complex work 10-14 days. Wedding dress alterations may require additional time.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Is preservation worth it?</h3>
+            <p class="sub">
+              Yes! Proper preservation prevents yellowing, stains from setting, and fabric degradation over time.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What if I'm not satisfied?</h3>
+            <p class="sub">
+              Our partners stand behind their work. If there's an issue, contact us and we'll make it right.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Do you offer rush service?</h3>
+            <p class="sub">
+              Rush service may be available for certain items. Ask when requesting your quote.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="text-center mt-12 pt-8">
+          <a href="/contact" class="btn">Request a Quote</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</Layout>

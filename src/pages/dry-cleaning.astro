@@ -1,0 +1,349 @@
+---
+import Layout from '../layout/Layout.astro';
+
+// SEO Meta
+const title = "Dry Cleaning Pickup & Delivery Detroit | Professional Garment Care | Bags of Laundry";
+const description = "Professional dry cleaning with free pickup and delivery across Detroit. Suits, dresses, delicates, and specialty garments cleaned and pressed by expert partners.";
+---
+
+<Layout title={title} description={description}>
+  <main>
+    <!-- HERO -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div class="inline-block bg-purple-100 text-purple-700 border border-purple-200 rounded-full px-3 py-1 text-xs font-bold mb-4">
+              Professional Garment Care
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black text-brand-text mb-6">Dry Cleaning Pickup & Delivery</h1>
+            <p class="sub text-lg leading-relaxed mb-6">
+              Professional dry cleaning service for your suits, dresses, and delicate garments. We pick up from your door, our expert partners clean and press each item with care, then we deliver them back ready to wear.
+            </p>
+            <ul class="space-y-3 mb-8">
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Free pickup & delivery across Detroit</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Expert partner dry cleaners</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Protective packaging on return</span>
+              </li>
+            </ul>
+            <div class="flex flex-wrap gap-3">
+              <a href="/start-basic" class="btn">Schedule Pickup</a>
+              <a href="/pricing" class="btn-alt">See Pricing</a>
+            </div>
+          </div>
+
+          <!-- Image -->
+          <div class="relative">
+            <div class="card overflow-hidden">
+              <img
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/commercial-laundry.png"
+                alt="Professional dry cleaning service"
+                class="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT WE CLEAN -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">What We Dry Clean</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Suits & Blazers</h3>
+            <p class="sub text-sm">Men's and women's suits, sport coats, blazers</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Dresses & Gowns</h3>
+            <p class="sub text-sm">Cocktail dresses, evening gowns, formal wear</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Dress Shirts</h3>
+            <p class="sub text-sm">Professionally cleaned, starched, and pressed</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Special Occasion</h3>
+            <p class="sub text-sm">Wedding attire, tuxedos, special fabrics</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Outerwear</h3>
+            <p class="sub text-sm">Coats, jackets, wool items, cashmere</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Leather & Suede</h3>
+            <p class="sub text-sm">Specialty cleaning for leather and suede items</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Household Items</h3>
+            <p class="sub text-sm">Curtains, drapes, tablecloths, comforters</p>
+          </div>
+
+          <div class="card p-6 text-center">
+            <div class="inline-block bg-purple-100 rounded-full p-4 mb-4">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+              </svg>
+            </div>
+            <h3 class="font-bold text-brand-text mb-2">Delicates</h3>
+            <p class="sub text-sm">Silk, lace, and other delicate fabrics</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">How Dry Cleaning Pickup & Delivery Works</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">1</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Schedule Pickup</h3>
+            <p class="sub text-sm">
+              Book online and choose your pickup window. Leave items at your door.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">2</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">We Pick Up</h3>
+            <p class="sub text-sm">
+              Our driver collects your items and takes a timestamped photo for your records.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">3</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Expert Cleaning</h3>
+            <p class="sub text-sm">
+              Our partner dry cleaners professionally clean, press, and package each garment.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">4</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Delivery</h3>
+            <p class="sub text-sm">
+              Clean, pressed items delivered back to your door in protective packaging.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="mt-16 pt-8 text-center">
+          <div class="inline-block bg-blue-50 border border-blue-200 rounded-xl p-6 max-w-2xl">
+            <p class="font-bold text-brand-text mb-2">Typical Turnaround Time</p>
+            <p class="text-4xl font-black text-brand-text mb-2">24-48 hours</p>
+            <p class="sub text-sm">Rush service available for select items. Same-day options may be available in certain areas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARE LABELS & QUALITY -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 class="section-title text-brand-text mb-6">Expert Care for Your Garments</h2>
+            <p class="sub mb-6">
+              Our partner dry cleaners are experienced professionals who treat each garment with care. They follow manufacturer care labels and use appropriate cleaning methods for different fabrics and materials.
+            </p>
+            <div class="space-y-4">
+              <div class="flex gap-3 items-start">
+                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-brand-primary flex items-center justify-center mt-1">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-semibold text-brand-text">Care labels followed</p>
+                  <p class="sub text-sm">Every garment is inspected and cleaned according to manufacturer instructions</p>
+                </div>
+              </div>
+
+              <div class="flex gap-3 items-start">
+                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-brand-primary flex items-center justify-center mt-1">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-semibold text-brand-text">Stain treatment</p>
+                  <p class="sub text-sm">Stubborn stains receive special pre-treatment before cleaning</p>
+                </div>
+              </div>
+
+              <div class="flex gap-3 items-start">
+                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-brand-primary flex items-center justify-center mt-1">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-semibold text-brand-text">Professional pressing</p>
+                  <p class="sub text-sm">Garments are expertly pressed to look their best</p>
+                </div>
+              </div>
+
+              <div class="flex gap-3 items-start">
+                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-brand-primary flex items-center justify-center mt-1">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-semibold text-brand-text">Protective packaging</p>
+                  <p class="sub text-sm">Items returned on hangers in protective bags to keep them clean</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-8 bg-purple-50 border-purple-200">
+            <h3 class="text-xl font-bold text-brand-text mb-4">Pricing Guide</h3>
+            <p class="sub mb-6 text-sm">Typical per-item pricing for dry cleaning services. Final prices determined by partner cleaner.</p>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center pb-3 border-b border-purple-200">
+                <span class="sub font-semibold">Dress Shirt</span>
+                <span class="text-brand-text font-bold">$3.50+</span>
+              </div>
+              <div class="flex justify-between items-center pb-3 border-b border-purple-200">
+                <span class="sub font-semibold">Pants/Skirt</span>
+                <span class="text-brand-text font-bold">$7.00+</span>
+              </div>
+              <div class="flex justify-between items-center pb-3 border-b border-purple-200">
+                <span class="sub font-semibold">Suit (2-piece)</span>
+                <span class="text-brand-text font-bold">$15.00+</span>
+              </div>
+              <div class="flex justify-between items-center pb-3 border-b border-purple-200">
+                <span class="sub font-semibold">Dress/Gown</span>
+                <span class="text-brand-text font-bold">$12.00+</span>
+              </div>
+              <div class="flex justify-between items-center pb-3 border-b border-purple-200">
+                <span class="sub font-semibold">Coat/Jacket</span>
+                <span class="text-brand-text font-bold">$15.00+</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="sub font-semibold">Comforter</span>
+                <span class="text-brand-text font-bold">$25.00+</span>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-6">Prices vary by item condition, fabric, and partner cleaner. See full pricing details at checkout.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Dry Cleaning FAQ</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How is dry cleaning different?</h3>
+            <p class="sub">
+              Dry cleaning uses special solvents instead of water, protecting delicate fabrics and removing stains water can't handle.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How long does it take?</h3>
+            <p class="sub">
+              Most items are ready in 24-48 hours. Rush service available for urgent needs. Same-day options in select areas.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What if there's a stain?</h3>
+            <p class="sub">
+              Point out stains when scheduling. Our partners pre-treat tough stains, though some set-in stains may not fully remove.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Do you clean wedding dresses?</h3>
+            <p class="sub">
+              Yes! We offer wedding dress cleaning and preservation. Contact us for a custom quote on specialty garments.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How does payment work?</h3>
+            <p class="sub">
+              We place a temporary authorization hold at booking. You're charged after cleaning based on itemized pricing.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What areas do you serve?</h3>
+            <p class="sub">
+              We serve Detroit and surrounding suburbs. Enter your ZIP at checkout to confirm availability.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="text-center mt-12 pt-8">
+          <a href="/start-basic" class="btn">Schedule Dry Cleaning</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</Layout>
