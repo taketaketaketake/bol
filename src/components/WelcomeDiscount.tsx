@@ -24,8 +24,8 @@ export default function WelcomeDiscount() {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={handleClose}>
-      <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md relative shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={handleClose}>
+      <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md relative shadow-2xl border-4 border-orange-200 ring-2 ring-orange-100" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={handleClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none"
