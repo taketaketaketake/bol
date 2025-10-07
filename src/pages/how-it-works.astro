@@ -1,149 +1,230 @@
 ---
-import Layout from "../layout/Layout.astro";
+import Layout from '../layout/Layout.astro';
 
-// SEO
-const title = "How It Works | Bags of Laundry Pickup & Delivery";
-const description =
-  "Simple, transparent laundry pickup & delivery in Detroit. See how it works in four easy steps: schedule, pickup, clean, deliver — fresh in ~24 hours.";
+// Payment holds
+const perPoundHold = 35;
+const perBagHolds = { small: 35, medium: 55, large: 85 };
 
-const steps = [
-  {
-    number: "01",
-    title: "Schedule",
-    text: "Book online in seconds. Choose your pickup window and set detergent, temperature, and folding preferences.",
-    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    number: "02",
-    title: "Pickup",
-    text: "Place your bag(s) at the door. We scan, confirm, and text you updates as we head your way.",
-    imageUrl: "https://images.unsplash.com/photo-1583016060830-35b0c530c707?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    number: "03",
-    title: "Clean",
-    text: "Sorted, washed, and folded with care. We pretreat stains and follow your preferences every time.",
-    imageUrl: "https://images.unsplash.com/photo-1609710228159-0fa9bd7c85b0?q=80&w=1600&auto=format&fit=crop",
-  },
-  {
-    number: "04",
-    title: "Deliver",
-    text: "Fresh, folded laundry arrives back at your door—often in 24 hours or less.",
-    imageUrl: "https://images.unsplash.com/photo-1604335399361-6839c7e4a4fa?q=80&w=1600&auto=format&fit=crop",
-  },
-];
-
-const timelineSteps = [
-  { time: "0:00", title: "Booking", desc: "Choose pickup window + preferences." },
-  { time: "+2–6 hrs", title: "Pickup", desc: "Driver collects and scans your order." },
-  { time: "+12–20 hrs", title: "Cleaning", desc: "Sorting, pretreating stains, folding/pressing." },
-  { time: "~24 hrs", title: "Delivery", desc: "Fresh laundry arrives at your door.", highlight: true },
-];
+// SEO Meta
+const title = "How It Works | Laundry Pickup & Delivery | Bags of Laundry";
+const description = "Place your order online. We handle pickup, washing, and delivery — with photo updates at every step. Secure payment holds, live status tracking, and trained drivers.";
 ---
 
 <Layout title={title} description={description}>
-  <!-- HERO -->
-  <section class="relative bg-gradient-to-r from-orange-50 via-white to-blue-50 py-20">
-    <div class="max-w-6xl mx-auto px-4 text-center">
-      <h1 class="text-4xl lg:text-6xl font-extrabold text-brand-text mb-6">
-        How It Works
-      </h1>
-      <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-        From doorstep to dresser: four simple steps. Transparent, reliable, and
-        built for busy Detroiters.
-      </p>
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="/start-basic" class="btn">Schedule Pickup</a>
-        <a href="/pricing" class="btn-alt">See Pricing</a>
-      </div>
-    </div>
-  </section>
+  <main>
+    <!-- HERO -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div class="inline-block bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-bold mb-4">
+              Laundry Delivery, Simplified
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black text-brand-text mb-6">How it works</h1>
+            <p class="sub text-lg leading-relaxed mb-6">
+              Place your order online. We handle pickup, washing, and delivery — with photo updates at every step so you always know what's happening.
+            </p>
+            <ul class="space-y-3 mb-8">
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Secure payment authorization (no charge until weighed)</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Live status in your dashboard</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Trained drivers & partner laundromats</span>
+              </li>
+            </ul>
+          </div>
 
-  <!-- PROCESS STEPS -->
-  <section class="py-20 bg-white">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="section-title text-center mb-12">Four Simple Steps</h2>
-      <div class="grid md:grid-cols-2 gap-10">
-        {steps.map((s) => (
-          <div class="group card overflow-hidden hover:shadow-xl transition">
-            <img
-              src={s.imageUrl}
-              alt={s.title}
-              class="h-56 w-full object-cover group-hover:scale-105 transition"
-            />
-            <div class="p-6">
-              <span class="block text-sm text-brand-primary font-bold mb-2">{s.number}</span>
-              <h3 class="text-xl font-semibold mb-3">{s.title}</h3>
-              <p class="text-gray-600">{s.text}</p>
+          <!-- Order Preview Card -->
+          <div class="relative">
+            <div class="card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <p class="text-sm text-gray-500">Example checkout</p>
+                  <h3 class="text-xl font-bold text-brand-text">Pay per pound</h3>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs text-gray-500">Authorization hold</p>
+                  <p class="text-lg font-bold text-brand-text">${perPoundHold}.00</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-3 gap-3 text-center mb-4">
+                <div class="rounded-xl border border-gray-200 p-3">
+                  <p class="text-xs text-gray-500 mb-1">Small bag hold</p>
+                  <p class="font-semibold text-brand-text">${perBagHolds.small}</p>
+                </div>
+                <div class="rounded-xl border border-gray-200 p-3">
+                  <p class="text-xs text-gray-500 mb-1">Medium bag hold</p>
+                  <p class="font-semibold text-brand-text">${perBagHolds.medium}</p>
+                </div>
+                <div class="rounded-xl border border-gray-200 p-3">
+                  <p class="text-xs text-gray-500 mb-1">Large bag hold</p>
+                  <p class="font-semibold text-brand-text">${perBagHolds.large}</p>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500">
+                Holds verify funds only. Final charge is based on the weighed total (or selected bag) after service.
+              </p>
             </div>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- TIMELINE -->
-  <section class="py-20 bg-brand-bg">
-    <div class="max-w-4xl mx-auto px-4">
-      <h2 class="section-title text-center mb-12">Typical Timeline</h2>
-      <div class="relative border-l-2 border-gray-200 pl-10">
-        {timelineSteps.map((step, i) => (
-          <div class="mb-10 relative">
-            <!-- Marker -->
-            <div class="absolute -left-[14px] top-1 w-6 h-6 flex items-center justify-center rounded-full border-2 border-orange-500 bg-white">
-              <div class={`w-2 h-2 rounded-full ${step.highlight ? "bg-orange-500" : "bg-gray-300"}`}></div>
+    <!-- INFO CALL-OUT -->
+    <section class="py-12 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="card p-6">
+          <div class="flex items-start gap-4">
+            <div class="mt-1 h-6 w-6 rounded-full bg-brand-primary flex-shrink-0"></div>
+            <div>
+              <p class="font-bold text-brand-text mb-2">Payment holds</p>
+              <p class="sub">
+                When you select <span class="font-semibold text-brand-text">pay per pound</span>, a <span class="font-bold text-brand-text">${perPoundHold} USD</span> authorization hold is placed. For <span class="font-semibold text-brand-text">pay per bag</span>, we hold the selected bag price (e.g., ${perBagHolds.small}/${perBagHolds.medium}/${perBagHolds.large}). Holds are not charges and will adjust to your final total at completion.
+              </p>
             </div>
-      
-            <!-- Text -->
-            <h3 class="font-bold text-brand-text">
-              {step.time} — {step.title}
-            </h3>
-            <p class="text-gray-500">{step.desc}</p>
           </div>
-        ))}
+        </div>
       </div>
-      
-    </div>
-  </section>
+    </section>
 
-  <!-- FAQ -->
-  <section class="py-20 bg-white">
-    <div class="max-w-4xl mx-auto px-4">
-      <h2 class="section-title text-center mb-12">FAQs</h2>
-      <div class="space-y-4">
-        <details class="card p-6">
-          <summary class="cursor-pointer font-semibold">How long does it take?</summary>
-          <p class="mt-2 text-gray-500">
-            Most orders are returned within 24 hours. Same-day may be available
-            depending on pickup time and load size.
-          </p>
-        </details>
-        <details class="card p-6">
-          <summary class="cursor-pointer font-semibold">Do you handle stains & delicates?</summary>
-          <p class="mt-2 text-gray-500">
-            Yes. We pretreat visible stains and follow care labels. Special-care
-            items should be marked as Dry Cleaning.
-          </p>
-        </details>
-        <details class="card p-6">
-          <summary class="cursor-pointer font-semibold">What if I’m not home?</summary>
-          <p class="mt-2 text-gray-500">
-            No problem—leave a note with a safe spot for pickup or drop-off.
-          </p>
-        </details>
-      </div>
-    </div>
-  </section>
+    <!-- STEPS -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">The complete process</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-  <!-- FINAL CTA -->
-  <section class="py-20 bg-gradient-to-r from-blue-50 to-orange-50">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-      <h2 class="text-3xl font-bold mb-4">Ready to skip laundry day?</h2>
-      <p class="text-gray-600 mb-8">Pickup & delivery service trusted across Detroit.</p>
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="/start-basic" class="btn">Schedule Pickup</a>
-        <a href="/pricing" class="btn-alt">View Pricing</a>
+          <!-- Step 1 -->
+          <div class="card p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary font-bold text-white">1</span>
+              <h3 class="text-lg font-bold text-brand-text">Place your order</h3>
+            </div>
+            <p class="sub">
+              Choose <span class="font-semibold text-brand-text">pay per pound</span> or <span class="font-semibold text-brand-text">pay per bag</span>, enter pickup details, and checkout. We place a secure authorization hold (${perPoundHold} for per‑pound or the bag amount for pay‑per‑bag).
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="card p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary font-bold text-white">2</span>
+              <h3 class="text-lg font-bold text-brand-text">We dispatch a driver</h3>
+            </div>
+            <p class="sub">
+              We receive your order and send the nearest driver. If needed, they'll text you on the way.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="card p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary font-bold text-white">3</span>
+              <h3 class="text-lg font-bold text-brand-text">Pickup photo & timestamp</h3>
+            </div>
+            <p class="sub">
+              Your driver takes a time‑stamped pickup photo. It appears in your customer dashboard instantly.
+            </p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="card p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary font-bold text-white">4</span>
+              <h3 class="text-lg font-bold text-brand-text">Wash, dry & fold</h3>
+            </div>
+            <p class="sub mb-3">
+              Our partner laundromat professionally washes, dries, and folds your clothes.
+            </p>
+            <p class="sub">
+              When finished, they submit a <span class="font-semibold text-brand-text">Load complete</span> update. Your dashboard status changes automatically.
+            </p>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="card p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary font-bold text-white">5</span>
+              <h3 class="text-lg font-bold text-brand-text">Delivery & drop‑off photo</h3>
+            </div>
+            <p class="sub">
+              Your driver drops off your order at the chosen location and takes a delivery photo for your records.
+            </p>
+          </div>
+
+          <!-- Step 6 -->
+          <div class="card p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary font-bold text-white">6</span>
+              <h3 class="text-lg font-bold text-brand-text">Final charge & receipt</h3>
+            </div>
+            <p class="sub">
+              We convert the authorization hold into your final charge (based on actual weight or selected bag) and email your receipt. Your dashboard keeps a full history of photos and timestamps.
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Common questions</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What is an authorization hold?</h3>
+            <p class="sub">
+              A temporary hold that verifies funds. It is not a charge and will adjust to your final total after service.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Where do I see updates?</h3>
+            <p class="sub">
+              All photos and timestamps appear in your customer dashboard in real time.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Can I change pickup instructions?</h3>
+            <p class="sub">
+              Yes. Add notes during checkout or update instructions from your dashboard before pickup.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How long does it take?</h3>
+            <p class="sub">
+              Most orders are completed within 24 hours. Same-day service is available in select areas.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What if I'm not home?</h3>
+            <p class="sub">
+              Leave your laundry in a safe spot (porch, garage, etc.) and add instructions during checkout. We'll handle the rest.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Is my payment secure?</h3>
+            <p class="sub">
+              Yes. We use industry-standard encryption and never store your full card details. All transactions are PCI-compliant.
+            </p>
+          </div>
+        </div>
+
+        <div class="text-center mt-12">
+          <a href="/schedule" class="btn">Schedule Pickup</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
 </Layout>
