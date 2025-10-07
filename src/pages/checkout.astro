@@ -49,15 +49,20 @@ const formatOrderType = (orderType: string) => {
 const calculateTotal = () => {
   let baseTotal = 3375; // Default $33.75 in cents
 
+  // Determine rate based on membership status
+  const memberRate = 175; // $1.75/lb in cents
+  const nonMemberRate = 225; // $2.25/lb in cents
+  const currentRate = w.isMember ? memberRate : nonMemberRate;
+
   // Base service pricing
   if (w.orderType === 'per_pound') {
-    baseTotal = 20 * 249; // 20 lbs * $2.49
+    baseTotal = 20 * currentRate; // 20 lbs * current rate
   } else if (w.orderType === 'small_bag') {
-    baseTotal = 3500; // $35
+    baseTotal = 3500; // $35 (members only)
   } else if (w.orderType === 'medium_bag') {
-    baseTotal = 5500; // $55
+    baseTotal = 5500; // $55 (members only)
   } else if (w.orderType === 'large_bag') {
-    baseTotal = 8500; // $85
+    baseTotal = 8500; // $85 (members only)
   }
 
   // Calculate add-on fees
@@ -159,16 +164,20 @@ const description = "Review your laundry service order and complete your booking
               <div>
                 <h3 class="font-medium text-gray-900">{formatOrderType(w.orderType)}</h3>
                 <p class="text-sm text-gray-600">
-                  {w.orderType === 'per_pound' ? '$2.49 per lb • 24-hour turnaround' : '24-hour turnaround'}
+                  {w.orderType === 'per_pound'
+                    ? (w.isMember ? '$1.75 per lb • 24-hour turnaround' : '$2.25 per lb • 24-hour turnaround')
+                    : '24-hour turnaround'}
                 </p>
               </div>
               <div class="text-right">
                 <span class="text-sm text-gray-500">Starting at</span>
                 <p class="font-semibold text-gray-900">
-                  {w.orderType === 'per_pound' ? '$2.49/lb' :
-                   w.orderType === 'small_bag' ? '$35' :
-                   w.orderType === 'medium_bag' ? '$55' :
-                   w.orderType === 'large_bag' ? '$85' : 'TBD'}
+                  {w.orderType === 'per_pound'
+                    ? (w.isMember ? '$1.75/lb' : '$2.25/lb')
+                    : w.orderType === 'small_bag' ? '$35'
+                    : w.orderType === 'medium_bag' ? '$55'
+                    : w.orderType === 'large_bag' ? '$85'
+                    : 'TBD'}
                 </p>
               </div>
             </div>
@@ -404,69 +413,90 @@ const description = "Review your laundry service order and complete your booking
               />
             </div>
 
-            <!-- Membership Upsell -->
-            <div class="mb-6" id="membership-upsell">
-              <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
-                <div class="flex items-start gap-4">
-                  <div class="flex-shrink-0">
-                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.5 2.5L16 4.5 14.5 3 16 1.5 17.5 3 16 4.5 17.5 6M13 13h4-4V8H9v5h4 0z" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-2">
-                      <h3 class="font-semibold text-gray-900">🎉 Special Offer: Join Our Membership</h3>
-                      <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">Save Money</span>
-                    </div>
-
-                    <p class="text-sm text-gray-600 mb-4">
-                      Add annual membership for just $99/year and save on every order. Get member pricing of $1.99/lb instead of $2.49/lb.
-                    </p>
-
-                    <div class="bg-white rounded-lg p-4 mb-4 border border-blue-200">
-                      <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm text-gray-600">Annual Membership</span>
-                        <span class="font-semibold text-gray-900">$99.00</span>
-                      </div>
-                      <div class="flex justify-between items-center text-sm">
-                        <span class="text-green-600">Savings on this order:</span>
-                        <span class="font-semibold text-green-600" id="membership-savings">$10.00</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs text-gray-500 mt-1">
-                        <span>Your new order total:</span>
-                        <span id="new-total-with-membership">$124.00</span>
+            <!-- Membership Upsell (Non-Members Only) -->
+            {!w.isMember && (
+              <div class="mb-6" id="membership-upsell">
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
+                  <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0">
+                      <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.5 2.5L16 4.5 14.5 3 16 1.5 17.5 3 16 4.5 17.5 6M13 13h4-4V8H9v5h4 0z" />
+                        </svg>
                       </div>
                     </div>
 
-                    <div class="flex items-center gap-3">
-                      <label class="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          id="add-membership"
-                          class="sr-only"
-                        />
-                        <div class="relative">
-                          <div class="w-6 h-6 bg-white border-2 border-gray-300 rounded-md transition-all duration-200 checkbox-box"></div>
-                          <svg class="w-4 h-4 text-white absolute top-1 left-1 hidden checkbox-check" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                          </svg>
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-2">
+                        <h3 class="font-semibold text-gray-900">🎉 Special Offer: Join Our Membership</h3>
+                        <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">Save $0.50/lb</span>
+                      </div>
+
+                      <p class="text-sm text-gray-600 mb-4">
+                        Add 6-month membership for just $49.99 and save on every order. Get member pricing of $1.75/lb instead of $2.25/lb, plus unlock per-bag pricing options.
+                      </p>
+
+                      <div class="bg-white rounded-lg p-4 mb-4 border border-blue-200">
+                        <div class="flex justify-between items-center mb-2">
+                          <span class="text-sm text-gray-600">6-Month Membership</span>
+                          <span class="font-semibold text-gray-900">$49.99</span>
                         </div>
-                        <span class="ml-3 text-sm font-medium text-gray-900">
-                          Yes, add membership and start saving immediately!
-                        </span>
-                      </label>
-                    </div>
+                        <div class="flex justify-between items-center text-sm">
+                          <span class="text-green-600">Savings on this order:</span>
+                          <span class="font-semibold text-green-600" id="membership-savings">$10.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-500 mt-1">
+                          <span>Your new order total:</span>
+                          <span id="new-total-with-membership">$84.99</span>
+                        </div>
+                      </div>
 
-                    <div class="mt-3 text-xs text-gray-500">
-                      ✓ $0.50 savings per pound  ✓ Priority booking  ✓ Exclusive promotions  ✓ Cancel anytime
+                      <div class="flex items-center gap-3">
+                        <label class="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            id="add-membership"
+                            class="sr-only"
+                          />
+                          <div class="relative">
+                            <div class="w-6 h-6 bg-white border-2 border-gray-300 rounded-md transition-all duration-200 checkbox-box"></div>
+                            <svg class="w-4 h-4 text-white absolute top-1 left-1 hidden checkbox-check" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                          <span class="ml-3 text-sm font-medium text-gray-900">
+                            Yes, add membership and start saving immediately!
+                          </span>
+                        </label>
+                      </div>
+
+                      <div class="mt-3 text-xs text-gray-500">
+                        ✓ $0.50 savings per pound  ✓ Per-bag pricing options  ✓ Priority booking  ✓ Exclusive promotions
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            <!-- Member Status Badge (Members Only) -->
+            {w.isMember && (
+              <div class="mb-6">
+                <div class="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-xl p-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <h3 class="font-semibold text-gray-900">✨ Member Pricing Active</h3>
+                      <p class="text-sm text-gray-600 mt-1">You're saving $0.50/lb with your membership!</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <!-- Navigation Buttons -->
             <div class="space-y-3">
@@ -510,7 +540,7 @@ const description = "Review your laundry service order and complete your booking
     </div>
   </div>
 
-  <script>
+  <script define:vars={{ orderType: w.orderType, hasEco: w.addonPrefs?.eco, hasHangDry: w.addonPrefs?.hangDry }}>
     document.addEventListener('DOMContentLoaded', function() {
       const addMembershipCheckbox = document.getElementById('add-membership');
       const membershipHiddenInput = document.getElementById('membership-hidden-input');
@@ -522,13 +552,31 @@ const description = "Review your laundry service order and complete your booking
       // Get current order total from the displayed value
       const totalElement = document.querySelector('.text-2xl.font-bold.text-gray-900');
       const currentTotal = parseFloat(totalElement?.textContent?.replace('$', '') || '0');
-      const membershipFee = 99.00;
+      const membershipFee = 49.99;
 
-      // Calculate potential savings based on current order
+      // Calculate actual savings based on current order
       function calculateSavings() {
-        // For per-pound orders: 20lbs * $0.50 savings = $10
-        // For fixed-price orders: estimated $10 savings
-        let savings = 10.00;
+        let savings = 0;
+
+        // Per-pound orders save $0.50/lb on base rate
+        if (orderType === 'per_pound') {
+          const estimatedLbs = 20; // Standard estimate
+          const perLbSavings = 0.50;
+          savings = estimatedLbs * perLbSavings; // 20 lbs * $0.50 = $10
+
+          // Add-on fees also save when they're per-pound
+          if (hasEco) {
+            savings += estimatedLbs * 0.10; // $0.10/lb eco fee savings
+          }
+          if (hasHangDry) {
+            savings += estimatedLbs * 0.25; // $0.25/lb hang dry fee savings
+          }
+        }
+        // Per-bag orders are members-only, but show comparable savings
+        else if (orderType === 'small_bag' || orderType === 'medium_bag' || orderType === 'large_bag') {
+          savings = 8.00; // Conservative estimate based on typical per-bag weight
+        }
+
         return savings;
       }
 

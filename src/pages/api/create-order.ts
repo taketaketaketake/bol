@@ -1,13 +1,14 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import { generateAccessToken, generateTokenExpiration, generateMagicLink, sendOrderConfirmationEmail } from '../../utils/guest-auth';
+import { checkMembershipStatus } from '../../utils/membership';
 
 const supabase = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 );
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
     const {
@@ -25,7 +26,8 @@ export const POST: APIRoute = async ({ request }) => {
       preferences = {},
       addons = [],
       addonPrefs = {},
-      estimatedAmount
+      estimatedAmount,
+      authUserId // Pass this from the frontend if authenticated
     } = body;
 
     // Validate required fields
@@ -33,6 +35,28 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(
         JSON.stringify({ error: 'Missing required fields: email, pickup date, and time window' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Server-side validation: Prevent non-members from using per-bag pricing
+    const isPerBagOrder = planType?.includes('bag') || orderType?.includes('bag');
+    if (isPerBagOrder && authUserId) {
+      const isMember = await checkMembershipStatus(authUserId);
+      if (!isMember) {
+        return new Response(
+          JSON.stringify({
+            error: 'Per-bag pricing is only available to members. Please become a member or choose per-pound pricing.'
+          }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    } else if (isPerBagOrder && !authUserId) {
+      // Guest users trying to use per-bag pricing
+      return new Response(
+        JSON.stringify({
+          error: 'Per-bag pricing is only available to members. Please sign in or choose per-pound pricing.'
+        }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
       );
     }
 

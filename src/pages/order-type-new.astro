@@ -236,8 +236,8 @@ const description = "Select your laundry service type and any specialty items.";
                 🔒 Members Only
               </span>
             </div>
-            <div class="relative rounded-2xl overflow-hidden">
-              <div class="space-y-4 opacity-30 pointer-events-none blur-sm">
+            <div class="relative">
+              <div class="space-y-4 opacity-50 pointer-events-none">
                 <div class="bg-gray-50 rounded-xl border-2 border-gray-200 p-6">
                   <div class="flex gap-6">
                     <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=400&auto=format&fit=crop" alt="Small Bag" class="w-24 h-24 rounded-xl object-cover" />
@@ -278,23 +278,14 @@ const description = "Select your laundry service type and any specialty items.";
                 </div>
               </div>
 
-              <div class="absolute inset-0 bg-gradient-to-b from-white/50 via-white/60 to-white/50 flex items-center justify-center p-6">
-                <div class="text-center">
-                  <a
-                    href="/pricing"
-                    class="inline-block bg-gradient-to-r from-orange-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold text-base shadow-2xl hover:shadow-orange-500/50 transition-all duration-200 transform hover:scale-105 hover:-translate-y-1"
-                  >
-                    🔓 Become a Member to Unlock Per-Bag Pricing
-                  </a>
-                </div>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <a
+                  href="/pricing"
+                  class="bg-gradient-to-r from-brand-primary to-brand-accent text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                >
+                  Become a Member to Unlock Per-Bag Pricing
+                </a>
               </div>
-            </div>
-
-            <!-- Benefits callout below the locked section -->
-            <div class="mt-4 text-center">
-              <p class="text-sm text-gray-700 font-semibold bg-gradient-to-r from-blue-50 to-orange-50 border border-blue-200 rounded-lg px-4 py-3 inline-block">
-                💰 Save $0.50/lb + Get Per-Bag Options
-              </p>
             </div>
           </div>
         )}
@@ -306,16 +297,16 @@ const description = "Select your laundry service type and any specialty items.";
             <div class="bg-purple-50 rounded-xl border-2 border-purple-200 p-6">
               <div class="flex justify-between items-center">
                 <div>
-                  <h3 class="font-bold text-gray-900">Comforter</h3>
-                  <p class="text-sm text-gray-600">$20 each</p>
+                  <h3 class="font-bold">Comforter</h3>
+                  <p class="text-sm text-gray-500">$20 each</p>
                 </div>
                 <div class="flex items-center gap-2" data-addon="comforter">
                   <div class="addon-controls hidden">
-                    <button type="button" class="addon-decrease px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900">-</button>
-                    <span class="addon-quantity px-3 font-semibold text-gray-900">0</span>
-                    <button type="button" class="addon-increase px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900">+</button>
+                    <button type="button" class="addon-decrease px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">-</button>
+                    <span class="addon-quantity px-3 font-semibold">0</span>
+                    <button type="button" class="addon-increase px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">+</button>
                   </div>
-                  <button type="button" class="addon-add px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-addon="comforter" data-price="20">Add</button>
+                  <button type="button" class="addon-add px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700" data-addon="comforter" data-price="20">Add</button>
                 </div>
               </div>
               <input type="hidden" name="addon_comforter" class="addon-input" value="0" />
@@ -324,16 +315,16 @@ const description = "Select your laundry service type and any specialty items.";
             <div class="bg-purple-50 rounded-xl border-2 border-purple-200 p-6">
               <div class="flex justify-between items-center">
                 <div>
-                  <h3 class="font-bold text-gray-900">Bedding Bundle</h3>
-                  <p class="text-sm text-gray-600">$25 set</p>
+                  <h3 class="font-bold">Bedding Bundle</h3>
+                  <p class="text-sm text-gray-500">$25 set</p>
                 </div>
                 <div class="flex items-center gap-2" data-addon="bedding_bundle">
                   <div class="addon-controls hidden">
-                    <button type="button" class="addon-decrease px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900">-</button>
-                    <span class="addon-quantity px-3 font-semibold text-gray-900">0</span>
-                    <button type="button" class="addon-increase px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900">+</button>
+                    <button type="button" class="addon-decrease px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">-</button>
+                    <span class="addon-quantity px-3 font-semibold">0</span>
+                    <button type="button" class="addon-increase px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">+</button>
                   </div>
-                  <button type="button" class="addon-add px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-addon="bedding_bundle" data-price="25">Add</button>
+                  <button type="button" class="addon-add px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700" data-addon="bedding_bundle" data-price="25">Add</button>
                 </div>
               </div>
               <input type="hidden" name="addon_bedding_bundle" class="addon-input" value="0" />
@@ -342,16 +333,16 @@ const description = "Select your laundry service type and any specialty items.";
             <div class="bg-purple-50 rounded-xl border-2 border-purple-200 p-6">
               <div class="flex justify-between items-center">
                 <div>
-                  <h3 class="font-bold text-gray-900">Dry Cleaning</h3>
-                  <p class="text-sm text-gray-600">$8 per item</p>
+                  <h3 class="font-bold">Dry Cleaning</h3>
+                  <p class="text-sm text-gray-500">$8 per item</p>
                 </div>
                 <div class="flex items-center gap-2" data-addon="dry_cleaning">
                   <div class="addon-controls hidden">
-                    <button type="button" class="addon-decrease px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900">-</button>
-                    <span class="addon-quantity px-3 font-semibold text-gray-900">0</span>
-                    <button type="button" class="addon-increase px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900">+</button>
+                    <button type="button" class="addon-decrease px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">-</button>
+                    <span class="addon-quantity px-3 font-semibold">0</span>
+                    <button type="button" class="addon-increase px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50">+</button>
                   </div>
-                  <button type="button" class="addon-add px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-addon="dry_cleaning" data-price="8">Add</button>
+                  <button type="button" class="addon-add px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700" data-addon="dry_cleaning" data-price="8">Add</button>
                 </div>
               </div>
               <input type="hidden" name="addon_dry_cleaning" class="addon-input" value="0" />
@@ -410,7 +401,7 @@ const description = "Select your laundry service type and any specialty items.";
     </div>
   </div>
 
-  <script define:vars={{ isMember, savedAddons: w.addons || {} }}>
+  <script define:vars={{ isMember }}>
     document.addEventListener('DOMContentLoaded', function() {
       const memberRate = 1.75;
       const nonMemberRate = 2.25;
@@ -446,11 +437,11 @@ const description = "Select your laundry service type and any specialty items.";
         radio.addEventListener('change', updateOrderTypeSelection);
       });
 
-      // Addon management - initialize with saved values
+      // Addon management
       const addonData = {
-        comforter: { price: 20, quantity: savedAddons.comforter || 0 },
-        bedding_bundle: { price: 25, quantity: savedAddons.bedding_bundle || 0 },
-        dry_cleaning: { price: 8, quantity: savedAddons.dry_cleaning || 0 }
+        comforter: { price: 20, quantity: 0 },
+        bedding_bundle: { price: 25, quantity: 0 },
+        dry_cleaning: { price: 8, quantity: 0 }
       };
 
       function updateAddonDisplay(addonId) {
@@ -506,8 +497,9 @@ const description = "Select your laundry service type and any specialty items.";
         });
       });
 
-      // Initialize addon displays from saved state
+      // Initialize addon displays
       Object.keys(addonData).forEach(addonId => {
+        addonData[addonId].quantity = 0;
         updateAddonDisplay(addonId);
       });
 

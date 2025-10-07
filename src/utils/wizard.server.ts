@@ -9,6 +9,7 @@ export type Wizard = {
   date?: string; // YYYY-MM-DD
   phone?: string;
   orderType?: string;
+  isMember?: boolean; // Member status for pricing
   addons?: { [id: string]: number }; // For specialty items
   addonPrefs?: { eco?: boolean; hangDry?: boolean; rush?: boolean; notes?: string };
   customer?: { fullName: string; email: string };
