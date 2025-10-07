@@ -1,0 +1,234 @@
+---
+import Layout from '../layout/Layout.astro';
+
+// Pricing
+const washFoldPrice = 1.50;
+
+// SEO Meta
+const title = "Wash & Fold Laundry Service Detroit | Drop Off & Pick Up | Bags of Laundry";
+const description = "Drop off your laundry, we wash and fold it, you pick it up. Professional wash and fold service at $1.50/lb. Clean, folded, and ready to wear.";
+---
+
+<Layout title={title} description={description}>
+  <main>
+    <!-- HERO -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div class="inline-block bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-bold mb-4">
+              Drop Off Service
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black text-brand-text mb-6">Wash & Fold Laundry Service</h1>
+            <p class="sub text-lg leading-relaxed mb-6">
+              Drop off your laundry at our location, we professionally wash, dry, and fold it, then you come pick it up when it's ready. Simple, affordable, and convenient.
+            </p>
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-8">
+              <div class="text-center">
+                <p class="text-sm text-gray-600 mb-2">Simple pricing</p>
+                <p class="text-5xl font-black text-brand-text mb-2">${washFoldPrice.toFixed(2)}<span class="text-2xl text-gray-500">/lb</span></p>
+                <p class="text-sm text-gray-500">Pay only for what you drop off</p>
+              </div>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Drop off at your convenience</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Professional wash, dry, and fold</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Pick up when ready</span>
+              </li>
+            </ul>
+            <div class="flex flex-wrap gap-3">
+              <a href="/contact" class="btn">Find Our Location</a>
+              <a href="/pricing" class="btn-alt">See All Pricing</a>
+            </div>
+          </div>
+
+          <!-- Image/Visual -->
+          <div class="relative">
+            <div class="card overflow-hidden">
+              <img
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/detergent-dispenser.png"
+                alt="Professional laundry wash and fold service"
+                class="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">How Wash & Fold Works</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+
+          <div class="card p-8 text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">1</div>
+            <h3 class="text-xl font-bold text-brand-text mb-3">Drop Off</h3>
+            <p class="sub">
+              Bring your laundry to our location during business hours. We'll weigh it and give you a receipt.
+            </p>
+          </div>
+
+          <div class="card p-8 text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">2</div>
+            <h3 class="text-xl font-bold text-brand-text mb-3">We Wash & Fold</h3>
+            <p class="sub">
+              Our team professionally washes, dries, and neatly folds your clothes following your preferences.
+            </p>
+          </div>
+
+          <div class="card p-8 text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">3</div>
+            <h3 class="text-xl font-bold text-brand-text mb-3">Pick Up</h3>
+            <p class="sub">
+              We'll notify you when your laundry is ready. Come pick it up clean, fresh, and folded.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT'S INCLUDED -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12">
+          <div>
+            <h2 class="section-title text-brand-text mb-6">What's Included</h2>
+            <ul class="space-y-4">
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <div>
+                  <p class="font-semibold text-brand-text">Professional Washing</p>
+                  <p class="sub text-sm">Sorted by color and fabric type, washed with quality detergents</p>
+                </div>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <div>
+                  <p class="font-semibold text-brand-text">Proper Drying</p>
+                  <p class="sub text-sm">Dried at appropriate temperatures for fabric safety</p>
+                </div>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <div>
+                  <p class="font-semibold text-brand-text">Neat Folding</p>
+                  <p class="sub text-sm">Carefully folded and organized, ready to put away</p>
+                </div>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <div>
+                  <p class="font-semibold text-brand-text">Stain Treatment</p>
+                  <p class="sub text-sm">Common stains pre-treated at no extra charge</p>
+                </div>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <div>
+                  <p class="font-semibold text-brand-text">Custom Preferences</p>
+                  <p class="sub text-sm">Detergent type, temperature, softener - your choice</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card p-8 bg-orange-50 border-orange-200">
+            <h3 class="text-xl font-bold text-brand-text mb-4">Prep Tips</h3>
+            <ul class="space-y-3 sub">
+              <li class="flex gap-2">
+                <span class="text-brand-primary font-bold">•</span>
+                <span>Empty all pockets before dropping off</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-brand-primary font-bold">•</span>
+                <span>Separate dry-clean-only items</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-brand-primary font-bold">•</span>
+                <span>Point out any stains or special care items</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-brand-primary font-bold">•</span>
+                <span>Let us know your detergent and softener preferences</span>
+              </li>
+              <li class="flex gap-2">
+                <span class="text-brand-primary font-bold">•</span>
+                <span>Mention if you want items hung or folded</span>
+              </li>
+            </ul>
+            <div class="mt-6 pt-6 border-t border-orange-300">
+              <p class="text-sm text-gray-600 mb-3">Typical turnaround time</p>
+              <p class="text-3xl font-black text-brand-text">24 hours</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Frequently Asked Questions</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Is there a minimum?</h3>
+            <p class="sub">
+              No minimum weight required. You only pay for what you drop off at $1.50/lb.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How long does it take?</h3>
+            <p class="sub">
+              Most orders are ready within 24 hours. We'll notify you when your laundry is ready for pickup.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What detergent do you use?</h3>
+            <p class="sub">
+              We use quality commercial detergents. Free & clear or hypoallergenic options available upon request.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Can you hang-dry items?</h3>
+            <p class="sub">
+              Yes! Just let us know which items you'd like hung instead of folded.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What about delicates?</h3>
+            <p class="sub">
+              We handle delicates with care. Point them out at drop-off or bag them separately with instructions.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">When can I drop off?</h3>
+            <p class="sub">
+              Check our business hours on the contact page. We accept drop-offs during all operating hours.
+            </p>
+          </div>
+        </div>
+
+        <div class="text-center mt-12 pt-8">
+          <a href="/contact" class="btn">Visit Our Location</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</Layout>

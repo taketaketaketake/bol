@@ -1,0 +1,407 @@
+---
+import Layout from '../layout/Layout.astro';
+
+// SEO Meta
+const title = "Commercial Laundry Services Detroit | Bulk Linen & Uniform Cleaning | Bags of Laundry";
+const description = "Professional commercial laundry services for businesses. Restaurants, gyms, salons, Airbnbs, and more. Reliable pickup, delivery, and volume pricing.";
+---
+
+<Layout title={title} description={description}>
+  <main>
+    <!-- HERO -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div class="inline-block bg-red-100 text-brand-secondary border border-red-200 rounded-full px-3 py-1 text-xs font-bold mb-4">
+              Business Solutions
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-black text-brand-text mb-6">Commercial Laundry Services</h1>
+            <p class="sub text-lg leading-relaxed mb-6">
+              Reliable, high-volume laundry solutions for Detroit businesses. From linens and towels to uniforms and specialty items—we handle the washing so you can focus on your business.
+            </p>
+            <ul class="space-y-3 mb-8">
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Scheduled pickups & deliveries</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Volume pricing & custom plans</span>
+              </li>
+              <li class="flex gap-3 items-start">
+                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="sub">Professional-grade cleaning</span>
+              </li>
+            </ul>
+            <div class="flex flex-wrap gap-3">
+              <a href="/contact" class="btn">Request Quote</a>
+              <a href="/pricing" class="btn-alt">See Pricing</a>
+            </div>
+          </div>
+
+          <!-- Image -->
+          <div class="relative">
+            <div class="card overflow-hidden">
+              <img
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/commercial-washers.png"
+                alt="Commercial laundry washers"
+                class="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHO WE SERVE -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Industries We Serve</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Short-Term Rentals</h3>
+            <p class="sub text-sm mb-3">Airbnb, VRBO, vacation properties</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Sheets, towels, blankets</li>
+              <li>• Fast turnaround between guests</li>
+              <li>• Inventory tracking available</li>
+            </ul>
+          </div>
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Gyms & Fitness Studios</h3>
+            <p class="sub text-sm mb-3">Health clubs, yoga studios, boxing gyms</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Towels, workout gear</li>
+              <li>• Weekly or bi-weekly routes</li>
+              <li>• Odor & bacteria elimination</li>
+            </ul>
+          </div>
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Salons & Spas</h3>
+            <p class="sub text-sm mb-3">Hair salons, nail spas, massage therapy</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Towels, robes, linens</li>
+              <li>• Hypoallergenic options</li>
+              <li>• Consistent quality & softness</li>
+            </ul>
+          </div>
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Restaurants & Cafes</h3>
+            <p class="sub text-sm mb-3">Full-service, quick-service, catering</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Aprons, chef coats, towels</li>
+              <li>• Table linens & napkins</li>
+              <li>• Stain removal & pressing</li>
+            </ul>
+          </div>
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Medical & Dental</h3>
+            <p class="sub text-sm mb-3">Clinics, offices, therapy practices</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Lab coats, scrubs</li>
+              <li>• Blankets, patient linens</li>
+              <li>• Sanitized & health-code compliant</li>
+            </ul>
+          </div>
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Offices & Coworking</h3>
+            <p class="sub text-sm mb-3">Corporate offices, shared workspaces</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Kitchen towels & linens</li>
+              <li>• Branded uniforms</li>
+              <li>• Flexible pickup schedules</li>
+            </ul>
+          </div>
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Hotels & Motels</h3>
+            <p class="sub text-sm mb-3">Boutique hotels, extended stay, motels</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Sheets, pillowcases, towels</li>
+              <li>• Comforters, duvet covers</li>
+              <li>• High-volume daily service</li>
+            </ul>
+          </div>
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Event Venues</h3>
+            <p class="sub text-sm mb-3">Banquet halls, wedding venues, conference centers</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Table linens, napkins, runners</li>
+              <li>• Chair covers & sashes</li>
+              <li>• Event-based scheduling</li>
+            </ul>
+          </div>
+
+          <div class="card p-6">
+            <div class="inline-block bg-orange-100 rounded-lg p-3 mb-4">
+              <svg class="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Childcare & Schools</h3>
+            <p class="sub text-sm mb-3">Daycares, preschools, educational facilities</p>
+            <ul class="sub text-xs space-y-1 text-gray-600">
+              <li>• Nap mats, blankets, sheets</li>
+              <li>• Bibs, smocks, play cloths</li>
+              <li>• Hypoallergenic cleaning</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">How Commercial Service Works</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">1</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Contact Us</h3>
+            <p class="sub text-sm">
+              Tell us about your business needs, volume, and preferred schedule.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">2</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Custom Quote</h3>
+            <p class="sub text-sm">
+              We provide volume pricing and a service plan tailored to your business.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">3</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Scheduled Pickup</h3>
+            <p class="sub text-sm">
+              We pick up on your schedule—daily, weekly, or custom cadence.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary text-white text-2xl font-bold mb-4">4</div>
+            <h3 class="text-lg font-bold text-brand-text mb-2">Clean & Deliver</h3>
+            <p class="sub text-sm">
+              Professional cleaning and on-time delivery. Invoiced monthly for easy accounting.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- BENEFITS -->
+    <section class="py-16 lg:py-20 bg-brand-bg">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 class="section-title text-brand-text mb-6">Why Choose Us for Commercial Laundry</h2>
+            <div class="space-y-6">
+              <div class="flex gap-4 items-start">
+                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-brand-primary flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-brand-text mb-1">Reliable Schedule</h3>
+                  <p class="sub text-sm">Consistent pickups and deliveries you can count on. Never run out of clean linens.</p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-brand-primary flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-brand-text mb-1">Volume Pricing</h3>
+                  <p class="sub text-sm">Better rates for higher volumes. Custom pricing based on your business needs.</p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-brand-primary flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-brand-text mb-1">Quality Assurance</h3>
+                  <p class="sub text-sm">Professional-grade equipment and processes. Consistent results every time.</p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-brand-primary flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-brand-text mb-1">Inventory Tracking</h3>
+                  <p class="sub text-sm">Know exactly what's in process and when it's delivered. Detailed manifests available.</p>
+                </div>
+              </div>
+
+              <div class="flex gap-4 items-start">
+                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-brand-primary flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-brand-text mb-1">Local & Responsive</h3>
+                  <p class="sub text-sm">Detroit-based team that understands your business. Quick support when you need it.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-8 bg-orange-50 border-orange-200">
+            <h3 class="text-2xl font-bold text-brand-text mb-4">Get a Custom Quote</h3>
+            <p class="sub mb-6">
+              Every business is different. Tell us about your needs and we'll create a plan that works for you.
+            </p>
+            <div class="space-y-4 mb-6">
+              <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-white border-2 border-brand-primary flex items-center justify-center">
+                  <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <span class="sub font-semibold">No long-term contracts required</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-white border-2 border-brand-primary flex items-center justify-center">
+                  <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <span class="sub font-semibold">Flexible scheduling options</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-white border-2 border-brand-primary flex items-center justify-center">
+                  <svg class="w-4 h-4 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <span class="sub font-semibold">Simple monthly invoicing</span>
+              </div>
+            </div>
+            <a href="/contact" class="btn w-full">Request a Quote</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 lg:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="section-title text-center text-brand-text mb-12">Commercial Laundry FAQ</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What's the minimum volume?</h3>
+            <p class="sub">
+              We work with businesses of all sizes. Contact us to discuss your specific needs and we'll create a plan that works.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How often can you pick up?</h3>
+            <p class="sub">
+              We offer daily, weekly, bi-weekly, or custom schedules based on your business needs.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Do you provide delivery manifests?</h3>
+            <p class="sub">
+              Yes. We provide detailed tracking of what's picked up and delivered, with itemized invoices.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">What's the turnaround time?</h3>
+            <p class="sub">
+              Typically 24-48 hours depending on volume and service level. Rush service available for urgent needs.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">Can you handle specialty items?</h3>
+            <p class="sub">
+              Yes. We handle a wide range of commercial textiles including specialty fabrics, stain removal, and pressing.
+            </p>
+          </div>
+
+          <div class="card p-6">
+            <h3 class="text-lg font-bold text-brand-text mb-3">How does billing work?</h3>
+            <p class="sub">
+              Simple monthly invoicing based on weight or piece count. Net 30 terms available for established accounts.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="text-center mt-12 pt-8">
+          <a href="/contact" class="btn">Talk to Sales</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</Layout>
