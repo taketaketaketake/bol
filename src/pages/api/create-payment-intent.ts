@@ -53,14 +53,14 @@ export const POST: APIRoute = async ({ request }) => {
         });
       }
 
-      // Create membership subscription (annual $99)
+      // Create membership subscription (6-month $49.99)
       const membershipPrice = await stripe.prices.create({
-        unit_amount: 9900, // $99 in cents
+        unit_amount: 4999, // $49.99 in cents
         currency: 'usd',
-        recurring: { interval: 'year' },
+        recurring: { interval: 'month', interval_count: 6 },
         product_data: {
-          name: 'Bags of Laundry Annual Membership',
-          description: 'Annual membership with discounted per-pound pricing and priority booking',
+          name: 'Bags of Laundry 6-Month Membership',
+          description: '6-month membership with discounted per-pound pricing and priority booking',
         },
       });
 
@@ -93,7 +93,7 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(
         JSON.stringify({
           clientSecret: paymentIntent.client_secret,
-          amount: 9900, // Membership subscription amount
+          amount: 4999, // Membership subscription amount ($49.99)
           orderAmount: discountedOrderAmount, // Discounted order amount (processed separately)
           membershipIncluded: true,
           customerId: customer.id,

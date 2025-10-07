@@ -1,0 +1,309 @@
+---
+import Layout from '../layout/Layout.astro';
+import { getSession } from '../utils/auth';
+import { checkMembershipStatus } from '../utils/membership';
+
+let isMember = false;
+let userEmail = '';
+const session = await getSession(Astro.cookies);
+
+if (session?.user?.id) {
+  isMember = await checkMembershipStatus(session.user.id);
+  userEmail = session.user.email || '';
+}
+---
+
+<Layout title="Join Our Membership | Bags of Laundry">
+  <main class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 py-16">
+    <div class="max-w-4xl mx-auto px-4">
+
+      {isMember ? (
+        <!-- Already a Member -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+          <div class="mb-6">
+            <span class="text-6xl">✨</span>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-4">You're Already a Member!</h1>
+          <p class="text-lg text-gray-600 mb-6">
+            Your membership is active and you're enjoying all the benefits.
+          </p>
+          <div class="flex gap-4 justify-center">
+            <a href="/order-type" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+              Place an Order
+            </a>
+            <a href="/account" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold">
+              Manage Account
+            </a>
+          </div>
+        </div>
+      ) : (
+        <!-- Membership Signup -->
+        <div>
+          <!-- Header -->
+          <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Join Our Membership
+            </h1>
+            <p class="text-xl text-gray-600">
+              Save on every order with exclusive member benefits
+            </p>
+          </div>
+
+          <!-- Pricing Card -->
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-orange-500 to-blue-600 text-white text-center py-4">
+              <p class="text-sm font-semibold uppercase tracking-wide">Limited Time Offer</p>
+            </div>
+
+            <div class="p-8 text-center">
+              <div class="mb-6">
+                <div class="text-5xl font-bold text-gray-900 mb-2">
+                  $49.99
+                </div>
+                <div class="text-gray-600 text-lg">
+                  for 6 months
+                </div>
+                <div class="text-sm text-gray-500 mt-2">
+                  That's just $8.33/month
+                </div>
+              </div>
+
+              <!-- Benefits List -->
+              <div class="space-y-4 mb-8 text-left max-w-md mx-auto">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl">💰</span>
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Save $0.50/lb</h3>
+                    <p class="text-sm text-gray-600">Pay just $1.75/lb instead of $2.25/lb</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl">🎒</span>
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Unlock Per-Bag Pricing</h3>
+                    <p class="text-sm text-gray-600">Choose from $35, $55, or $85 fixed-price bags</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl">⭐</span>
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Priority Booking</h3>
+                    <p class="text-sm text-gray-600">Get first access to premium time slots</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl">🚀</span>
+                  <div>
+                    <h3 class="font-semibold text-gray-900">No Commitment</h3>
+                    <p class="text-sm text-gray-600">Cancel anytime, no questions asked</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Savings Calculator -->
+              <div class="bg-gradient-to-r from-blue-50 to-orange-50 border border-blue-200 rounded-xl p-4 mb-8">
+                <p class="font-semibold text-gray-900 mb-2">💡 Break-Even Analysis</p>
+                <p class="text-sm text-gray-700">
+                  With just <strong>5 orders of 20 lbs each</strong> over 6 months, you'll save <strong>$50</strong> in laundry costs — already covering your membership fee!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Form -->
+          <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Complete Your Membership Signup
+            </h2>
+
+            {!session ? (
+              <!-- Not Logged In -->
+              <div class="text-center py-8">
+                <p class="text-gray-600 mb-6">
+                  Please sign in to continue with membership signup
+                </p>
+                <a href="/login?redirect=/membership" class="inline-block px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                  Sign In
+                </a>
+              </div>
+            ) : (
+              <!-- Logged In - Show Payment Form -->
+              <div>
+                <form id="membership-form">
+                  <!-- Customer Email (readonly) -->
+                  <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={userEmail}
+                      readonly
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                    />
+                  </div>
+
+                  <!-- Stripe Elements Container -->
+                  <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                      Payment Information
+                    </label>
+                    <div id="payment-element" class="border border-gray-300 rounded-lg p-4 bg-white">
+                      <!-- Stripe Elements will be inserted here -->
+                    </div>
+                    <div id="payment-errors" class="text-red-600 text-sm mt-2 hidden"></div>
+                  </div>
+
+                  <!-- Terms Checkbox -->
+                  <div class="mb-6">
+                    <label class="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        id="terms-checkbox"
+                        required
+                        class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span class="text-sm text-gray-700">
+                        I agree to the membership terms. This is a 6-month subscription for $49.99, billed today. You can cancel anytime before the renewal date.
+                      </span>
+                    </label>
+                  </div>
+
+                  <!-- Submit Button -->
+                  <button
+                    type="submit"
+                    id="submit-button"
+                    class="w-full py-4 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span id="button-text">Join Membership — $49.99</span>
+                    <span id="button-spinner" class="hidden">Processing...</span>
+                  </button>
+                </form>
+
+                <!-- Security Badge -->
+                <div class="mt-6 text-center">
+                  <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd" />
+                    </svg>
+                    Secured by Stripe • Your payment information is encrypted
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <!-- FAQ Section -->
+          <div class="mt-12 bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Frequently Asked Questions
+            </h2>
+
+            <div class="space-y-6 max-w-2xl mx-auto">
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-2">When does my membership start?</h3>
+                <p class="text-sm text-gray-600">Your membership starts immediately after payment and lasts for 6 months.</p>
+              </div>
+
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-2">Can I cancel anytime?</h3>
+                <p class="text-sm text-gray-600">Yes! Cancel anytime from your account settings. No questions asked.</p>
+              </div>
+
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-2">How much can I save?</h3>
+                <p class="text-sm text-gray-600">On a typical 20 lb order, you'll save $10 per order. Most members save $50-100+ over 6 months.</p>
+              </div>
+
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-2">What happens after 6 months?</h3>
+                <p class="text-sm text-gray-600">Your membership will renew automatically for another 6 months unless you cancel before the renewal date.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  </main>
+
+  <script define:vars={{ userEmail, publishableKey: import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY }}>
+    // Only run Stripe initialization if user is logged in and not already a member
+    if (userEmail && publishableKey) {
+      (async () => {
+        const { loadStripe } = await import('https://js.stripe.com/v3/');
+        const stripe = await loadStripe(publishableKey);
+
+        if (!stripe) {
+          console.error('Failed to load Stripe');
+          return;
+        }
+
+        // Create Payment Intent for membership
+        const response = await fetch('/api/create-membership-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          document.getElementById('payment-errors').textContent = error.error || 'Failed to initialize payment';
+          document.getElementById('payment-errors').classList.remove('hidden');
+          return;
+        }
+
+        const { clientSecret } = await response.json();
+
+        // Mount Stripe Elements
+        const elements = stripe.elements({ clientSecret });
+        const paymentElement = elements.create('payment');
+        paymentElement.mount('#payment-element');
+
+        // Handle form submission
+        const form = document.getElementById('membership-form');
+        const submitButton = document.getElementById('submit-button');
+        const buttonText = document.getElementById('button-text');
+        const buttonSpinner = document.getElementById('button-spinner');
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          // Check terms checkbox
+          const termsCheckbox = document.getElementById('terms-checkbox');
+          if (!termsCheckbox.checked) {
+            alert('Please accept the membership terms to continue');
+            return;
+          }
+
+          // Disable button
+          submitButton.disabled = true;
+          buttonText.classList.add('hidden');
+          buttonSpinner.classList.remove('hidden');
+
+          // Confirm payment
+          const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+              return_url: `${window.location.origin}/membership-success`,
+            },
+          });
+
+          if (error) {
+            // Show error
+            document.getElementById('payment-errors').textContent = error.message;
+            document.getElementById('payment-errors').classList.remove('hidden');
+
+            // Re-enable button
+            submitButton.disabled = false;
+            buttonText.classList.remove('hidden');
+            buttonSpinner.classList.add('hidden');
+          }
+        });
+      })();
+    }
+  </script>
+</Layout>

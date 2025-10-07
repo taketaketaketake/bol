@@ -1,0 +1,98 @@
+---
+import Layout from '../layout/Layout.astro';
+---
+
+<Layout title="Membership Activated | Bags of Laundry">
+  <main class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 flex items-center justify-center py-16 px-4">
+    <div class="max-w-2xl w-full">
+
+      <!-- Success Card -->
+      <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center">
+
+        <!-- Success Icon -->
+        <div class="mb-6">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Heading -->
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          🎉 Welcome to the Club!
+        </h1>
+
+        <p class="text-lg text-gray-600 mb-8">
+          Your membership has been activated successfully. You're now enjoying exclusive benefits and savings.
+        </p>
+
+        <!-- Benefits Summary -->
+        <div class="bg-gradient-to-r from-blue-50 to-orange-50 border border-blue-200 rounded-xl p-6 mb-8 text-left">
+          <h2 class="font-bold text-gray-900 mb-4 text-center">✨ Your Membership Benefits</h2>
+          <ul class="space-y-3 text-sm text-gray-700">
+            <li class="flex items-start gap-3">
+              <span class="text-green-600 font-bold mt-0.5">✓</span>
+              <span><strong>$1.75/lb pricing</strong> — Save $0.50 per pound on every order</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-green-600 font-bold mt-0.5">✓</span>
+              <span><strong>Per-Bag options</strong> — Choose from $35, $55, or $85 fixed-price bags</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-green-600 font-bold mt-0.5">✓</span>
+              <span><strong>Priority booking</strong> — Get first access to premium time slots</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-green-600 font-bold mt-0.5">✓</span>
+              <span><strong>Valid for 6 months</strong> — Enjoy savings on every order until {new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/order-type"
+            class="px-8 py-3 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-xl font-bold hover:from-orange-600 hover:to-blue-700 transition-all"
+          >
+            Place Your First Order
+          </a>
+          <a
+            href="/account"
+            class="px-8 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all"
+          >
+            View Account
+          </a>
+        </div>
+
+        <!-- Email Confirmation Note -->
+        <div class="mt-8 pt-8 border-t border-gray-200">
+          <p class="text-sm text-gray-600">
+            📧 A confirmation email has been sent to your inbox with your membership details and receipt.
+          </p>
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+        <h3 class="font-bold text-gray-900 mb-4 text-center">What's Next?</h3>
+        <div class="space-y-3 text-sm text-gray-700">
+          <div class="flex items-start gap-3">
+            <span class="font-bold text-blue-600">1.</span>
+            <p><strong>Schedule your pickup</strong> — Choose your preferred date and time</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="font-bold text-blue-600">2.</span>
+            <p><strong>Prepare your laundry</strong> — Place items in bags (we provide them on first order)</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="font-bold text-blue-600">3.</span>
+            <p><strong>We handle the rest</strong> — Professional cleaning and delivery within 24 hours</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</Layout>
