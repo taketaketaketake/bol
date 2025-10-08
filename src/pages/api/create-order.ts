@@ -87,6 +87,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       customer = existingCustomer;
     } else {
       // Create new guest customer
+      console.log('[create-order] Creating new guest customer:', {
+        full_name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
+        is_guest: true
+      });
+
       const { data: newCustomer, error: customerError } = await supabase
         .from('customers')
         .insert({
@@ -99,13 +106,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         .single();
 
       if (customerError) {
-        console.error('Error creating customer:', customerError);
+        console.error('[create-order] Error creating customer:', customerError);
+        console.error('[create-order] Error details:', JSON.stringify(customerError, null, 2));
         return new Response(
-          JSON.stringify({ error: 'Failed to create customer' }),
+          JSON.stringify({
+            error: 'Failed to create customer',
+            details: customerError.message,
+            code: customerError.code
+          }),
           { status: 500, headers: { 'Content-Type': 'application/json' } }
         );
       }
 
+      console.log('[create-order] Customer created successfully:', newCustomer);
       customer = newCustomer;
     }
 

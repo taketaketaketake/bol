@@ -90,7 +90,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
         try {
           const errorData = JSON.parse(errorText);
-          onPaymentError(errorData.error || 'Failed to create order');
+          const errorMessage = errorData.details
+            ? `${errorData.error}: ${errorData.details}`
+            : errorData.error || 'Failed to create order';
+          onPaymentError(errorMessage);
         } catch (e) {
           onPaymentError(`Failed to create order: ${orderResponse.status} ${errorText}`);
         }
