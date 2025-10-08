@@ -46,6 +46,27 @@ const session = await getSession(Astro.cookies);
 const userEmail = session?.user?.email || w.customer?.email || "";
 const userName = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || w.customer?.fullName || "";
 
+// Check membership status
+let isMember = false;
+if (session?.user?.id) {
+  const { supabase } = await import('../lib/supabase');
+  const { checkMembershipStatus } = await import('../utils/membership');
+
+  // Set the session on the client for RLS to work
+  await supabase.auth.setSession({
+    access_token: Astro.cookies.get('sb-access-token')?.value || '',
+    refresh_token: Astro.cookies.get('sb-refresh-token')?.value || ''
+  });
+
+  isMember = await checkMembershipStatus(session.user.id, supabase);
+}
+
+// Determine pricing based on membership
+const perPoundRate = isMember ? '$1.75/lb' : '$2.25/lb';
+const perPoundDescription = isMember
+  ? '$1.75 per lb • 24-hour turnaround • Member pricing'
+  : '$2.25 per lb • 24-hour turnaround';
+
 // Redirect if prerequisites not met
 if (!w.addonPrefs) {
   return Astro.redirect("/addons");
@@ -216,13 +237,13 @@ const description = "Enter your contact information to complete your laundry ser
                 <div>
                   <h3 class="font-medium text-gray-900">{w.orderType?.replace('_', ' ') || 'Selected service'}</h3>
                   <p class="text-sm text-gray-600">
-                    {w.orderType === 'per_pound' ? '$2.49 per lb • 24-hour turnaround' : '24-hour turnaround'}
+                    {w.orderType === 'per_pound' ? perPoundDescription : '24-hour turnaround'}
                   </p>
                 </div>
                 <div class="text-right">
                   <span class="text-sm text-gray-500">Starting at</span>
                   <p class="font-semibold text-gray-900">
-                    {w.orderType === 'per_pound' ? '$2.49/lb' :
+                    {w.orderType === 'per_pound' ? perPoundRate :
                      w.orderType === 'small_bag' ? '$35' :
                      w.orderType === 'medium_bag' ? '$55' :
                      w.orderType === 'large_bag' ? '$85' : 'TBD'}
