@@ -583,9 +583,13 @@ const description = "Review your laundry service order and complete your booking
       const savings = calculateSavings();
       const newTotal = currentTotal + membershipFee - savings;
 
-      // Update display
-      membershipSavings.textContent = `$${savings.toFixed(2)}`;
-      newTotalWithMembership.textContent = `$${newTotal.toFixed(2)}`;
+      // Update display (only if elements exist - they won't exist for members)
+      if (membershipSavings) {
+        membershipSavings.textContent = `$${savings.toFixed(2)}`;
+      }
+      if (newTotalWithMembership) {
+        newTotalWithMembership.textContent = `$${newTotal.toFixed(2)}`;
+      }
 
       // Store reference to Stripe Elements component for updates
       let stripeElementsComponent = null;
@@ -595,7 +599,7 @@ const description = "Review your laundry service order and complete your booking
         stripeElementsComponent = document.querySelector('[data-stripe-elements]');
       }, 1000);
 
-      // Checkbox functionality
+      // Checkbox functionality (only if checkbox exists - won't exist for members)
       addMembershipCheckbox?.addEventListener('change', function() {
         const isChecked = this.checked;
 
