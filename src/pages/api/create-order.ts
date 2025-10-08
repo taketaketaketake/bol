@@ -34,6 +34,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       authUserId // Pass this from the frontend if authenticated
     } = body;
 
+    // Require authentication
+    if (!authUserId) {
+      console.error('[create-order] Unauthenticated request');
+      return new Response(
+        JSON.stringify({ error: 'Authentication required to place an order' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Validate required fields
     if (!customerEmail || !pickupDate || !pickupTimeWindowId) {
       console.error('[create-order] Missing required fields:', {
@@ -73,34 +82,47 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const accessToken = generateAccessToken();
     const tokenExpiresAt = generateTokenExpiration();
 
-    // Create or find customer (guest customer)
+    // Find or create customer record for authenticated user
     let customer;
 
-    // First, try to find existing customer by email
+    // First, try to find existing customer by auth_user_id
     const { data: existingCustomer } = await supabase
       .from('customers')
       .select('*')
-      .eq('email', customerEmail)
+      .eq('auth_user_id', authUserId)
       .single();
 
     if (existingCustomer) {
+      console.log('[create-order] Found existing customer:', existingCustomer.id);
       customer = existingCustomer;
+
+      // Update customer info if it changed
+      await supabase
+        .from('customers')
+        .update({
+          full_name: customerName,
+          email: customerEmail,
+          phone: customerPhone
+        })
+        .eq('id', customer.id);
     } else {
-      // Create new guest customer
-      console.log('[create-order] Creating new guest customer:', {
+      // Create new customer record for authenticated user
+      console.log('[create-order] Creating new customer for auth user:', {
+        auth_user_id: authUserId,
         full_name: customerName,
         email: customerEmail,
         phone: customerPhone,
-        is_guest: true
+        is_guest: false
       });
 
       const { data: newCustomer, error: customerError } = await supabase
         .from('customers')
         .insert({
+          auth_user_id: authUserId,
           full_name: customerName,
           email: customerEmail,
           phone: customerPhone,
-          is_guest: true
+          is_guest: false
         })
         .select()
         .single();

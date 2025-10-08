@@ -30,6 +30,11 @@ w = await readWizard(Astro.request);
 const session = await getSession(Astro.cookies);
 const authUserId = session?.user?.id || null;
 
+// Require authentication to checkout
+if (!session?.user?.id) {
+  return Astro.redirect("/auth/login?redirect=/checkout");
+}
+
 // Redirect if prerequisites not met
 if (!w.customer) {
   return Astro.redirect("/details");
