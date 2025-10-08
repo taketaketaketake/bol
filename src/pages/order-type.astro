@@ -41,6 +41,10 @@ let isMember = false;
 const session = await getSession(Astro.cookies);
 if (session?.user?.id) {
   isMember = await checkMembershipStatus(session.user.id);
+  console.log('[Order-Type] User ID:', session.user.id);
+  console.log('[Order-Type] Is Member:', isMember);
+} else {
+  console.log('[Order-Type] No session found');
 }
 
 // SEO
@@ -71,6 +75,13 @@ const description = "Select your laundry service type and any specialty items.";
               Non-Member Pricing
             </div>
           )}
+        </div>
+
+        <!-- Debug Info (remove after testing) -->
+        <div class="text-xs bg-yellow-100 border border-yellow-300 rounded p-2 mb-4">
+          <strong>Debug:</strong> isMember = {isMember ? 'true' : 'false'} |
+          Session = {session?.user?.id ? 'exists' : 'null'} |
+          User ID = {session?.user?.id || 'none'}
         </div>
 
         <!-- Pricing Info -->

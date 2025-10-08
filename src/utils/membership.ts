@@ -11,7 +11,10 @@ const supabase = createClient(
  * @returns boolean - true if user has active membership, false otherwise
  */
 export async function checkMembershipStatus(authUserId: string): Promise<boolean> {
-  if (!authUserId) return false;
+  if (!authUserId) {
+    console.log('[checkMembershipStatus] No authUserId provided');
+    return false;
+  }
 
   try {
     // First, get the customer record linked to this auth user
@@ -21,7 +24,10 @@ export async function checkMembershipStatus(authUserId: string): Promise<boolean
       .eq('auth_user_id', authUserId)
       .single();
 
+    console.log('[checkMembershipStatus] Customer lookup:', { customer, customerError });
+
     if (customerError || !customer) {
+      console.log('[checkMembershipStatus] No customer found for auth_user_id:', authUserId);
       return false;
     }
 
@@ -33,7 +39,10 @@ export async function checkMembershipStatus(authUserId: string): Promise<boolean
       .eq('status', 'active')
       .maybeSingle();
 
+    console.log('[checkMembershipStatus] Membership lookup:', { membership, membershipError });
+
     if (membershipError || !membership) {
+      console.log('[checkMembershipStatus] No active membership found for customer_id:', customer.id);
       return false;
     }
 
@@ -42,10 +51,12 @@ export async function checkMembershipStatus(authUserId: string): Promise<boolean
       const endDate = new Date(membership.end_date);
       const now = new Date();
       if (endDate < now) {
+        console.log('[checkMembershipStatus] Membership expired:', membership.end_date);
         return false;
       }
     }
 
+    console.log('[checkMembershipStatus] Active membership found!');
     return true;
   } catch (error) {
     console.error('Error checking membership status:', error);
