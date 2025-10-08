@@ -6,8 +6,8 @@ import { checkMembershipStatus } from '../../utils/membership';
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Create authenticated Supabase client with user session
-    const accessToken = cookies.get('sb-access-token')?.value;
-    const refreshToken = cookies.get('sb-refresh-token')?.value;
+    const sbAccessToken = cookies.get('sb-access-token')?.value;
+    const sbRefreshToken = cookies.get('sb-refresh-token')?.value;
 
     const supabase = createClient(
       import.meta.env.PUBLIC_SUPABASE_URL,
@@ -15,10 +15,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     );
 
     // Set the session if we have tokens
-    if (accessToken && refreshToken) {
+    if (sbAccessToken && sbRefreshToken) {
       await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken
+        access_token: sbAccessToken,
+        refresh_token: sbRefreshToken
       });
     }
 
