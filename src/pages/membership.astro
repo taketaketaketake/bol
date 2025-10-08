@@ -139,7 +139,7 @@ if (session?.user?.id) {
 
                 <button
                   id="checkout-button"
-                  class="w-full max-w-md mx-auto py-4 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="block w-full max-w-md mx-auto py-4 px-8 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:to-blue-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span id="button-text">Continue to Checkout — $49.99</span>
                   <span id="button-spinner" class="hidden">Loading...</span>
@@ -217,17 +217,26 @@ if (session?.user?.id) {
             body: JSON.stringify({ email: userEmail })
           });
 
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to create checkout session');
+          let data;
+          try {
+            data = await response.json();
+          } catch (e) {
+            throw new Error('Server error. Please try again later.');
           }
 
-          const { url } = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to create checkout session');
+          }
+
+          if (!data.url) {
+            throw new Error('Invalid response from server');
+          }
 
           // Redirect to Stripe Checkout
-          window.location.href = url;
+          window.location.href = data.url;
 
         } catch (error) {
+          console.error('Checkout error:', error);
           // Show error
           errorDiv.textContent = error.message || 'Something went wrong. Please try again.';
           errorDiv.classList.remove('hidden');
