@@ -208,7 +208,15 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         console.log('[StripeElements] Payment succeeded!', result.paymentIntent);
         console.log('[StripeElements] Payment status:', result.paymentIntent.status);
         console.log('[StripeElements] Order data:', (window as any).orderData);
-        onPaymentSuccess(result.paymentIntent);
+
+        // Direct redirect - handle it here instead of relying on callback
+        if ((window as any).orderData?.magicLink) {
+          console.log('[StripeElements] Redirecting to magic link:', (window as any).orderData.magicLink);
+          window.location.href = (window as any).orderData.magicLink;
+        } else {
+          console.log('[StripeElements] No magic link found, redirecting to /confirm');
+          window.location.href = '/confirm';
+        }
       } else {
         console.error('[StripeElements] Unknown payment result:', result);
         onPaymentError('Payment failed - please try again');
