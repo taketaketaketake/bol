@@ -31,7 +31,7 @@ if (session?.user?.id) {
             <a href="/order-type" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
               Place an Order
             </a>
-            <a href="/account" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold">
+            <a href="/dashboard" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold">
               Manage Account
             </a>
           </div>
@@ -125,71 +125,35 @@ if (session?.user?.id) {
                 <p class="text-gray-600 mb-6">
                   Please sign in to continue with membership signup
                 </p>
-                <a href="/login?redirect=/membership" class="inline-block px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                <a href="/auth/login?redirect=/membership" class="inline-block px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
                   Sign In
                 </a>
               </div>
             ) : (
-              <!-- Logged In - Show Payment Form -->
-              <div>
-                <form id="membership-form">
-                  <!-- Customer Email (readonly) -->
-                  <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={userEmail}
-                      readonly
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                    />
-                  </div>
+              <!-- Logged In - Show Checkout Button -->
+              <div class="text-center py-8">
+                <div class="mb-6">
+                  <p class="text-sm text-gray-600 mb-2">Signing up as:</p>
+                  <p class="text-lg font-semibold text-gray-900">{userEmail}</p>
+                </div>
 
-                  <!-- Stripe Elements Container -->
-                  <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                      Payment Information
-                    </label>
-                    <div id="payment-element" class="border border-gray-300 rounded-lg p-4 bg-white">
-                      <!-- Stripe Elements will be inserted here -->
-                    </div>
-                    <div id="payment-errors" class="text-red-600 text-sm mt-2 hidden"></div>
-                  </div>
+                <button
+                  id="checkout-button"
+                  class="w-full max-w-md mx-auto py-4 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span id="button-text">Continue to Checkout — $49.99</span>
+                  <span id="button-spinner" class="hidden">Loading...</span>
+                </button>
 
-                  <!-- Terms Checkbox -->
-                  <div class="mb-6">
-                    <label class="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        id="terms-checkbox"
-                        required
-                        class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span class="text-sm text-gray-700">
-                        I agree to the membership terms. This is a 6-month subscription for $49.99, billed today. You can cancel anytime before the renewal date.
-                      </span>
-                    </label>
-                  </div>
-
-                  <!-- Submit Button -->
-                  <button
-                    type="submit"
-                    id="submit-button"
-                    class="w-full py-4 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span id="button-text">Join Membership — $49.99</span>
-                    <span id="button-spinner" class="hidden">Processing...</span>
-                  </button>
-                </form>
+                <div id="checkout-error" class="text-red-600 text-sm mt-4 hidden"></div>
 
                 <!-- Security Badge -->
-                <div class="mt-6 text-center">
+                <div class="mt-6">
                   <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd" />
                     </svg>
-                    Secured by Stripe • Your payment information is encrypted
+                    Secured by Stripe • 256-bit SSL encryption
                   </p>
                 </div>
               </div>
@@ -230,80 +194,50 @@ if (session?.user?.id) {
     </div>
   </main>
 
-  <script define:vars={{ userEmail, publishableKey: import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY }}>
-    // Only run Stripe initialization if user is logged in and not already a member
-    if (userEmail && publishableKey) {
-      (async () => {
-        const { loadStripe } = await import('https://js.stripe.com/v3/');
-        const stripe = await loadStripe(publishableKey);
+  <script define:vars={{ userEmail }}>
+    // Only run if user is logged in
+    if (userEmail) {
+      const checkoutButton = document.getElementById('checkout-button');
+      const buttonText = document.getElementById('button-text');
+      const buttonSpinner = document.getElementById('button-spinner');
+      const errorDiv = document.getElementById('checkout-error');
 
-        if (!stripe) {
-          console.error('Failed to load Stripe');
-          return;
-        }
+      checkoutButton.addEventListener('click', async () => {
+        // Disable button
+        checkoutButton.disabled = true;
+        buttonText.classList.add('hidden');
+        buttonSpinner.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
 
-        // Create Payment Intent for membership
-        const response = await fetch('/api/create-membership-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: userEmail })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          document.getElementById('payment-errors').textContent = error.error || 'Failed to initialize payment';
-          document.getElementById('payment-errors').classList.remove('hidden');
-          return;
-        }
-
-        const { clientSecret } = await response.json();
-
-        // Mount Stripe Elements
-        const elements = stripe.elements({ clientSecret });
-        const paymentElement = elements.create('payment');
-        paymentElement.mount('#payment-element');
-
-        // Handle form submission
-        const form = document.getElementById('membership-form');
-        const submitButton = document.getElementById('submit-button');
-        const buttonText = document.getElementById('button-text');
-        const buttonSpinner = document.getElementById('button-spinner');
-
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-
-          // Check terms checkbox
-          const termsCheckbox = document.getElementById('terms-checkbox');
-          if (!termsCheckbox.checked) {
-            alert('Please accept the membership terms to continue');
-            return;
-          }
-
-          // Disable button
-          submitButton.disabled = true;
-          buttonText.classList.add('hidden');
-          buttonSpinner.classList.remove('hidden');
-
-          // Confirm payment
-          const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-              return_url: `${window.location.origin}/membership-success`,
-            },
+        try {
+          // Create Checkout Session
+          const response = await fetch('/api/create-membership-payment-intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail })
           });
 
-          if (error) {
-            // Show error
-            document.getElementById('payment-errors').textContent = error.message;
-            document.getElementById('payment-errors').classList.remove('hidden');
-
-            // Re-enable button
-            submitButton.disabled = false;
-            buttonText.classList.remove('hidden');
-            buttonSpinner.classList.add('hidden');
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to create checkout session');
           }
-        });
-      })();
+
+          const { url } = await response.json();
+
+          // Redirect to Stripe Checkout
+          window.location.href = url;
+
+        } catch (error) {
+          // Show error
+          errorDiv.textContent = error.message || 'Something went wrong. Please try again.';
+          errorDiv.classList.remove('hidden');
+
+          // Re-enable button
+          checkoutButton.disabled = false;
+          buttonText.classList.remove('hidden');
+          buttonSpinner.classList.add('hidden');
+        }
+      });
     }
   </script>
 </Layout>

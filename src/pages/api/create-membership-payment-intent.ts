@@ -17,6 +17,8 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    const origin = new URL(request.url).origin;
+
     // Check if customer already exists
     let customer;
     const existingCustomers = await stripe.customers.list({
@@ -36,38 +38,43 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Create membership price (6-month $49.99)
-    const membershipPrice = await stripe.prices.create({
-      unit_amount: 4999, // $49.99 in cents
-      currency: 'usd',
-      recurring: { interval: 'month', interval_count: 6 },
-      product_data: {
-        name: 'Bags of Laundry 6-Month Membership',
-        description: '6-month membership with discounted per-pound pricing and priority booking',
-      },
-    });
-
-    // Create subscription
-    const subscription = await stripe.subscriptions.create({
+    // Create Stripe Checkout Session for subscription
+    const session = await stripe.checkout.sessions.create({
       customer: customer.id,
-      items: [{ price: membershipPrice.id }],
-      payment_behavior: 'default_incomplete',
-      payment_settings: { save_default_payment_method: 'on_subscription' },
-      expand: ['latest_invoice.payment_intent'],
-      metadata: {
-        membershipType: '6_month',
-        source: 'direct_signup',
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Bags of Laundry 6-Month Membership',
+              description: 'Save $0.50/lb on every order + unlock per-bag pricing options',
+            },
+            recurring: {
+              interval: 'month',
+              interval_count: 6,
+            },
+            unit_amount: 4999, // $49.99
+          },
+          quantity: 1,
+        },
+      ],
+      subscription_data: {
+        metadata: {
+          membershipType: '6_month',
+          source: 'direct_signup',
+        },
       },
+      success_url: `${origin}/api/verify-membership-payment?session_id={CHECKOUT_SESSION_ID}&redirect=/order-type`,
+      cancel_url: `${origin}/membership?canceled=true`,
+      allow_promotion_codes: true,
     });
-
-    const invoice = subscription.latest_invoice as Stripe.Invoice;
-    const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
 
     return new Response(
       JSON.stringify({
-        clientSecret: paymentIntent.client_secret,
-        customerId: customer.id,
-        subscriptionId: subscription.id,
+        sessionId: session.id,
+        url: session.url,
       }),
       {
         status: 200,
@@ -76,11 +83,11 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
   } catch (error) {
-    console.error('Error creating membership payment intent:', error);
+    console.error('Error creating membership checkout session:', error);
 
     return new Response(
       JSON.stringify({
-        error: 'Failed to create membership payment intent',
+        error: 'Failed to create membership checkout session',
         details: error instanceof Error ? error.message : 'Unknown error'
       }),
       {

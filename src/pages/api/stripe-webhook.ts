@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
+import { supabase } from '../../lib/supabase';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
@@ -43,9 +44,14 @@ export const POST: APIRoute = async ({ request }) => {
         await handleSubscriptionPayment(invoice);
         break;
 
-      case 'customer.subscription.created':
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionCreated(subscription);
+      case 'customer.subscription.updated':
+        const updatedSubscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionUpdated(updatedSubscription);
+        break;
+
+      case 'customer.subscription.deleted':
+        const deletedSubscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionDeleted(deletedSubscription);
         break;
 
       default:
@@ -97,28 +103,132 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
 async function handleSubscriptionPayment(invoice: Stripe.Invoice) {
   console.log('Subscription payment succeeded:', invoice.id);
 
-  // TODO: Handle recurring subscription payments
-  // - Extend membership period
-  // - Update customer status
+  // Handle recurring subscription payments (renewals)
+  if (!invoice.subscription) {
+    console.log('No subscription associated with invoice');
+    return;
+  }
+
+  const subscriptionId = typeof invoice.subscription === 'string'
+    ? invoice.subscription
+    : invoice.subscription.id;
+
+  try {
+    // Find membership by subscription ID
+    const { data: membership, error: fetchError } = await supabase
+      .from('memberships')
+      .select('id, end_date')
+      .eq('stripe_subscription_id', subscriptionId)
+      .maybeSingle();
+
+    if (fetchError || !membership) {
+      console.error('Membership not found for subscription:', subscriptionId);
+      return;
+    }
+
+    // Extend membership by 6 months from current end_date
+    const currentEndDate = new Date(membership.end_date);
+    const newEndDate = new Date(currentEndDate);
+    newEndDate.setMonth(newEndDate.getMonth() + 6);
+
+    const { error: updateError } = await supabase
+      .from('memberships')
+      .update({
+        end_date: newEndDate.toISOString().split('T')[0],
+        status: 'active',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', membership.id);
+
+    if (updateError) {
+      console.error('Error extending membership:', updateError);
+      return;
+    }
+
+    console.log('Membership extended successfully to:', newEndDate.toISOString().split('T')[0]);
+  } catch (error) {
+    console.error('Error handling subscription payment:', error);
+  }
 }
 
-async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  console.log('New subscription created:', subscription.id);
+async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+  console.log('Subscription updated:', subscription.id);
 
-  const customerId = subscription.customer as string;
-  const metadata = subscription.metadata;
+  try {
+    // Find membership by subscription ID
+    const { data: membership, error: fetchError } = await supabase
+      .from('memberships')
+      .select('id')
+      .eq('stripe_subscription_id', subscription.id)
+      .maybeSingle();
 
-  // Activate membership benefits
-  console.log('Activating membership for customer:', customerId);
-  console.log('Membership type:', metadata.membershipType);
-  console.log('Signup order amount:', metadata.signupOrderAmount);
+    if (fetchError || !membership) {
+      console.error('Membership not found for subscription:', subscription.id);
+      return;
+    }
 
-  // TODO: Update database with membership status
-  // - Set customer as active member
-  // - Record membership start date
-  // - Apply member pricing for future orders
-  // - Send welcome email with membership benefits
+    // Map Stripe status to our status
+    let status = 'active';
+    if (subscription.status === 'canceled') {
+      status = 'canceled';
+    } else if (subscription.status === 'past_due') {
+      status = 'past_due';
+    } else if (subscription.status === 'trialing') {
+      status = 'trialing';
+    }
 
-  // For now, we'll log the membership activation
-  console.log('Membership activated successfully for subscription:', subscription.id);
+    // Update membership status
+    const { error: updateError } = await supabase
+      .from('memberships')
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', membership.id);
+
+    if (updateError) {
+      console.error('Error updating membership status:', updateError);
+      return;
+    }
+
+    console.log('Membership status updated to:', status);
+  } catch (error) {
+    console.error('Error handling subscription update:', error);
+  }
+}
+
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+  console.log('Subscription deleted:', subscription.id);
+
+  try {
+    // Find membership by subscription ID
+    const { data: membership, error: fetchError } = await supabase
+      .from('memberships')
+      .select('id')
+      .eq('stripe_subscription_id', subscription.id)
+      .maybeSingle();
+
+    if (fetchError || !membership) {
+      console.error('Membership not found for subscription:', subscription.id);
+      return;
+    }
+
+    // Mark membership as canceled
+    const { error: updateError } = await supabase
+      .from('memberships')
+      .update({
+        status: 'canceled',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', membership.id);
+
+    if (updateError) {
+      console.error('Error canceling membership:', updateError);
+      return;
+    }
+
+    console.log('Membership canceled successfully');
+  } catch (error) {
+    console.error('Error handling subscription deletion:', error);
+  }
 }

@@ -7,15 +7,19 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const provider = formData.get("provider")?.toString();
+  const redirectAfterLogin = formData.get("redirect")?.toString() || "/dashboard";
 
   const validProviders = ["google", "github"];
 
   // Handle OAuth providers
   if (provider && validProviders.includes(provider)) {
+    const origin = new URL(request.url).origin;
+    const callbackUrl = `${origin}/auth/callback?redirect=${encodeURIComponent(redirectAfterLogin)}`;
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as Provider,
       options: {
-        redirectTo: `${new URL(request.url).origin}/auth/login`,
+        redirectTo: callbackUrl,
       },
     });
 
@@ -67,7 +71,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       maxAge: 60 * 60 * 24 * 7, // 1 week
     });
 
-    return redirect("/dashboard");
+    return redirect(redirectAfterLogin);
   } catch (error) {
     const errorMessage = error instanceof Error ?
       (error.message.includes('Invalid login credentials') ? 'Email or password is incorrect' : error.message) :

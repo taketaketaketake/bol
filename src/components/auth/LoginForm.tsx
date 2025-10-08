@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -7,6 +7,16 @@ export default function LoginForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [redirectTo, setRedirectTo] = useState('/dashboard');
+
+  useEffect(() => {
+    // Get redirect parameter from URL
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      setRedirectTo(redirect);
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,6 +35,7 @@ export default function LoginForm() {
       const formDataToSend = new FormData();
       formDataToSend.append('email', formData.email.trim());
       formDataToSend.append('password', formData.password);
+      formDataToSend.append('redirect', redirectTo);
 
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
@@ -57,6 +68,7 @@ export default function LoginForm() {
     try {
       const formData = new FormData();
       formData.append('provider', provider);
+      formData.append('redirect', redirectTo);
 
       const response = await fetch('/api/auth/signin', {
         method: 'POST',

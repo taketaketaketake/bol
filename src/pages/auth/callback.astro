@@ -4,8 +4,10 @@ import { supabase } from '../../lib/supabase';
 
 const { url, cookies, redirect } = Astro;
 const code = url.searchParams.get('code');
+const redirectTo = url.searchParams.get('redirect') || '/dashboard';
 
 console.log('[Callback] Code received:', code ? 'Yes' : 'No');
+console.log('[Callback] Redirect target:', redirectTo);
 
 if (code) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
@@ -37,11 +39,49 @@ if (code) {
       maxAge: 60 * 60 * 24 * 7,
     });
 
-    console.log('[Callback] Redirecting to dashboard');
-    return redirect('/dashboard');
+    console.log('[Callback] Redirecting to:', redirectTo);
+    return redirect(redirectTo);
   }
 }
 
-console.log('[Callback] No code found, redirecting to login');
-return redirect('/auth/login?error=no-code');
+console.log('[Callback] No code found, checking for hash fragment');
+// If no code, might be hash fragment (implicit flow) - handled client-side below
 ---
+
+<script define:vars={{ redirectTo }}>
+  // Handle OAuth callback with hash fragment (implicit flow)
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    console.log('[Callback Client] Processing hash fragment tokens');
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+
+    if (access_token && refresh_token) {
+      // Send tokens to server to set session cookies
+      fetch('/api/auth/set-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token, refresh_token })
+      }).then(res => {
+        if (res.ok) {
+          console.log('[Callback Client] Session set, redirecting to:', redirectTo);
+          window.location.href = redirectTo;
+        } else {
+          console.error('[Callback Client] Failed to set session');
+          window.location.href = '/auth/login?error=session-failed';
+        }
+      }).catch(err => {
+        console.error('[Callback Client] Session error:', err);
+        window.location.href = '/auth/login?error=session-error';
+      });
+    } else {
+      console.error('[Callback Client] Missing tokens in hash fragment');
+      window.location.href = '/auth/login?error=no-tokens';
+    }
+  } else {
+    // No hash fragment and no code - redirect to login
+    console.log('[Callback Client] No auth data found');
+    window.location.href = '/auth/login?error=no-code';
+  }
+</script>
