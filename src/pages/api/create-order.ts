@@ -274,8 +274,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     console.log('[create-order] Order created successfully:', order.id);
 
-    // Generate magic link
-    const baseUrl = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
+    // Generate magic link using the request origin
+    const origin = new URL(request.url).origin;
+    const baseUrl = origin || import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
     const magicLink = generateMagicLink(order.id, accessToken, baseUrl);
 
     // Send confirmation email
