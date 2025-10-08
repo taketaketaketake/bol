@@ -82,7 +82,7 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
           email: customerEmail,
           stripe_customer_id: stripeCustomerId,
           is_guest: false,
-          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+          full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
           phone: session.user.phone || '',
         })
         .select('id')
