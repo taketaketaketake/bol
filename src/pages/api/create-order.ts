@@ -184,6 +184,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     let estimatedTotal = estimatedAmount || 3375; // Default $33.75 in cents
 
     // Create the order
+    console.log('[create-order] Creating order with data:', {
+      customer_id: customer.id,
+      address_id: addressId,
+      service_type: serviceType,
+      plan_type: planType || orderType,
+      pickup_date: pickupDate,
+      pickup_time_window_id: pickupTimeWindowId,
+      subtotal_cents: estimatedTotal,
+      total_cents: estimatedTotal,
+      status: 'scheduled',
+      payment_status: 'requires_payment'
+    });
+
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -207,12 +220,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       .single();
 
     if (orderError) {
-      console.error('Error creating order:', orderError);
+      console.error('[create-order] Error creating order:', orderError);
+      console.error('[create-order] Error details:', JSON.stringify(orderError, null, 2));
       return new Response(
-        JSON.stringify({ error: 'Failed to create order' }),
+        JSON.stringify({
+          error: 'Failed to create order',
+          details: orderError.message,
+          code: orderError.code
+        }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('[create-order] Order created successfully:', order.id);
 
     // Generate magic link
     const baseUrl = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
