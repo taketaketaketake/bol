@@ -65,6 +65,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           customerEmail: orderDetails.customerEmail,
           customerPhone: orderDetails.customerPhone || '',
           orderType: orderDetails.orderType,
+          planType: orderDetails.planType || orderDetails.orderType,
           serviceType: orderDetails.serviceType || 'wash_fold',
           pickupDate: orderDetails.pickupDate,
           pickupTimeWindowId: orderDetails.pickupTimeWindowId,
@@ -73,7 +74,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           preferences: orderDetails.preferences,
           addons: orderDetails.addons,
           addonPrefs: orderDetails.addonPrefs,
-          estimatedAmount: currentAmount
+          estimatedAmount: currentAmount,
+          authUserId: orderDetails.authUserId || null
         }),
       });
 

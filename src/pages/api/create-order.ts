@@ -41,7 +41,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     // Server-side validation: Prevent non-members from using per-bag pricing
     const isPerBagOrder = planType?.includes('bag') || orderType?.includes('bag');
     if (isPerBagOrder && authUserId) {
-      const isMember = await checkMembershipStatus(authUserId);
+      const isMember = await checkMembershipStatus(authUserId, supabase);
       if (!isMember) {
         return new Response(
           JSON.stringify({

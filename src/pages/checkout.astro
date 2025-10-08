@@ -3,6 +3,7 @@ import Layout from '../layout/Layout.astro';
 import ProgressSteps from '../components/ProgressSteps';
 import StripeElements from '../components/StripeElements';
 import { readWizard, clearWizard, writeWizard } from "../utils/wizard.server";
+import { getSession } from "../utils/auth";
 
 // Server-side handling
 let w = {};
@@ -24,6 +25,10 @@ if (Astro.request.method === "POST") {
 }
 
 w = await readWizard(Astro.request);
+
+// Get user session for authenticated orders
+const session = await getSession(Astro.cookies);
+const authUserId = session?.user?.id || null;
 
 // Redirect if prerequisites not met
 if (!w.customer) {
@@ -386,16 +391,20 @@ const description = "Review your laundry service order and complete your booking
                 addMembership={false}
                 orderDetails={{
                   orderType: w.orderType,
+                  planType: w.orderType,
                   customerName: w.customer?.fullName || '',
                   customerEmail: w.customer?.email || '',
+                  customerPhone: w.customer?.phone || '',
                   pickupAddress: w.pickup?.address || '',
                   pickupDate: w.pickup?.date || '',
                   pickupTimeWindowId: w.pickup?.timeWindowId || '',
                   notes: w.addonPrefs?.notes || '',
                   preferences: w.addonPrefs || {},
                   addons: w.addons || [],
+                  addonPrefs: w.addonPrefs || {},
                   serviceType: 'wash_fold',
-                  estimatedAmount: totals.grandTotalCents
+                  estimatedAmount: totals.grandTotalCents,
+                  authUserId: authUserId
                 }}
                 onPaymentSuccess={(paymentIntent) => {
                   console.log('Payment successful:', paymentIntent);
