@@ -41,13 +41,16 @@ let isMember = false;
 const session = await getSession(Astro.cookies);
 if (session?.user?.id) {
   // Create authenticated Supabase client with user session
-  const { supabase } = await import('../lib/supabase');
-  const authenticatedClient = supabase;
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-  // Set the session on the client for RLS to work
-  await authenticatedClient.auth.setSession({
-    access_token: Astro.cookies.get('sb-access-token')?.value || '',
-    refresh_token: Astro.cookies.get('sb-refresh-token')?.value || ''
+  const authenticatedClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${Astro.cookies.get('sb-access-token')?.value || ''}`
+      }
+    }
   });
 
   isMember = await checkMembershipStatus(session.user.id, authenticatedClient);
