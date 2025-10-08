@@ -156,28 +156,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       customer = newCustomer;
     }
 
-    // Create address if provided
-    let addressId = null;
-    if (pickupAddress) {
-      const { data: address, error: addressError } = await supabase
-        .from('addresses')
-        .insert({
-          customer_id: customer.id,
-          label: 'Pickup Address',
-          line1: pickupAddress.line1 || pickupAddress.address,
-          line2: pickupAddress.line2,
-          city: pickupAddress.city || 'Detroit',
-          state: pickupAddress.state || 'MI',
-          postal_code: pickupAddress.postal_code || pickupAddress.zip,
-          latitude: pickupAddress.latitude,
-          longitude: pickupAddress.longitude
-        })
-        .select()
-        .single();
-
-      if (!addressError) {
-        addressId = address.id;
-      }
+    // Validate pickup address is provided
+    if (!pickupAddress || !pickupAddress.line1) {
+      console.error('[create-order] Missing pickup address');
+      return new Response(
+        JSON.stringify({ error: 'Pickup address is required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     // Resolve time window ID if it's a label instead of UUID
@@ -221,15 +206,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     // Calculate estimated pricing
     let estimatedTotal = estimatedAmount || 3375; // Default $33.75 in cents
 
-    // Create the order
+    // Create the order with address data stored directly
     console.log('[create-order] Creating order with data:', {
       customer_id: customer.id,
-      address_id: addressId,
       service_type: serviceType,
       pricing_model: pricingModel,
       plan_type: null,
       pickup_date: pickupDate,
       pickup_time_window_id: resolvedTimeWindowId,
+      pickup_address_line1: pickupAddress.line1,
       subtotal_cents: estimatedTotal,
       total_cents: estimatedTotal,
       status: 'scheduled',
@@ -240,7 +225,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       .from('orders')
       .insert({
         customer_id: customer.id,
-        address_id: addressId,
         service_type: serviceType,
         pricing_model: pricingModel,  // Use mapped pricing_model value
         plan_type: null,              // Set to null for one-time orders
@@ -254,7 +238,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         access_token: accessToken,
         token_expires_at: tokenExpiresAt.toISOString(),
         status: 'scheduled',
-        payment_status: 'requires_payment'
+        payment_status: 'requires_payment',
+        // Pickup address
+        pickup_address_line1: pickupAddress.line1 || pickupAddress.address,
+        pickup_address_line2: pickupAddress.line2,
+        pickup_address_city: pickupAddress.city || 'Detroit',
+        pickup_address_state: pickupAddress.state || 'MI',
+        pickup_address_postal_code: pickupAddress.postal_code || pickupAddress.zip,
+        // Dropoff address (if different from pickup)
+        dropoff_address_line1: deliveryAddress?.line1,
+        dropoff_address_line2: deliveryAddress?.line2,
+        dropoff_address_city: deliveryAddress?.city,
+        dropoff_address_state: deliveryAddress?.state,
+        dropoff_address_postal_code: deliveryAddress?.postal_code
       })
       .select()
       .single();

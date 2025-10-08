@@ -29,14 +29,6 @@ const { data: order, error } = await supabase
       email,
       phone
     ),
-    addresses (
-      label,
-      line1,
-      line2,
-      city,
-      state,
-      postal_code
-    ),
     time_windows:pickup_time_window_id (
       label,
       start_time,
@@ -65,7 +57,6 @@ if (!isTokenValid(order.token_expires_at)) {
 
 // Format order data for display
 const customer = order.customers;
-const address = order.addresses;
 
 const formatOrderType = (type: string) => {
   switch(type) {
@@ -187,15 +178,28 @@ const description = `View your laundry order details and track status.`;
             </div>
           </div>
 
-          <!-- Address Information -->
-          {address && (
+          <!-- Pickup Address Information -->
+          {order.pickup_address_line1 && (
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 class="text-xl font-semibold text-gray-900 mb-4">Pickup Address</h2>
 
               <div class="text-gray-900">
-                <p>{address.line1}</p>
-                {address.line2 && <p>{address.line2}</p>}
-                <p>{address.city}, {address.state} {address.postal_code}</p>
+                <p>{order.pickup_address_line1}</p>
+                {order.pickup_address_line2 && <p>{order.pickup_address_line2}</p>}
+                <p>{order.pickup_address_city}, {order.pickup_address_state} {order.pickup_address_postal_code}</p>
+              </div>
+            </div>
+          )}
+
+          <!-- Dropoff Address Information (if different from pickup) -->
+          {order.dropoff_address_line1 && (
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 class="text-xl font-semibold text-gray-900 mb-4">Dropoff Address</h2>
+
+              <div class="text-gray-900">
+                <p>{order.dropoff_address_line1}</p>
+                {order.dropoff_address_line2 && <p>{order.dropoff_address_line2}</p>}
+                <p>{order.dropoff_address_city}, {order.dropoff_address_state} {order.dropoff_address_postal_code}</p>
               </div>
             </div>
           )}
