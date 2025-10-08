@@ -40,7 +40,17 @@ if (!w.address || !w.date || !w.phone) {
 let isMember = false;
 const session = await getSession(Astro.cookies);
 if (session?.user?.id) {
-  isMember = await checkMembershipStatus(session.user.id);
+  // Create authenticated Supabase client with user session
+  const { supabase } = await import('../lib/supabase');
+  const authenticatedClient = supabase;
+
+  // Set the session on the client for RLS to work
+  await authenticatedClient.auth.setSession({
+    access_token: Astro.cookies.get('sb-access-token')?.value || '',
+    refresh_token: Astro.cookies.get('sb-refresh-token')?.value || ''
+  });
+
+  isMember = await checkMembershipStatus(session.user.id, authenticatedClient);
   console.log('[Order-Type] User ID:', session.user.id);
   console.log('[Order-Type] Is Member:', isMember);
 } else {

@@ -1,16 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-);
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Check if a user has an active membership
  * @param authUserId - The Supabase auth user ID
+ * @param supabaseClient - Authenticated Supabase client with user session
  * @returns boolean - true if user has active membership, false otherwise
  */
-export async function checkMembershipStatus(authUserId: string): Promise<boolean> {
+export async function checkMembershipStatus(authUserId: string, supabaseClient: SupabaseClient): Promise<boolean> {
   if (!authUserId) {
     console.log('[checkMembershipStatus] No authUserId provided');
     return false;
@@ -18,7 +15,7 @@ export async function checkMembershipStatus(authUserId: string): Promise<boolean
 
   try {
     // First, get the customer record linked to this auth user
-    const { data: customer, error: customerError } = await supabase
+    const { data: customer, error: customerError } = await supabaseClient
       .from('customers')
       .select('id')
       .eq('auth_user_id', authUserId)
@@ -32,7 +29,7 @@ export async function checkMembershipStatus(authUserId: string): Promise<boolean
     }
 
     // Check for an active membership
-    const { data: membership, error: membershipError } = await supabase
+    const { data: membership, error: membershipError } = await supabaseClient
       .from('memberships')
       .select('status, end_date')
       .eq('customer_id', customer.id)
