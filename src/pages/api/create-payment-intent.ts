@@ -117,8 +117,11 @@ export const POST: APIRoute = async ({ request }) => {
           orderType: orderDetails?.orderType || 'unknown',
           addMembership: 'false',
           customerEmail: orderDetails?.customerEmail || '',
-          pickupAddress: orderDetails?.pickupAddress || '',
+          pickupAddress: typeof orderDetails?.pickupAddress === 'string'
+            ? orderDetails.pickupAddress
+            : orderDetails?.pickupAddress?.line1 || '',
           pickupDate: orderDetails?.pickupDate || '',
+          orderId: orderDetails?.orderId || '',
         },
         automatic_payment_methods: {
           enabled: true,
