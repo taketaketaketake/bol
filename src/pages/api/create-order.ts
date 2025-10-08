@@ -209,6 +209,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
     }
 
+    // Map frontend orderType to database pricing_model format
+    const pricingModelMap: { [key: string]: string } = {
+      'per_pound': 'per_lb',
+      'small_bag': 'bag_small',
+      'medium_bag': 'bag_medium',
+      'large_bag': 'bag_large'
+    };
+    const pricingModel = pricingModelMap[orderType] || 'per_lb';
+
     // Calculate estimated pricing
     let estimatedTotal = estimatedAmount || 3375; // Default $33.75 in cents
 
@@ -217,7 +226,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       customer_id: customer.id,
       address_id: addressId,
       service_type: serviceType,
-      pricing_model: orderType,
+      pricing_model: pricingModel,
       plan_type: null,
       pickup_date: pickupDate,
       pickup_time_window_id: resolvedTimeWindowId,
@@ -233,8 +242,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         customer_id: customer.id,
         address_id: addressId,
         service_type: serviceType,
-        pricing_model: orderType,  // Use pricing_model instead of plan_type
-        plan_type: null,           // Set to null for one-time orders (or 'standard' if needed)
+        pricing_model: pricingModel,  // Use mapped pricing_model value
+        plan_type: null,              // Set to null for one-time orders
         pickup_date: pickupDate,
         pickup_time_window_id: resolvedTimeWindowId,
         notes: notes,
