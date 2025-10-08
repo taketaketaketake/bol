@@ -87,13 +87,6 @@ const description = "Select your laundry service type and any specialty items.";
           )}
         </div>
 
-        <!-- Debug Info (remove after testing) -->
-        <div class="text-xs bg-yellow-100 border border-yellow-300 rounded p-2 mb-4">
-          <strong>Debug:</strong> isMember = {isMember ? 'true' : 'false'} |
-          Session = {session?.user?.id ? 'exists' : 'null'} |
-          User ID = {session?.user?.id || 'none'}
-        </div>
-
         <!-- Pricing Info -->
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-2xl mx-auto mb-4">
           {isMember ? (
