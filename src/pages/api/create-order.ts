@@ -217,7 +217,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       customer_id: customer.id,
       address_id: addressId,
       service_type: serviceType,
-      plan_type: planType || orderType,
+      pricing_model: orderType,
+      plan_type: null,
       pickup_date: pickupDate,
       pickup_time_window_id: resolvedTimeWindowId,
       subtotal_cents: estimatedTotal,
@@ -232,7 +233,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         customer_id: customer.id,
         address_id: addressId,
         service_type: serviceType,
-        plan_type: planType || orderType,
+        pricing_model: orderType,  // Use pricing_model instead of plan_type
+        plan_type: null,           // Set to null for one-time orders (or 'standard' if needed)
         pickup_date: pickupDate,
         pickup_time_window_id: resolvedTimeWindowId,
         notes: notes,
