@@ -24,7 +24,7 @@ const { data: order, error } = await supabase
   .from('orders')
   .select(`
     *,
-    customers (
+    customers!inner (
       full_name,
       email,
       phone
@@ -36,11 +36,16 @@ const { data: order, error } = await supabase
       city,
       state,
       postal_code
+    ),
+    time_windows:pickup_time_window_id (
+      label,
+      start_time,
+      end_time
     )
   `)
   .eq('id', id)
   .eq('access_token', token)
-  .single();
+  .maybeSingle();
 
 console.log('[orders/id] Query result:', { order: !!order, error });
 
@@ -151,6 +156,13 @@ const description = `View your laundry order details and track status.`;
                 <span class="text-sm font-medium text-gray-500">Pickup Date</span>
                 <p class="text-gray-900">{formatDate(order.pickup_date)}</p>
               </div>
+
+              {order.time_windows && (
+                <div>
+                  <span class="text-sm font-medium text-gray-500">Pickup Time</span>
+                  <p class="text-gray-900">{order.time_windows.label} ({order.time_windows.start_time} - {order.time_windows.end_time})</p>
+                </div>
+              )}
 
               {order.delivery_date && (
                 <div>
