@@ -79,9 +79,28 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         }),
       });
 
+      if (!orderResponse.ok) {
+        // Log the full response for debugging
+        const errorText = await orderResponse.text();
+        console.error('Order creation failed:', {
+          status: orderResponse.status,
+          statusText: orderResponse.statusText,
+          body: errorText
+        });
+
+        try {
+          const errorData = JSON.parse(errorText);
+          onPaymentError(errorData.error || 'Failed to create order');
+        } catch (e) {
+          onPaymentError(`Failed to create order: ${orderResponse.status} ${errorText}`);
+        }
+        return;
+      }
+
       const orderData = await orderResponse.json();
 
       if (!orderData.success) {
+        console.error('Order creation failed:', orderData);
         onPaymentError(orderData.error || 'Failed to create order');
         return;
       }

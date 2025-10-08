@@ -11,6 +11,10 @@ const supabase = createClient(
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
+
+    // Log the received data for debugging
+    console.log('[create-order] Received request body:', JSON.stringify(body, null, 2));
+
     const {
       customerName,
       customerEmail,
@@ -32,6 +36,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     // Validate required fields
     if (!customerEmail || !pickupDate || !pickupTimeWindowId) {
+      console.error('[create-order] Missing required fields:', {
+        hasEmail: !!customerEmail,
+        hasPickupDate: !!pickupDate,
+        hasPickupTimeWindowId: !!pickupTimeWindowId
+      });
       return new Response(
         JSON.stringify({ error: 'Missing required fields: email, pickup date, and time window' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
