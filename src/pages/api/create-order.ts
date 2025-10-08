@@ -189,17 +189,23 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     if (!isUUID && pickupTimeWindowId) {
       // It's a label like "morning", "afternoon", "evening" - look up the ID
       // Use case-insensitive search with ilike
-      const { data: timeWindow } = await supabase
+      console.log('[create-order] Looking up time window for label:', pickupTimeWindowId);
+
+      const { data: timeWindow, error: timeWindowError } = await supabase
         .from('time_windows')
-        .select('id')
+        .select('id, label')
         .ilike('label', pickupTimeWindowId)
-        .single();
+        .limit(1)
+        .maybeSingle();
+
+      console.log('[create-order] Time window lookup result:', { timeWindow, timeWindowError });
 
       if (timeWindow) {
         resolvedTimeWindowId = timeWindow.id;
         console.log('[create-order] Resolved time window label to ID:', pickupTimeWindowId, '->', resolvedTimeWindowId);
       } else {
         console.error('[create-order] Could not find time window with label:', pickupTimeWindowId);
+        console.error('[create-order] Time window error:', timeWindowError);
       }
     }
 
