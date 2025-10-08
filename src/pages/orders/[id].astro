@@ -58,9 +58,13 @@ const address = order.addresses;
 const formatOrderType = (type: string) => {
   switch(type) {
     case 'per_pound': return 'Per Pound';
+    case 'per_lb': return 'Per Pound';
     case 'small_bag': return 'Small Bag';
+    case 'bag_small': return 'Small Bag';
     case 'medium_bag': return 'Medium Bag';
+    case 'bag_medium': return 'Medium Bag';
     case 'large_bag': return 'Large Bag';
+    case 'bag_large': return 'Large Bag';
     default: return type?.replace('_', ' ') || 'Service';
   }
 };
@@ -133,7 +137,7 @@ const description = `View your laundry order details and track status.`;
             <div class="space-y-4">
               <div>
                 <span class="text-sm font-medium text-gray-500">Service Type</span>
-                <p class="text-gray-900">{formatOrderType(order.plan_type || order.service_type)}</p>
+                <p class="text-gray-900">{formatOrderType(order.pricing_model || order.service_type)}</p>
               </div>
 
               <div>
