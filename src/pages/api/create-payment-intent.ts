@@ -8,6 +8,8 @@ const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
+    console.log('[create-payment-intent] Received request:', JSON.stringify(body, null, 2));
+
     const {
       amount,
       currency = 'usd',
@@ -17,6 +19,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Validate amount
     if (!amount || amount < 50) { // Minimum $0.50
+      console.error('[create-payment-intent] Invalid amount:', amount);
       return new Response(
         JSON.stringify({ error: 'Invalid amount' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
@@ -136,12 +139,14 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    console.error('[create-payment-intent] Error:', error);
+    console.error('[create-payment-intent] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 
     return new Response(
       JSON.stringify({
         error: 'Failed to create payment intent',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
       }),
       {
         status: 500,
