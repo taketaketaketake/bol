@@ -33,9 +33,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   const [membershipSelected, setMembershipSelected] = useState(addMembership);
 
   useEffect(() => {
-    // Create payment intent when component mounts
+    // Create payment intent only once when component mounts
     createPaymentIntent();
-  }, [currentAmount, membershipSelected]);
+  }, []); // Empty dependency array - only run once on mount
 
   useEffect(() => {
     // Listen for membership toggle events from the parent page
@@ -199,10 +199,19 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
       setLoading(false);
 
+      console.log('[StripeElements] Payment result:', result);
+
       if (result.error) {
+        console.error('[StripeElements] Stripe payment error:', result.error);
         onPaymentError(result.error.message || 'Payment failed');
-      } else {
+      } else if (result.paymentIntent) {
+        console.log('[StripeElements] Payment succeeded!', result.paymentIntent);
+        console.log('[StripeElements] Payment status:', result.paymentIntent.status);
+        console.log('[StripeElements] Order data:', (window as any).orderData);
         onPaymentSuccess(result.paymentIntent);
+      } else {
+        console.error('[StripeElements] Unknown payment result:', result);
+        onPaymentError('Payment failed - please try again');
       }
     }
   };
