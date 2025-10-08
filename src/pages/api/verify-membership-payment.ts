@@ -82,13 +82,22 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
           email: customerEmail,
           stripe_customer_id: stripeCustomerId,
           is_guest: false,
+          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
+          phone: session.user.phone || '',
         })
         .select('id')
         .single();
 
       if (customerCreateError || !newCustomer) {
         console.error('Error creating customer:', customerCreateError);
-        return redirect(`${redirectTo}?error=customer_creation_failed`);
+        console.error('Customer create error details:', JSON.stringify(customerCreateError, null, 2));
+        console.error('Attempted to insert:', {
+          auth_user_id: authUserId,
+          email: customerEmail,
+          stripe_customer_id: stripeCustomerId,
+          is_guest: false,
+        });
+        return redirect(`${redirectTo}?error=customer_creation_failed&details=${encodeURIComponent(customerCreateError?.message || 'unknown')}`);
       }
 
       customerId = newCustomer.id;
