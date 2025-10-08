@@ -180,6 +180,26 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
     }
 
+    // Resolve time window ID if it's a label instead of UUID
+    let resolvedTimeWindowId = pickupTimeWindowId;
+
+    // Check if pickupTimeWindowId is a UUID (contains hyphens) or a label
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pickupTimeWindowId || '');
+
+    if (!isUUID && pickupTimeWindowId) {
+      // It's a label like "morning", "afternoon", "evening" - look up the ID
+      const { data: timeWindow } = await supabase
+        .from('time_windows')
+        .select('id')
+        .eq('label', pickupTimeWindowId)
+        .single();
+
+      if (timeWindow) {
+        resolvedTimeWindowId = timeWindow.id;
+        console.log('[create-order] Resolved time window label to ID:', pickupTimeWindowId, '->', resolvedTimeWindowId);
+      }
+    }
+
     // Calculate estimated pricing
     let estimatedTotal = estimatedAmount || 3375; // Default $33.75 in cents
 
@@ -190,7 +210,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       service_type: serviceType,
       plan_type: planType || orderType,
       pickup_date: pickupDate,
-      pickup_time_window_id: pickupTimeWindowId,
+      pickup_time_window_id: resolvedTimeWindowId,
       subtotal_cents: estimatedTotal,
       total_cents: estimatedTotal,
       status: 'scheduled',
@@ -205,7 +225,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         service_type: serviceType,
         plan_type: planType || orderType,
         pickup_date: pickupDate,
-        pickup_time_window_id: pickupTimeWindowId,
+        pickup_time_window_id: resolvedTimeWindowId,
         notes: notes,
         preferences: preferences,
         addons: addons,
