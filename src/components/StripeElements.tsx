@@ -210,11 +210,19 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         console.log('[StripeElements] Order data:', (window as any).orderData);
 
         // Direct redirect - handle it here instead of relying on callback
-        if ((window as any).orderData?.magicLink) {
-          console.log('[StripeElements] Redirecting to magic link:', (window as any).orderData.magicLink);
-          window.location.href = (window as any).orderData.magicLink;
+        const orderData = (window as any).orderData;
+        console.log('[StripeElements] Full order data for redirect:', orderData);
+
+        if (orderData?.magicLink) {
+          console.log('[StripeElements] Redirecting to magic link:', orderData.magicLink);
+          window.location.href = orderData.magicLink;
+        } else if (orderData?.orderId && orderData?.accessToken) {
+          // Fallback: construct the URL manually
+          const fallbackUrl = `${window.location.origin}/orders/${orderData.orderId}?token=${orderData.accessToken}`;
+          console.log('[StripeElements] No magic link, using fallback URL:', fallbackUrl);
+          window.location.href = fallbackUrl;
         } else {
-          console.log('[StripeElements] No magic link found, redirecting to /confirm');
+          console.error('[StripeElements] No order data available for redirect!', orderData);
           window.location.href = '/confirm';
         }
       } else {

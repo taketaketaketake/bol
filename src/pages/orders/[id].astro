@@ -13,8 +13,11 @@ const token = Astro.url.searchParams.get('token');
 
 // Validate required parameters
 if (!id || !token) {
+  console.error('[orders/id] Missing parameters:', { id, token });
   return Astro.redirect('/404');
 }
+
+console.log('[orders/id] Looking up order:', { id, token });
 
 // Fetch order with token validation
 const { data: order, error } = await supabase
@@ -39,9 +42,13 @@ const { data: order, error } = await supabase
   .eq('access_token', token)
   .single();
 
+console.log('[orders/id] Query result:', { order: !!order, error });
+
 // Check if order exists and token is valid
 if (!order || error) {
-  console.error('Order not found or invalid token:', error);
+  console.error('[orders/id] Order not found or invalid token:', error);
+  console.error('[orders/id] Searched for order ID:', id);
+  console.error('[orders/id] With token:', token);
   return Astro.redirect('/404');
 }
 
