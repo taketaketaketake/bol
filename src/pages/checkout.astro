@@ -394,10 +394,17 @@ const description = "Review your laundry service order and complete your booking
                   planType: w.orderType,
                   customerName: w.customer?.fullName || '',
                   customerEmail: w.customer?.email || '',
-                  customerPhone: w.customer?.phone || '',
-                  pickupAddress: w.pickup?.address || '',
-                  pickupDate: w.pickup?.date || '',
-                  pickupTimeWindowId: w.pickup?.timeWindowId || '',
+                  customerPhone: w.phone || '',
+                  pickupAddress: {
+                    line1: w.address?.line1 || '',
+                    postal: w.address?.postal || ''
+                  },
+                  deliveryAddress: w.dropoffAddress ? {
+                    line1: w.dropoffAddress.line1 || '',
+                    date: w.dropoffAddress.date || ''
+                  } : null,
+                  pickupDate: w.date || '',
+                  pickupTimeWindowId: w.timeWindow || '',
                   notes: w.addonPrefs?.notes || '',
                   preferences: w.addonPrefs || {},
                   addons: w.addons || [],
