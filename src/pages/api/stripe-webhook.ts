@@ -20,11 +20,21 @@ const supabaseAdmin = createClient(
   }
 );
 
+// Validate configuration on startup
+console.log('[Webhook] Supabase URL configured:', !!import.meta.env.PUBLIC_SUPABASE_URL);
+console.log('[Webhook] Service role key configured:', !!import.meta.env.SUPABASE_SERVICE_ROLE_KEY);
+console.log('[Webhook] Stripe webhook secret configured:', !!endpointSecret);
+
 export const POST: APIRoute = async ({ request }) => {
+  console.log('[Webhook] ========== NEW WEBHOOK REQUEST ==========');
+  console.log('[Webhook] Time:', new Date().toISOString());
+
   const sig = request.headers.get('stripe-signature');
 
   if (!sig || !endpointSecret) {
-    console.error('Missing stripe signature or webhook secret');
+    console.error('[Webhook] Missing stripe signature or webhook secret');
+    console.error('[Webhook] Has signature:', !!sig);
+    console.error('[Webhook] Has endpoint secret:', !!endpointSecret);
     return new Response('Webhook signature verification failed', { status: 400 });
   }
 
@@ -32,9 +42,13 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const body = await request.text();
+    console.log('[Webhook] Body length:', body.length);
     event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+    console.log('[Webhook] ✅ Signature verified successfully');
+    console.log('[Webhook] Event type:', event.type);
+    console.log('[Webhook] Event ID:', event.id);
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+    console.error('[Webhook] ❌ Signature verification failed:', err);
     return new Response('Webhook signature verification failed', { status: 400 });
   }
 
