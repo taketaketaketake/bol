@@ -1,12 +1,24 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 });
 
 const endpointSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
+
+// Create Supabase admin client for webhooks (bypasses RLS)
+const supabaseAdmin = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
 
 export const POST: APIRoute = async ({ request }) => {
   const sig = request.headers.get('stripe-signature');
@@ -129,7 +141,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   try {
     // Check if membership already exists
-    const { data: existingMembership } = await supabase
+    const { data: existingMembership } = await supabaseAdmin
       .from('memberships')
       .select('id')
       .eq('customer_id', customerId)
@@ -148,7 +160,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     endDate.setMonth(endDate.getMonth() + 6);
 
     // Create membership record
-    const { data: newMembership, error: insertError } = await supabase
+    const { data: newMembership, error: insertError } = await supabaseAdmin
       .from('memberships')
       .insert({
         customer_id: customerId,
@@ -190,7 +202,7 @@ async function handleSubscriptionPayment(invoice: Stripe.Invoice) {
 
   try {
     // Find membership by subscription ID
-    const { data: membership, error: fetchError } = await supabase
+    const { data: membership, error: fetchError } = await supabaseAdmin
       .from('memberships')
       .select('id, end_date')
       .eq('stripe_subscription_id', subscriptionId)
@@ -206,7 +218,7 @@ async function handleSubscriptionPayment(invoice: Stripe.Invoice) {
     const newEndDate = new Date(currentEndDate);
     newEndDate.setMonth(newEndDate.getMonth() + 6);
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('memberships')
       .update({
         end_date: newEndDate.toISOString().split('T')[0],
@@ -231,7 +243,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   try {
     // Find membership by subscription ID
-    const { data: membership, error: fetchError } = await supabase
+    const { data: membership, error: fetchError } = await supabaseAdmin
       .from('memberships')
       .select('id')
       .eq('stripe_subscription_id', subscription.id)
@@ -253,7 +265,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     }
 
     // Update membership status
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('memberships')
       .update({
         status,
@@ -277,7 +289,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
   try {
     // Find membership by subscription ID
-    const { data: membership, error: fetchError } = await supabase
+    const { data: membership, error: fetchError } = await supabaseAdmin
       .from('memberships')
       .select('id')
       .eq('stripe_subscription_id', subscription.id)
@@ -289,7 +301,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     }
 
     // Mark membership as canceled
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('memberships')
       .update({
         status: 'canceled',
