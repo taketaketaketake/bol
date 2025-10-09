@@ -18,7 +18,7 @@ export default function SiteFooter() {
             <div className="space-y-2 text-sm">
               <p className="flex items-center gap-2">
                 <span>📞</span>
-                <a href="tel:+18559274224" className="text-gray-400 hover:text-white">(855) 927-4224</a>
+                <a href="tel:+18559274224" className="text-gray-400 hover:text-white">855&nbsp;WASH-BAGS</a>
               </p>
               <p className="flex items-center gap-2">
                 <span>✉️</span>
@@ -26,6 +26,7 @@ export default function SiteFooter() {
               </p>
             </div>
           </div>
+
 
           {/* Quick Links */}
           <div>
