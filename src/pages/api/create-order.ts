@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
-import { generateAccessToken, generateTokenExpiration, generateMagicLink, sendOrderConfirmationEmail } from '../../utils/guest-auth';
 import { checkMembershipStatus } from '../../utils/membership';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
@@ -43,10 +42,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       addons = [],
       addonPrefs = {},
       estimatedAmount,
-      authUserId // Pass this from the frontend if authenticated
+      authUserId // Required - no guest orders
     } = body;
 
-    // Require authentication
+    // Require authentication - no guest orders allowed
+    // Defense-in-depth: Even though checkout.astro enforces auth,
+    // APIs should validate their own inputs to protect against:
+    // - Direct API calls bypassing the UI
+    // - Future refactoring changes
+    // - Developer errors
     if (!authUserId) {
       console.error('[create-order] Unauthenticated request');
       return new Response(
@@ -80,19 +84,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           { status: 403, headers: { 'Content-Type': 'application/json' } }
         );
       }
-    } else if (isPerBagOrder && !authUserId) {
-      // Guest users trying to use per-bag pricing
-      return new Response(
-        JSON.stringify({
-          error: 'Per-bag pricing is only available to members. Please sign in or choose per-pound pricing.'
-        }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } }
-      );
     }
-
-    // Generate secure access token
-    const accessToken = generateAccessToken();
-    const tokenExpiresAt = generateTokenExpiration();
 
     // Find or create customer record for authenticated user
     let customer;
@@ -123,8 +115,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         auth_user_id: authUserId,
         full_name: customerName,
         email: customerEmail,
-        phone: customerPhone,
-        is_guest: false
+        phone: customerPhone
       });
 
       const { data: newCustomer, error: customerError } = await supabase
@@ -133,8 +124,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           auth_user_id: authUserId,
           full_name: customerName,
           email: customerEmail,
-          phone: customerPhone,
-          is_guest: false
+          phone: customerPhone
+          // is_guest defaults to false in database - no need to set explicitly
         })
         .select()
         .single();
@@ -173,7 +164,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     if (!isUUID && pickupTimeWindowId) {
       // It's a label like "morning", "afternoon", "evening" - look up the ID
-      // Use case-insensitive search with ilike
       console.log('[create-order] Looking up time window for label:', pickupTimeWindowId);
 
       const { data: timeWindow, error: timeWindowError } = await supabase
@@ -235,8 +225,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         addons: addons,
         subtotal_cents: estimatedTotal,
         total_cents: estimatedTotal,
-        access_token: accessToken,
-        token_expires_at: tokenExpiresAt.toISOString(),
         status: 'scheduled',
         payment_status: 'requires_payment',
         // Pickup address
@@ -251,6 +239,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         dropoff_address_city: deliveryAddress?.city,
         dropoff_address_state: deliveryAddress?.state,
         dropoff_address_postal_code: deliveryAddress?.postal_code
+        // No access_token or token_expires_at - guest auth removed
       })
       .select()
       .single();
@@ -270,28 +259,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     console.log('[create-order] Order created successfully:', order.id);
 
-    // Generate magic link using the request origin
-    const origin = new URL(request.url).origin;
-    const baseUrl = origin || import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
-    const magicLink = generateMagicLink(order.id, accessToken, baseUrl);
-
-    // Send confirmation email
-    const emailSent = await sendOrderConfirmationEmail(
-      customerEmail,
-      customerName || 'Valued Customer',
-      order.id,
-      magicLink,
-      `$${(estimatedTotal / 100).toFixed(2)}`
-    );
-
+    // Return order ID for redirect - no magic links needed
     return new Response(
       JSON.stringify({
         success: true,
         orderId: order.id,
-        accessToken: accessToken,
-        magicLink: magicLink,
-        emailSent: emailSent,
-        message: 'Order created successfully! Check your email for the order details.'
+        message: 'Order created successfully!'
       }),
       {
         status: 200,

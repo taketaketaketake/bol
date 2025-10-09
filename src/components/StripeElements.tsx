@@ -14,7 +14,6 @@ interface PaymentFormProps {
   amount: number;
   addMembership: boolean;
   orderDetails: any;
-  onPaymentSuccess: (paymentIntent: any) => void;
   onPaymentError: (error: string) => void;
 }
 
@@ -22,7 +21,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   amount,
   addMembership,
   orderDetails,
-  onPaymentSuccess,
   onPaymentError
 }) => {
   const stripe = useStripe();
@@ -31,10 +29,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [currentAmount, setCurrentAmount] = useState(amount);
   const [membershipSelected, setMembershipSelected] = useState(addMembership);
+  const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Create payment intent only once when component mounts
-    createPaymentIntent();
+    // Create order and payment intent when component mounts
+    createOrderAndPaymentIntent();
   }, []); // Empty dependency array - only run once on mount
 
   useEffect(() => {
@@ -52,9 +51,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     };
   }, []);
 
-  const createPaymentIntent = async () => {
+  const createOrderAndPaymentIntent = async () => {
     try {
-      // Step 1: Create the guest order first
+      // Step 1: Create the order first
       const orderResponse = await fetch('/api/create-order', {
         method: 'POST',
         headers: {
@@ -80,9 +79,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       });
 
       if (!orderResponse.ok) {
-        // Log the full response for debugging
         const errorText = await orderResponse.text();
-        console.error('Order creation failed:', {
+        console.error('[StripeElements] Order creation failed:', {
           status: orderResponse.status,
           statusText: orderResponse.statusText,
           body: errorText
@@ -103,13 +101,15 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       const orderData = await orderResponse.json();
 
       if (!orderData.success) {
-        console.error('Order creation failed:', orderData);
+        console.error('[StripeElements] Order creation failed:', orderData);
         onPaymentError(orderData.error || 'Failed to create order');
         return;
       }
 
-      // Store order data globally for redirect after payment
-      (window as any).orderData = orderData;
+      // Store order ID for redirect after successful payment
+      const createdOrderId = orderData.orderId;
+      setOrderId(createdOrderId);
+      console.log('[StripeElements] Order created:', createdOrderId);
 
       // Step 2: Create payment intent for the order
       const paymentResponse = await fetch('/api/create-payment-intent', {
@@ -122,7 +122,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           addMembership: membershipSelected,
           orderDetails: {
             ...orderDetails,
-            orderId: orderData.orderId
+            orderId: createdOrderId
           }
         }),
       });
@@ -147,6 +147,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         };
       }
     } catch (error) {
+      console.error('[StripeElements] Error initializing payment:', error);
       onPaymentError('Failed to initialize payment');
     }
   };
@@ -169,10 +170,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
     if (membershipSelected) {
       // For subscription payments, use confirmPayment
+      // Note: Stripe handles the redirect for subscriptions requiring additional actions
       const result = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/confirm`, // Subscription confirmation page
+          return_url: `${window.location.origin}/orders/${orderId}`, // Redirect to order detail
         },
         redirect: 'if_required',
       });
@@ -183,7 +185,16 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         onPaymentError(result.error.message || 'Payment failed');
       } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
         // Subscription payment succeeded
-        onPaymentSuccess(result.paymentIntent);
+        console.log('[StripeElements] Subscription payment succeeded');
+        
+        // Redirect to order detail page
+        if (orderId) {
+          console.log('[StripeElements] Redirecting to order page:', orderId);
+          window.location.href = `/orders/${orderId}`;
+        } else {
+          console.error('[StripeElements] No order ID available for redirect');
+          window.location.href = '/dashboard?error=order-not-found';
+        }
       }
     } else {
       // For regular payments, use confirmCardPayment
@@ -204,26 +215,17 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       if (result.error) {
         console.error('[StripeElements] Stripe payment error:', result.error);
         onPaymentError(result.error.message || 'Payment failed');
-      } else if (result.paymentIntent) {
+      } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
         console.log('[StripeElements] Payment succeeded!', result.paymentIntent);
-        console.log('[StripeElements] Payment status:', result.paymentIntent.status);
-        console.log('[StripeElements] Order data:', (window as any).orderData);
-
-        // Direct redirect - handle it here instead of relying on callback
-        const orderData = (window as any).orderData;
-        console.log('[StripeElements] Full order data for redirect:', orderData);
-
-        if (orderData?.magicLink) {
-          console.log('[StripeElements] Redirecting to magic link:', orderData.magicLink);
-          window.location.href = orderData.magicLink;
-        } else if (orderData?.orderId && orderData?.accessToken) {
-          // Fallback: construct the URL manually
-          const fallbackUrl = `${window.location.origin}/orders/${orderData.orderId}?token=${orderData.accessToken}`;
-          console.log('[StripeElements] No magic link, using fallback URL:', fallbackUrl);
-          window.location.href = fallbackUrl;
+        
+        // Redirect to order detail page using the orderId from state
+        if (orderId) {
+          console.log('[StripeElements] Redirecting to order page:', orderId);
+          window.location.href = `/orders/${orderId}`;
         } else {
-          console.error('[StripeElements] No order data available for redirect!', orderData);
-          window.location.href = '/confirm';
+          console.error('[StripeElements] No order ID available for redirect');
+          // Fallback to dashboard with error message
+          window.location.href = '/dashboard?error=order-not-found';
         }
       } else {
         console.error('[StripeElements] Unknown payment result:', result);
@@ -248,7 +250,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" data-stripe-elements>
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="p-4 border border-gray-300 rounded-xl bg-white">
         <CardElement options={cardElementOptions} />
       </div>
@@ -272,6 +274,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
                 r="10"
                 stroke="currentColor"
                 strokeWidth="4"
+                fill="none"
               />
               <path
                 className="opacity-75"
@@ -302,7 +305,6 @@ interface StripeElementsProps {
   amount: number;
   addMembership: boolean;
   orderDetails: any;
-  onPaymentSuccess: (paymentIntent: any) => void;
   onPaymentError: (error: string) => void;
 }
 

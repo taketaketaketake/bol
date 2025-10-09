@@ -390,6 +390,7 @@ const description = "Review your laundry service order and complete your booking
               <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
 
               <!-- Stripe Elements -->
+              <!-- AFTER (removed onPaymentSuccess): -->
               <StripeElements
                 client:load
                 amount={totals.grandTotalCents}
@@ -417,15 +418,6 @@ const description = "Review your laundry service order and complete your booking
                   serviceType: 'wash_fold',
                   estimatedAmount: totals.grandTotalCents,
                   authUserId: authUserId
-                }}
-                onPaymentSuccess={(paymentIntent) => {
-                  console.log('Payment successful:', paymentIntent);
-                  // Redirect to the order view page using the token
-                  if (window.orderData) {
-                    window.location.href = window.orderData.magicLink;
-                  } else {
-                    window.location.href = '/confirm';
-                  }
                 }}
                 onPaymentError={(error) => {
                   console.error('Payment error:', error);

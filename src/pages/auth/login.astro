@@ -70,6 +70,10 @@ if (session && !hasHashFragment) {
       const refresh_token = params.get('refresh_token');
 
       if (access_token && refresh_token) {
+        // Check if there's a redirect parameter from the original login attempt
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectTo = urlParams.get('redirect') || '/dashboard';
+
         // Send tokens to server to set session cookies
         fetch('/api/auth/set-session', {
           method: 'POST',
@@ -77,7 +81,8 @@ if (session && !hasHashFragment) {
           body: JSON.stringify({ access_token, refresh_token })
         }).then(res => {
           if (res.ok) {
-            window.location.href = '/dashboard';
+            // Redirect to the original destination
+            window.location.href = redirectTo;
           }
         }).catch(err => {
           console.error('Session error:', err);
