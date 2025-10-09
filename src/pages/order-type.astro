@@ -39,23 +39,30 @@ if (!w.address || !w.date || !w.phone) {
 // Check real membership status from database
 let isMember = false;
 const session = await getSession(Astro.cookies);
+
 if (session?.user?.id) {
-  // Create authenticated Supabase client with user session
-  const { createClient } = await import('@supabase/supabase-js');
-  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  console.log('[Order-Type] Session found, user ID:', session.user.id);
 
-  const authenticatedClient = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${Astro.cookies.get('sb-access-token')?.value || ''}`
-      }
-    }
-  });
+  // Create Supabase client and set session properly
+  const { supabase } = await import('../lib/supabase');
 
-  isMember = await checkMembershipStatus(session.user.id, authenticatedClient);
-  console.log('[Order-Type] User ID:', session.user.id);
-  console.log('[Order-Type] Is Member:', isMember);
+  const sbAccessToken = Astro.cookies.get('sb-access-token')?.value;
+  const sbRefreshToken = Astro.cookies.get('sb-refresh-token')?.value;
+
+  if (sbAccessToken && sbRefreshToken) {
+    await supabase.auth.setSession({
+      access_token: sbAccessToken,
+      refresh_token: sbRefreshToken
+    });
+
+    console.log('[Order-Type] Session set on Supabase client');
+
+    // Check membership
+    isMember = await checkMembershipStatus(session.user.id, supabase);
+    console.log('[Order-Type] Membership check result:', isMember);
+  } else {
+    console.log('[Order-Type] Missing auth tokens in cookies');
+  }
 } else {
   console.log('[Order-Type] No session found');
 }
