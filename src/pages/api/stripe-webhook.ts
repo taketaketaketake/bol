@@ -29,6 +29,11 @@ export const POST: APIRoute = async ({ request }) => {
   // Handle the event
   try {
     switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutCompleted(session);
+        break;
+
       case 'payment_intent.succeeded':
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         await handlePaymentSuccess(paymentIntent);
@@ -98,6 +103,76 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
   // - Log the failure
   // - Notify customer
   // - Update order status
+}
+
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  console.log('[Webhook] Checkout completed:', session.id);
+  console.log('[Webhook] Mode:', session.mode);
+  console.log('[Webhook] Metadata:', session.metadata);
+
+  // Only handle subscription checkouts (membership signups)
+  if (session.mode !== 'subscription') {
+    console.log('[Webhook] Not a subscription, skipping');
+    return;
+  }
+
+  const customerId = session.metadata?.customer_id;
+  const authUserId = session.metadata?.auth_user_id;
+  const subscriptionId = typeof session.subscription === 'string'
+    ? session.subscription
+    : session.subscription?.id;
+
+  if (!customerId || !authUserId || !subscriptionId) {
+    console.error('[Webhook] Missing required metadata:', { customerId, authUserId, subscriptionId });
+    return;
+  }
+
+  try {
+    // Check if membership already exists
+    const { data: existingMembership } = await supabase
+      .from('memberships')
+      .select('id')
+      .eq('customer_id', customerId)
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle();
+
+    if (existingMembership) {
+      console.log('[Webhook] Membership already exists for customer:', customerId);
+      return;
+    }
+
+    // Calculate dates
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + 6);
+
+    // Create membership record
+    const { data: newMembership, error: insertError } = await supabase
+      .from('memberships')
+      .insert({
+        customer_id: customerId,
+        stripe_subscription_id: subscriptionId,
+        status: 'active',
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('[Webhook] Error creating membership:', insertError);
+      return;
+    }
+
+    console.log('[Webhook] Membership created successfully:', newMembership.id);
+    console.log('[Webhook] Active until:', endDate.toISOString().split('T')[0]);
+
+  } catch (error) {
+    console.error('[Webhook] Error handling checkout completion:', error);
+  }
 }
 
 async function handleSubscriptionPayment(invoice: Stripe.Invoice) {

@@ -1,0 +1,162 @@
+---
+export const prerender = false;
+import Layout from '../../layout/Layout.astro';
+import { getSession } from '../../utils/auth';
+
+const { url } = Astro;
+const sessionId = url.searchParams.get('session_id');
+
+// Get user session
+const session = await getSession(Astro.cookies);
+
+if (!session?.user?.id) {
+  return Astro.redirect('/auth/login?redirect=/membership/success');
+}
+
+// TODO: Verify the Stripe checkout session and create membership in database
+// For now, we'll just show the success message
+
+const title = "Welcome to Membership! | Bags of Laundry";
+const description = "Your membership is now active. Start saving on every order!";
+---
+
+<Layout title={title} description={description} noIndex={true}>
+  <main class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 py-16">
+    <div class="max-w-2xl mx-auto px-4">
+      
+      <!-- Success Card -->
+      <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-green-500 to-blue-600 text-white text-center py-8 px-6">
+          <div class="text-6xl mb-4">🎉</div>
+          <h1 class="text-3xl md:text-4xl font-bold mb-2">
+            Welcome to the Club!
+          </h1>
+          <p class="text-lg text-blue-50">
+            Your membership is now active
+          </p>
+        </div>
+
+        <!-- Content -->
+        <div class="p-8">
+          
+          <!-- Confirmation -->
+          <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-8">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h2 class="font-semibold text-gray-900 text-lg mb-2">Payment Confirmed</h2>
+                <p class="text-sm text-gray-700 mb-2">
+                  Thank you for joining! Your membership is active for the next 6 months.
+                </p>
+                {sessionId && (
+                  <p class="text-xs text-gray-500">
+                    Confirmation: {sessionId.slice(0, 20)}...
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <!-- Benefits Reminder -->
+          <div class="mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Your Member Benefits</h2>
+            <div class="space-y-3">
+              <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                <span class="text-2xl">💰</span>
+                <div>
+                  <h3 class="font-semibold text-gray-900">Save $0.50/lb</h3>
+                  <p class="text-sm text-gray-600">Pay just $1.75/lb instead of $2.25/lb</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
+                <span class="text-2xl">🎒</span>
+                <div>
+                  <h3 class="font-semibold text-gray-900">Per-Bag Pricing Unlocked</h3>
+                  <p class="text-sm text-gray-600">Choose from $35, $55, or $85 fixed-price bags</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
+                <span class="text-2xl">⭐</span>
+                <div>
+                  <h3 class="font-semibold text-gray-900">Priority Booking</h3>
+                  <p class="text-sm text-gray-600">Get first access to premium time slots</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- What's Next -->
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6 mb-8">
+            <h2 class="font-semibold text-gray-900 mb-3">📋 What's Next?</h2>
+            <ol class="space-y-2 text-sm text-gray-700">
+              <li class="flex items-start gap-2">
+                <span class="font-semibold text-blue-600">1.</span>
+                <span>You'll receive a confirmation email with your membership details</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="font-semibold text-blue-600">2.</span>
+                <span>Place your first order and start saving immediately</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="font-semibold text-blue-600">3.</span>
+                <span>Enjoy member pricing for the next 6 months</span>
+              </li>
+            </ol>
+          </div>
+
+          <!-- Actions -->
+          <div class="space-y-3">
+            <a
+              href="/start-basic"
+              class="block w-full py-4 px-6 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-xl font-bold text-center hover:from-orange-600 hover:to-blue-700 transition-all shadow-lg"
+            >
+              Place Your First Order
+            </a>
+
+            <a
+              href="/dashboard"
+              class="block w-full py-4 px-6 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-semibold text-center hover:bg-gray-50 hover:border-gray-400 transition-all"
+            >
+              Go to Dashboard
+            </a>
+          </div>
+
+          <!-- Support -->
+          <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+            <p class="text-sm text-gray-600 mb-2">
+              Questions about your membership?
+            </p>
+            <a href="mailto:support@bagsoflaundry.com" class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+              Contact Support
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Info -->
+      <div class="mt-8 text-center">
+        <p class="text-sm text-gray-600">
+          Your membership will automatically renew after 6 months unless cancelled.
+          <br>
+          You can cancel anytime from your account settings.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Optional: Track conversion for analytics
+    console.log('Membership signup successful');
+    
+    // You can add analytics tracking here, e.g.:
+    // gtag('event', 'purchase', { value: 49.99, currency: 'USD' });
+  </script>
+</Layout>
