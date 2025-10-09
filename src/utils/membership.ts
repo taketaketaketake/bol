@@ -29,11 +29,13 @@ export async function checkMembershipStatus(authUserId: string, supabaseClient: 
     }
 
     // Check for an active membership
+    // Use .limit(1).maybeSingle() to handle multiple memberships gracefully
     const { data: membership, error: membershipError } = await supabaseClient
       .from('memberships')
       .select('status, end_date')
       .eq('customer_id', customer.id)
       .eq('status', 'active')
+      .limit(1)
       .maybeSingle();
 
     console.log('[checkMembershipStatus] Membership lookup:', { membership, membershipError });
@@ -64,14 +66,15 @@ export async function checkMembershipStatus(authUserId: string, supabaseClient: 
 /**
  * Get full membership details for a user
  * @param authUserId - The Supabase auth user ID
+ * @param supabaseClient - Authenticated Supabase client
  * @returns Membership object or null
  */
-export async function getMembershipDetails(authUserId: string) {
+export async function getMembershipDetails(authUserId: string, supabaseClient: SupabaseClient) {
   if (!authUserId) return null;
 
   try {
     // Get customer record
-    const { data: customer, error: customerError } = await supabase
+    const { data: customer, error: customerError } = await supabaseClient
       .from('customers')
       .select('id')
       .eq('auth_user_id', authUserId)
@@ -81,12 +84,13 @@ export async function getMembershipDetails(authUserId: string) {
       return null;
     }
 
-    // Get active membership
-    const { data: membership, error: membershipError } = await supabase
+    // Get active membership (handle multiple memberships)
+    const { data: membership, error: membershipError } = await supabaseClient
       .from('memberships')
       .select('*')
       .eq('customer_id', customer.id)
       .eq('status', 'active')
+      .limit(1)
       .maybeSingle();
 
     if (membershipError) {

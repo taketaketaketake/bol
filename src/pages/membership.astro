@@ -2,13 +2,25 @@
 import Layout from '../layout/Layout.astro';
 import { getSession } from '../utils/auth';
 import { checkMembershipStatus } from '../utils/membership';
+import { supabase } from '../lib/supabase';
 
 let isMember = false;
 let userEmail = '';
 const session = await getSession(Astro.cookies);
 
 if (session?.user?.id) {
-  isMember = await checkMembershipStatus(session.user.id);
+  // Set session on Supabase client
+  const sbAccessToken = Astro.cookies.get('sb-access-token')?.value;
+  const sbRefreshToken = Astro.cookies.get('sb-refresh-token')?.value;
+
+  if (sbAccessToken && sbRefreshToken) {
+    await supabase.auth.setSession({
+      access_token: sbAccessToken,
+      refresh_token: sbRefreshToken
+    });
+  }
+
+  isMember = await checkMembershipStatus(session.user.id, supabase);
   userEmail = session.user.email || '';
 }
 ---

@@ -1,14 +1,14 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 });
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const body = await request.json();
-    const { email } = body;
+    const { email } = await request.json();
 
     if (!email) {
       return new Response(
@@ -17,64 +17,125 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const origin = new URL(request.url).origin;
+    // Get authenticated user session
+    const sbAccessToken = cookies.get('sb-access-token')?.value;
+    const sbRefreshToken = cookies.get('sb-refresh-token')?.value;
 
-    // Check if customer already exists
-    let customer;
+    if (!sbAccessToken || !sbRefreshToken) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create Supabase client with user session
+    const supabase = createClient(
+      import.meta.env.PUBLIC_SUPABASE_URL,
+      import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.setSession({
+      access_token: sbAccessToken,
+      refresh_token: sbRefreshToken
+    });
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid session' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get customer record
+    const { data: customer, error: customerError } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('auth_user_id', user.id)
+      .single();
+
+    if (customerError || !customer) {
+      return new Response(
+        JSON.stringify({ error: 'Customer record not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // ✅ CHECK FOR EXISTING ACTIVE MEMBERSHIP
+    const { data: existingMembership, error: membershipCheckError } = await supabase
+      .from('memberships')
+      .select('id, status, start_date, end_date')
+      .eq('customer_id', customer.id)
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle();
+
+    if (membershipCheckError) {
+      console.error('[create-membership-payment-intent] Error checking membership:', membershipCheckError);
+    }
+
+    if (existingMembership) {
+      console.log('[create-membership-payment-intent] User already has active membership');
+      return new Response(
+        JSON.stringify({
+          error: 'You already have an active membership',
+          existingMembership: true
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Find or create Stripe customer
+    let stripeCustomer;
     const existingCustomers = await stripe.customers.list({
       email: email,
       limit: 1,
     });
 
     if (existingCustomers.data.length > 0) {
-      customer = existingCustomers.data[0];
+      stripeCustomer = existingCustomers.data[0];
     } else {
-      // Create new customer
-      customer = await stripe.customers.create({
+      stripeCustomer = await stripe.customers.create({
         email: email,
         metadata: {
-          source: 'membership_signup',
+          supabase_customer_id: customer.id,
+          auth_user_id: user.id
         },
       });
     }
 
-    // Create Stripe Checkout Session for subscription
+    // Create Stripe Checkout Session for membership
     const session = await stripe.checkout.sessions.create({
-      customer: customer.id,
+      customer: stripeCustomer.id,
       mode: 'subscription',
-      payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Bags of Laundry 6-Month Membership',
-              description: 'Save $0.50/lb on every order + unlock per-bag pricing options',
+              name: 'Bags of Laundry - 6 Month Membership',
+              description: 'Save $0.50/lb + unlock per-bag pricing',
             },
+            unit_amount: 4999, // $49.99
             recurring: {
               interval: 'month',
               interval_count: 6,
             },
-            unit_amount: 4999, // $49.99
           },
           quantity: 1,
         },
       ],
-      subscription_data: {
-        metadata: {
-          membershipType: '6_month',
-          source: 'direct_signup',
-        },
+      success_url: `${new URL(request.url).origin}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${new URL(request.url).origin}/membership?canceled=true`,
+      metadata: {
+        customer_id: customer.id,
+        auth_user_id: user.id,
       },
-      success_url: `${origin}/api/verify-membership-payment?session_id={CHECKOUT_SESSION_ID}&redirect=/order-type`,
-      cancel_url: `${origin}/membership?canceled=true`,
-      allow_promotion_codes: true,
     });
 
     return new Response(
       JSON.stringify({
-        sessionId: session.id,
         url: session.url,
+        sessionId: session.id
       }),
       {
         status: 200,
@@ -83,23 +144,18 @@ export const POST: APIRoute = async ({ request }) => {
     );
 
   } catch (error) {
-    console.error('Error creating membership checkout session:', error);
-
-    // Log detailed error info
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-    }
-
+    console.error('[create-membership-payment-intent] Error:', error);
     return new Response(
       JSON.stringify({
-        error: 'Failed to create membership checkout session',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to create checkout session',
+        details: error instanceof Error ? error.message : 'Unknown error',
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }
 };
+
+export const prerender = false;
