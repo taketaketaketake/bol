@@ -59,7 +59,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
                 </a>
                 <div className="flex items-center gap-2 text-sm text-brand-text">
                   <span>
-                    Hi, {session.user?.user_metadata?.first_name || session.user?.email?.split("@")[0]}!
+                    Hi, {session.user?.user_metadata?.full_name || session.user?.email?.split("@")[0]}!
                   </span>
                 </div>
                 <a href="/api/auth/signout" className="btn-ghost text-sm">Sign Out</a>
@@ -114,7 +114,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
                   Dashboard
                 </a>
                 <div className="text-sm text-brand-text">
-                  Hi, {session.user?.user_metadata?.first_name || session.user?.email?.split("@")[0]}!
+                  Hi, {session.user?.user_metadata?.full_name || session.user?.email?.split("@")[0]}!
                 </div>
                 <a href="/api/auth/signout" className="btn-ghost text-sm w-full text-left">Sign Out</a>
               </>

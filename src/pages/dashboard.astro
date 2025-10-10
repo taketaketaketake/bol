@@ -39,6 +39,12 @@ const upcomingPickups = dashboardData?.upcomingPickups || [];
 const orderHistory = dashboardData?.orderHistory || [];
 const stats = dashboardData?.stats || { totalOrders: 0, totalSpent: 0 };
 const membership = dashboardData?.membership || null;
+
+// Check for success/error messages from URL params
+const url = new URL(Astro.request.url);
+const cancelled = url.searchParams.get('cancelled');
+const refundAmount = url.searchParams.get('refund');
+const error = url.searchParams.get('error');
 ---
 
 <Layout title="Dashboard">
@@ -49,6 +55,48 @@ const membership = dashboardData?.membership || null;
         <h1 class="text-2xl sm:text-3xl font-bold text-brand-text">Dashboard</h1>
         <p class="text-sm text-brand-muted mt-1">{user.email}</p>
       </div>
+
+      <!-- Success Message -->
+      {cancelled && (
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-green-700 font-medium">Order cancelled successfully</p>
+              {refundAmount && (
+                <p class="text-sm text-green-600 mt-1">
+                  A refund of ${refundAmount} has been processed to your original payment method
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <!-- Error Message -->
+      {error && (
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p class="text-red-700 font-medium">
+              {error === 'order_not_found' && 'Order not found'}
+              {error === 'unauthorized' && 'You do not have permission to cancel this order'}
+              {error === 'cannot_cancel' && 'This order cannot be cancelled'}
+              {error === 'cancel_failed' && 'Failed to cancel order. Please try again.'}
+              {error === 'refund_failed' && 'Order cancelled but refund failed. Please contact support.'}
+              {error === 'unexpected' && 'An unexpected error occurred'}
+            </p>
+          </div>
+        </div>
+      )}
 
       <!-- Membership Banner -->
       {membership && (

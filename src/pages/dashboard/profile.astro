@@ -266,6 +266,7 @@ const userMetadata = user.user_metadata || {};
 
         if (res.ok) {
           alert('Profile updated successfully!');
+          window.location.reload(); // Reload to show updated name in header
         } else {
           alert('Failed to update profile');
         }
