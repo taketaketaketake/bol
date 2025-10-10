@@ -168,10 +168,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       return;
     }
 
-    // Calculate dates
+    // Calculate dates - use more reliable date math to avoid month overflow issues
     const startDate = new Date();
-    const endDate = new Date();
-    endDate.setMonth(endDate.getMonth() + 6);
+    const endDate = new Date(startDate);
+    // Add 6 months (approximately 182 days to be safe)
+    endDate.setDate(endDate.getDate() + 182);
 
     // Create membership record
     const { data: newMembership, error: insertError } = await supabaseAdmin
@@ -227,10 +228,10 @@ async function handleSubscriptionPayment(invoice: Stripe.Invoice) {
       return;
     }
 
-    // Extend membership by 6 months from current end_date
+    // Extend membership by 6 months (182 days) from current end_date
     const currentEndDate = new Date(membership.end_date);
     const newEndDate = new Date(currentEndDate);
-    newEndDate.setMonth(newEndDate.getMonth() + 6);
+    newEndDate.setDate(newEndDate.getDate() + 182);
 
     const { error: updateError } = await supabaseAdmin
       .from('memberships')
