@@ -100,16 +100,16 @@ const error = url.searchParams.get('error');
 
       <!-- Membership Banner -->
       {membership && (
-        <div class="bg-gradient-to-r from-brand-primary to-brand-accent text-white rounded-lg p-4 mb-6">
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow-sm p-4 mb-6">
           <div class="flex justify-between items-center">
             <div>
-              <h3 class="font-semibold">✨ Active Member</h3>
+              <h3 class="font-semibold text-lg">✨ Active Member</h3>
               <p class="text-sm opacity-90">Enjoy member pricing on all orders</p>
             </div>
             <div class="text-right">
               <p class="text-sm opacity-90">Expires</p>
               <p class="font-semibold">{new Date(membership.end_date).toLocaleDateString()}</p>
-              <p class="text-xs">{membership.daysRemaining} days left</p>
+              <p class="text-xs opacity-80">{membership.daysRemaining} days left</p>
             </div>
           </div>
         </div>
