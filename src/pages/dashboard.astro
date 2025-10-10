@@ -3,6 +3,8 @@ export const prerender = false;
 
 import Layout from '../layout/Layout.astro';
 import { supabase } from '../lib/supabase';
+import { getDashboardData } from '../utils/dashboard/customer';
+import { getStatusColor, getStatusLabel, formatCents, formatOrderId } from '../utils/orderHelpers';
 
 const { cookies } = Astro;
 const accessToken = cookies.get('sb-access-token');
@@ -24,21 +26,19 @@ if (!session) {
 
 const user = session.user;
 
-// Mock data - replace with real database queries later
-const activeOrders = [
-  { id: 1, status: 'In Progress', date: '2025-09-28', items: '15 lbs', total: '$22.50' },
-  { id: 2, status: 'Scheduled', date: '2025-09-30', items: '10 lbs', total: '$15.00' },
-];
+// Fetch real dashboard data
+const dashboardData = await getDashboardData(user.id, supabase);
 
-const upcomingPickups = [
-  { id: 1, date: '2025-10-01', time: 'Morning (8-12pm)', address: '123 Main St' },
-];
+if (!dashboardData) {
+  // Customer doesn't exist yet - redirect to profile setup or show empty state
+  console.warn('[Dashboard] No customer record found for user:', user.id);
+}
 
-const orderHistory = [
-  { id: 3, date: '2025-09-20', items: '12 lbs', total: '$18.00', status: 'Completed' },
-  { id: 4, date: '2025-09-15', items: '8 lbs', total: '$12.00', status: 'Completed' },
-  { id: 5, date: '2025-09-10', items: '20 lbs', total: '$30.00', status: 'Completed' },
-];
+const activeOrders = dashboardData?.activeOrders || [];
+const upcomingPickups = dashboardData?.upcomingPickups || [];
+const orderHistory = dashboardData?.orderHistory || [];
+const stats = dashboardData?.stats || { totalOrders: 0, totalSpent: 0 };
+const membership = dashboardData?.membership || null;
 ---
 
 <Layout title="Dashboard">
@@ -49,6 +49,41 @@ const orderHistory = [
         <h1 class="text-2xl sm:text-3xl font-bold text-brand-text">Dashboard</h1>
         <p class="text-sm text-brand-muted mt-1">{user.email}</p>
       </div>
+
+      <!-- Membership Banner -->
+      {membership && (
+        <div class="bg-gradient-to-r from-brand-primary to-brand-accent text-white rounded-lg p-4 mb-6">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-semibold">✨ Active Member</h3>
+              <p class="text-sm opacity-90">Enjoy member pricing on all orders</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm opacity-90">Expires</p>
+              <p class="font-semibold">{new Date(membership.end_date).toLocaleDateString()}</p>
+              <p class="text-xs">{membership.daysRemaining} days left</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <!-- Stats Cards -->
+      {stats.totalOrders > 0 && (
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <p class="text-sm text-brand-muted">Total Orders</p>
+            <p class="text-2xl font-bold text-brand-text">{stats.totalOrders}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <p class="text-sm text-brand-muted">Total Spent</p>
+            <p class="text-2xl font-bold text-brand-text">{formatCents(stats.totalSpent)}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <p class="text-sm text-brand-muted">Total Weight</p>
+            <p class="text-2xl font-bold text-brand-text">{stats.totalWeight.toFixed(1)} lbs</p>
+          </div>
+        </div>
+      )}
 
       <!-- Quick Actions -->
       <div class="mb-6">
@@ -72,22 +107,28 @@ const orderHistory = [
           </div>
           <div class="divide-y divide-gray-200">
             {activeOrders.map(order => (
-              <div class="p-4 hover:bg-gray-50 transition">
+              <a href={`/dashboard/orders/${order.id}`} class="block p-4 hover:bg-gray-50 transition">
                 <div class="flex justify-between items-start mb-2">
                   <div>
-                    <span class="text-sm font-medium text-brand-text">Order #{order.id}</span>
-                    <span class={`ml-2 inline-block px-2 py-1 text-xs rounded-full ${
-                      order.status === 'In Progress' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-                    }`}>
-                      {order.status}
+                    <span class="text-sm font-medium text-brand-text">{formatOrderId(order.id)}</span>
+                    <span class={`ml-2 inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
+                      {getStatusLabel(order.status)}
                     </span>
                   </div>
-                  <span class="text-sm font-semibold text-brand-text">{order.total}</span>
+                  <span class="text-sm font-semibold text-brand-text">
+                    {formatCents(order.total_cents || order.subtotal_cents)}
+                  </span>
                 </div>
                 <div class="text-sm text-brand-muted">
-                  {order.items} • {order.date}
+                  {order.service_type} • {new Date(order.pickup_date).toLocaleDateString()}
+                  {order.time_windows?.label && ` • ${order.time_windows.label}`}
                 </div>
-              </div>
+                {order.pickup_address_line1 && (
+                  <div class="text-xs text-brand-muted mt-1">
+                    {order.pickup_address_line1}, {order.pickup_address_city}
+                  </div>
+                )}
+              </a>
             ))}
           </div>
         </div>
@@ -101,18 +142,30 @@ const orderHistory = [
           </div>
           <div class="divide-y divide-gray-200">
             {upcomingPickups.map(pickup => (
-              <div class="p-4">
+              <a href={`/dashboard/orders/${pickup.id}`} class="block p-4 hover:bg-gray-50 transition">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-brand-primary mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-brand-text">{pickup.date}</div>
-                    <div class="text-sm text-brand-muted">{pickup.time}</div>
-                    <div class="text-sm text-brand-muted truncate">{pickup.address}</div>
+                    <div class="text-sm font-medium text-brand-text">
+                      {new Date(pickup.pickup_date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </div>
+                    <div class="text-sm text-brand-muted">
+                      {pickup.time_windows?.label || 'Time TBD'}
+                    </div>
+                    {pickup.pickup_address_line1 && (
+                      <div class="text-sm text-brand-muted truncate">
+                        {pickup.pickup_address_line1}
+                        {pickup.pickup_address_line2 && `, ${pickup.pickup_address_line2}`}
+                      </div>
+                    )}
+                    {pickup.notes && (
+                      <div class="text-xs text-brand-muted mt-1 italic">Note: {pickup.notes}</div>
+                    )}
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
@@ -126,23 +179,30 @@ const orderHistory = [
         {orderHistory.length > 0 ? (
           <div class="divide-y divide-gray-200">
             {orderHistory.map(order => (
-              <div class="p-4 hover:bg-gray-50 transition">
+              <a href={`/dashboard/orders/${order.id}`} class="block p-4 hover:bg-gray-50 transition">
                 <div class="flex justify-between items-center">
                   <div>
-                    <div class="text-sm font-medium text-brand-text">Order #{order.id}</div>
-                    <div class="text-sm text-brand-muted">{order.date} • {order.items}</div>
+                    <div class="text-sm font-medium text-brand-text">{formatOrderId(order.id)}</div>
+                    <div class="text-sm text-brand-muted">
+                      {new Date(order.pickup_date).toLocaleDateString()} • {order.service_type}
+                      {order.measured_weight_lb && ` • ${order.measured_weight_lb.toFixed(1)} lbs`}
+                    </div>
                   </div>
                   <div class="text-right">
-                    <div class="text-sm font-semibold text-brand-text">{order.total}</div>
-                    <div class="text-xs text-green-600">{order.status}</div>
+                    <div class="text-sm font-semibold text-brand-text">
+                      {formatCents(order.total_cents || order.subtotal_cents)}
+                    </div>
+                    <div class={`text-xs ${getStatusColor(order.status)}`}>
+                      {getStatusLabel(order.status)}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         ) : (
           <div class="p-8 text-center text-brand-muted">
-            <p class="text-sm">No orders yet</p>
+            <p class="text-sm">No completed orders yet</p>
             <a href="/start-basic" class="text-sm text-brand-primary hover:underline mt-2 inline-block">Schedule your first pickup</a>
           </div>
         )}

@@ -1,0 +1,352 @@
+---
+export const prerender = false;
+
+import Layout from '../../../layout/Layout.astro';
+import { supabase } from '../../../lib/supabase';
+import { getOrderById, getCustomerId } from '../../../utils/dashboard/customer';
+import {
+  getStatusColor,
+  getStatusLabel,
+  formatCents,
+  formatOrderId,
+  getOrderProgress,
+  getNextAction,
+  canCancelOrder,
+  canRescheduleOrder
+} from '../../../utils/orderHelpers';
+
+const { cookies } = Astro;
+const accessToken = cookies.get('sb-access-token');
+const refreshToken = cookies.get('sb-refresh-token');
+
+if (!accessToken || !refreshToken) {
+  return Astro.redirect('/auth/login');
+}
+
+// Set up Supabase client with cookies
+const { data: { session } } = await supabase.auth.setSession({
+  access_token: accessToken.value,
+  refresh_token: refreshToken.value
+});
+
+if (!session) {
+  return Astro.redirect('/auth/login');
+}
+
+const user = session.user;
+const orderId = Astro.params.id;
+
+if (!orderId) {
+  return Astro.redirect('/dashboard');
+}
+
+// Get customer ID to verify ownership
+const customerId = await getCustomerId(user.id, supabase);
+
+if (!customerId) {
+  return Astro.redirect('/dashboard');
+}
+
+// Fetch order details
+const order = await getOrderById(orderId, supabase);
+
+// Verify order exists and belongs to this customer
+if (!order || order.customer_id !== customerId) {
+  return Astro.redirect('/dashboard');
+}
+
+// Calculate if user can cancel or reschedule
+const canCancel = canCancelOrder(order.status, order.pickup_date);
+const canReschedule = canRescheduleOrder(order.status, order.pickup_date);
+const progress = getOrderProgress(order.status);
+const nextAction = getNextAction(order.status);
+
+// Format addresses
+const pickupAddress = [
+  order.pickup_address_line1,
+  order.pickup_address_line2,
+  `${order.pickup_address_city}, ${order.pickup_address_state} ${order.pickup_address_postal_code}`
+].filter(Boolean).join('\n');
+
+const deliveryAddress = order.delivery_address_line1 ? [
+  order.delivery_address_line1,
+  order.delivery_address_line2,
+  `${order.delivery_address_city}, ${order.delivery_address_state} ${order.delivery_address_postal_code}`
+].filter(Boolean).join('\n') : pickupAddress; // Default to pickup if same
+
+// Parse addons if present
+const addons = order.addons ? (Array.isArray(order.addons) ? order.addons : []) : [];
+---
+
+<Layout title={`Order ${formatOrderId(order.id)}`}>
+  <div class="min-h-screen bg-brand-bg">
+    <main class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <!-- Back Button -->
+      <div class="mb-4">
+        <a href="/dashboard" class="text-brand-primary hover:underline text-sm flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Dashboard
+        </a>
+      </div>
+
+      <!-- Header -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <h1 class="text-2xl sm:text-3xl font-bold text-brand-text">
+            {formatOrderId(order.id)}
+          </h1>
+          <span class={`px-3 py-1 text-sm rounded-full ${getStatusColor(order.status)}`}>
+            {getStatusLabel(order.status)}
+          </span>
+        </div>
+        <p class="text-sm text-brand-muted">{nextAction}</p>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        <div class="mb-2">
+          <span class="text-sm font-medium text-brand-text">Order Progress</span>
+          <span class="text-sm text-brand-muted ml-2">{progress}%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div
+            class="bg-brand-primary h-2 rounded-full transition-all duration-300"
+            style={`width: ${progress}%`}
+          ></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      {(canCancel || canReschedule) && (
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <div class="flex flex-col sm:flex-row gap-3">
+            {canReschedule && (
+              <a
+                href={`/dashboard/orders/${order.id}/reschedule`}
+                class="flex-1 bg-brand-primary hover:bg-orange-600 text-white py-2 px-4 rounded-lg text-center transition"
+              >
+                Reschedule Order
+              </a>
+            )}
+            {canCancel && (
+              <button
+                type="button"
+                class="flex-1 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg transition"
+                onclick="if(confirm('Are you sure you want to cancel this order?')) window.location.href='/api/orders/cancel?id=' + this.dataset.orderId"
+                data-order-id={order.id}
+              >
+                Cancel Order
+              </button>
+            )}
+          </div>
+          <p class="text-xs text-brand-muted mt-2">
+            You can modify this order up to 6 hours before pickup
+          </p>
+        </div>
+      )}
+
+      <!-- Order Details Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Service Details -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h2 class="font-semibold text-brand-text mb-3">Service Details</h2>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-brand-muted">Service Type:</span>
+              <span class="font-medium text-brand-text">{order.service_type}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-brand-muted">Plan Type:</span>
+              <span class="font-medium text-brand-text">{order.plan_type}</span>
+            </div>
+            {order.measured_weight_lb && (
+              <div class="flex justify-between">
+                <span class="text-brand-muted">Weight:</span>
+                <span class="font-medium text-brand-text">{order.measured_weight_lb.toFixed(1)} lbs</span>
+              </div>
+            )}
+            {order.is_rush && (
+              <div class="flex justify-between">
+                <span class="text-brand-muted">Rush Service:</span>
+                <span class="font-medium text-brand-primary">Yes</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h2 class="font-semibold text-brand-text mb-3">Pricing</h2>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-brand-muted">Subtotal:</span>
+              <span class="text-brand-text">{formatCents(order.subtotal_cents)}</span>
+            </div>
+            {order.rush_fee_cents && order.rush_fee_cents > 0 && (
+              <div class="flex justify-between">
+                <span class="text-brand-muted">Rush Fee:</span>
+                <span class="text-brand-text">{formatCents(order.rush_fee_cents)}</span>
+              </div>
+            )}
+            {order.taxes_cents && order.taxes_cents > 0 && (
+              <div class="flex justify-between">
+                <span class="text-brand-muted">Tax:</span>
+                <span class="text-brand-text">{formatCents(order.taxes_cents)}</span>
+              </div>
+            )}
+            {order.discounts_cents && order.discounts_cents > 0 && (
+              <div class="flex justify-between text-green-600">
+                <span>Discount:</span>
+                <span>-{formatCents(order.discounts_cents)}</span>
+              </div>
+            )}
+            <div class="border-t border-gray-200 pt-2 mt-2">
+              <div class="flex justify-between font-semibold text-brand-text">
+                <span>Total:</span>
+                <span>{formatCents(order.total_cents || order.subtotal_cents)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pickup Details -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        <h2 class="font-semibold text-brand-text mb-3">Pickup Details</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <span class="text-sm text-brand-muted">Date</span>
+            <p class="font-medium text-brand-text">
+              {new Date(order.pickup_date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </p>
+          </div>
+          <div>
+            <span class="text-sm text-brand-muted">Time Window</span>
+            <p class="font-medium text-brand-text">
+              {order.pickup_time_window?.label || 'Time TBD'}
+            </p>
+          </div>
+          <div class="sm:col-span-2">
+            <span class="text-sm text-brand-muted">Address</span>
+            <p class="font-medium text-brand-text whitespace-pre-line">{pickupAddress}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delivery Details -->
+      {order.delivery_date && (
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <h2 class="font-semibold text-brand-text mb-3">Delivery Details</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <span class="text-sm text-brand-muted">Date</span>
+              <p class="font-medium text-brand-text">
+                {new Date(order.delivery_date).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+            <div>
+              <span class="text-sm text-brand-muted">Time Window</span>
+              <p class="font-medium text-brand-text">
+                {order.delivery_time_window?.label || 'Time TBD'}
+              </p>
+            </div>
+            <div class="sm:col-span-2">
+              <span class="text-sm text-brand-muted">Address</span>
+              <p class="font-medium text-brand-text whitespace-pre-line">{deliveryAddress}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <!-- Addons -->
+      {addons.length > 0 && (
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <h2 class="font-semibold text-brand-text mb-3">Add-ons</h2>
+          <div class="space-y-2">
+            {addons.map((addon: any) => (
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-brand-text">{addon.name || addon.label}</span>
+                <span class="text-brand-muted">
+                  {addon.price ? formatCents(addon.price) : 'Included'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Notes -->
+      {order.notes && (
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <h2 class="font-semibold text-brand-text mb-3">Special Instructions</h2>
+          <p class="text-sm text-brand-text whitespace-pre-line">{order.notes}</p>
+        </div>
+      )}
+
+      <!-- Order Timeline -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h2 class="font-semibold text-brand-text mb-3">Order Timeline</h2>
+        <div class="space-y-3">
+          <div class="flex gap-3">
+            <div class="flex flex-col items-center">
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <div class="w-0.5 h-full bg-gray-200 mt-1"></div>
+            </div>
+            <div class="pb-4">
+              <p class="text-sm font-medium text-brand-text">Order Created</p>
+              <p class="text-xs text-brand-muted">
+                {new Date(order.created_at).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+          </div>
+
+          {order.updated_at && order.updated_at !== order.created_at && (
+            <div class="flex gap-3">
+              <div class="flex flex-col items-center">
+                <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-brand-text">Last Updated</p>
+                <p class="text-xs text-brand-muted">
+                  {new Date(order.updated_at).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Help Section -->
+      <div class="mt-6 text-center text-sm text-brand-muted">
+        <p>Need help with your order?</p>
+        <a href="tel:8559274224" class="text-brand-primary hover:underline font-medium">
+          Call us at (855) WASH-BAGS
+        </a>
+      </div>
+    </main>
+  </div>
+</Layout>
