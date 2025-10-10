@@ -152,64 +152,38 @@ const error = url.searchParams.get('error');
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div class="p-4 border-b border-gray-200">
             <h2 class="font-semibold text-brand-text">Active Orders</h2>
+            <p class="text-xs text-brand-muted mt-1">Your scheduled pickups and in-progress orders</p>
           </div>
           <div class="divide-y divide-gray-200">
             {activeOrders.map(order => (
               <a href={`/dashboard/orders/${order.id}`} class="block p-4 hover:bg-gray-50 transition">
-                <div class="flex justify-between items-start mb-2">
-                  <div>
-                    <span class="text-sm font-medium text-brand-text">{formatOrderId(order.id)}</span>
-                    <span class={`ml-2 inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
-                      {getStatusLabel(order.status)}
-                    </span>
-                  </div>
-                  <span class="text-sm font-semibold text-brand-text">
-                    {formatCents(order.total_cents || order.subtotal_cents)}
-                  </span>
-                </div>
-                <div class="text-sm text-brand-muted">
-                  {order.service_type} • {new Date(order.pickup_date).toLocaleDateString()}
-                  {order.time_windows?.label && ` • ${order.time_windows.label}`}
-                </div>
-                {order.pickup_address_line1 && (
-                  <div class="text-xs text-brand-muted mt-1">
-                    {order.pickup_address_line1}, {order.pickup_address_city}
-                  </div>
-                )}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <!-- Upcoming Pickups -->
-      {upcomingPickups.length > 0 && (
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div class="p-4 border-b border-gray-200">
-            <h2 class="font-semibold text-brand-text">Upcoming Pickups</h2>
-          </div>
-          <div class="divide-y divide-gray-200">
-            {upcomingPickups.map(pickup => (
-              <a href={`/dashboard/orders/${pickup.id}`} class="block p-4 hover:bg-gray-50 transition">
                 <div class="flex items-start gap-3">
                   <svg class="w-5 h-5 text-brand-primary mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-start mb-1">
+                      <div>
+                        <span class="text-sm font-medium text-brand-text">{formatOrderId(order.id)}</span>
+                        <span class={`ml-2 inline-block px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
+                          {getStatusLabel(order.status)}
+                        </span>
+                      </div>
+                      <span class="text-sm font-semibold text-brand-text">
+                        {formatCents(order.total_cents || order.subtotal_cents)}
+                      </span>
+                    </div>
                     <div class="text-sm font-medium text-brand-text">
-                      {new Date(pickup.pickup_date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                      {new Date(order.pickup_date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </div>
                     <div class="text-sm text-brand-muted">
-                      {pickup.time_windows?.label || 'Time TBD'}
+                      {order.time_windows?.label || 'Time TBD'} • {order.service_type}
                     </div>
-                    {pickup.pickup_address_line1 && (
-                      <div class="text-sm text-brand-muted truncate">
-                        {pickup.pickup_address_line1}
-                        {pickup.pickup_address_line2 && `, ${pickup.pickup_address_line2}`}
+                    {order.pickup_address_line1 && (
+                      <div class="text-sm text-brand-muted truncate mt-1">
+                        {order.pickup_address_line1}
+                        {order.pickup_address_line2 && `, ${order.pickup_address_line2}`}
                       </div>
-                    )}
-                    {pickup.notes && (
-                      <div class="text-xs text-brand-muted mt-1 italic">Note: {pickup.notes}</div>
                     )}
                   </div>
                 </div>
