@@ -8,13 +8,13 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Latest-181818?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-Latest-008CDD?logo=stripe&logoColor=white)](https://stripe.com/)
 
-A modern, comprehensive laundry service platform built with Astro, featuring guest authentication, real-time availability checking, Stripe payment integration, and advanced capacity management for pickup and delivery operations.
+A modern, comprehensive laundry service platform built with Astro, featuring unified authentication, real-time availability checking, Stripe payment integration, and advanced capacity management for pickup and delivery operations.
 
 ## ✨ Core Features
 
 ### 🚀 **Modern Booking Experience**
 - **Smart Availability Checking** - Real-time capacity management with service area validation
-- **Guest Authentication** - Passwordless ordering with secure token-based access
+- **Unified Authentication** - Secure cookie-based authentication with Supabase Auth
 - **Dynamic Time Windows** - Live capacity display with overbooking prevention
 - **Progressive Web Experience** - Mobile-first booking flow
 
@@ -51,13 +51,14 @@ A modern, comprehensive laundry service platform built with Astro, featuring gue
 
 ## 🏗️ Architecture
 
-### Authentication Model
+### Authentication Architecture
 ```
-Guest Order → Magic Link → Optional Account Upgrade
+Login/Signup → Cookie-Based Session → Authenticated API Access
 ```
-- **Guest Orders**: Instant booking with email + phone
-- **Secure Tokens**: 14-day access tokens for order tracking
-- **Progressive Enhancement**: Natural upgrade path to full accounts
+- **Unified Auth**: All API routes use consistent `requireAuth()` helper
+- **Cookie-Based Sessions**: Secure session management via HTTP-only cookies
+- **Server-Optimized**: Custom Supabase client configuration for API routes
+- **Type-Safe**: Strong typing with `AuthResult` interface
 
 ### Payment Processing
 ```
@@ -85,23 +86,27 @@ scheduled → en_route_pickup → picked_up → processing → ready_for_deliver
 │   │   └── Layout.astro       # SEO-optimized layout
 │   ├── pages/
 │   │   ├── api/               # Backend APIs
-│   │   │   ├── create-order.ts          # Guest order creation
+│   │   │   ├── auth/                    # Authentication routes
+│   │   │   ├── create-order.ts          # Authenticated order creation
 │   │   │   ├── check-availability.ts    # Real-time availability
 │   │   │   ├── create-payment-intent.ts # Payment processing
 │   │   │   ├── capture-payment.ts       # Post-weight capture
 │   │   │   └── stripe-webhook.ts        # Payment confirmations
 │   │   ├── orders/
-│   │   │   └── [id].astro     # Token-authenticated order view
+│   │   │   └── [id].astro     # Authenticated order view
 │   │   ├── start-basic.astro  # Enhanced booking entry
 │   │   ├── checkout.astro     # Payment & membership upsell
 │   │   └── confirm.astro      # Order confirmation
+│   ├── lib/
+│   │   ├── supabase.ts        # Client-side Supabase config
+│   │   └── supabase-server.ts # Server-optimized Supabase config
 │   └── utils/
-│       ├── guest-auth.ts      # Token utilities & email
+│       ├── require-auth.ts    # Unified authentication helper
 │       ├── order-status.ts    # Status machine
 │       └── wizard.server.ts   # Booking flow state
 ├── database-migrations.sql     # Database schema updates
 ├── sql-functions.sql          # Availability & capacity functions
-├── GUEST-AUTH-IMPLEMENTATION.md # Complete auth documentation
+├── CLAUDE.md                  # Claude Code development guide
 └── .env                       # Environment configuration
 ```
 
@@ -206,6 +211,51 @@ scheduled → en_route_pickup → picked_up → processing → ready_for_deliver
 | `npm run lint` | Run ESLint |
 | `npm run type-check` | TypeScript checking |
 
+## 🔐 Authentication System
+
+### **Unified Authentication Helper**
+The application uses a centralized `requireAuth()` helper function for all protected API routes:
+
+```typescript
+// src/utils/require-auth.ts
+import { requireAuth, createAuthErrorResponse } from '../../utils/require-auth';
+
+export const POST: APIRoute = async ({ request, cookies }) => {
+  try {
+    // Authenticate user and get Supabase client
+    const { user, supabase } = await requireAuth(cookies);
+    
+    // Your route logic here...
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('Authentication')) {
+      return createAuthErrorResponse(error.message);
+    }
+    // Handle other errors...
+  }
+};
+```
+
+### **Protected Routes**
+The following API routes require authentication:
+- **Order Management**: `create-order.ts`, `orders/cancel.ts`
+- **Payment Processing**: `create-membership-payment-intent.ts`
+- **Profile Management**: `profile/update.ts`
+- **Content Management**: `articles.ts`, `articles/[id].ts`
+- **Authentication**: `auth/reset-password.ts`
+
+### **Public Routes**
+These routes are intentionally public:
+- **Availability Checking**: `check-availability.ts`
+- **Payment Processing**: `authorize-payment.ts`, `create-payment-intent.ts`
+- **Webhooks**: `stripe-webhook.ts` (uses Stripe signature verification)
+- **Authentication**: All `/auth/*` routes handle their own verification
+
+### **Security Features**
+- **Server-Optimized Supabase Config**: Disabled auto-refresh and session persistence for API routes
+- **Consistent Error Handling**: Standardized 401 responses across all routes
+- **Type Safety**: `AuthResult` interface provides strong typing for user data
+- **Cookie-Based Sessions**: Secure session management using HTTP-only cookies
+
 ## 🌟 Key Implementation Highlights
 
 ### ✅ **SEO Implementation Complete**
@@ -214,11 +264,11 @@ scheduled → en_route_pickup → picked_up → processing → ready_for_deliver
 - **Social Media Ready**: Open Graph and Twitter Card integration
 - **Performance Optimized**: Fast loading with enterprise-level SEO
 
-### ✅ **Guest Authentication System**
-- **Passwordless Ordering**: Email + phone creates instant orders with secure tokens
-- **Magic Links**: 14-day secure access without account creation
-- **Progressive Enhancement**: Natural upgrade path to full accounts
-- **Mobile Optimized**: SMS-friendly links and bookmarkable order pages
+### ✅ **Unified Authentication System**
+- **Centralized Auth Helper**: `requireAuth()` function used across all protected routes
+- **Cookie-Based Sessions**: Secure session management with HTTP-only cookies
+- **Server-Optimized**: Custom Supabase client configuration for better performance
+- **Type-Safe**: Strong typing with `AuthResult` interface and consistent error handling
 
 ### ✅ **Real-Time Availability Management**
 - **Service Area Validation**: Postal code-based zone verification

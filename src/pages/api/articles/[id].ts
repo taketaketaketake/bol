@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { supabase } from "../../../lib/supabase";
+import { requireAuth, createAuthErrorResponse } from "../../../utils/require-auth";
 import { eq } from "drizzle-orm";
 import { articles } from "../../../db/schema";
 import { db } from "../../../db/client";
@@ -55,59 +55,64 @@ export const GET: APIRoute = async ({ params }) => {
  * @route /api/articles/[id]
  * @method PATCH
  */
-export const PATCH: APIRoute = async ({ request, params }) => {
+export const PATCH: APIRoute = async ({ request, params, cookies }) => {
   console.info("[PATCH] Incoming article update request");
-  const user = await supabase.auth.getUser();
-  if (!user.data.user) {
-    console.warn('[PATCH] Unauthorized attempt to update article');
+  
+    const id = z.coerce.number().int().positive().parse(params.id);
+
+    const body = await request.json();
+    const updateFields = ArticleUpdateSchema.parse(body);
+
+    if (Object.keys(updateFields).length === 0) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'No updatable fields provided',
+      }), { status: 400 });
+    }
+
+    const updated = await db
+      .update(articles)
+      .set({
+        title: updateFields.title,
+        slug: updateFields.slug,
+        excerpt: updateFields.excerpt,
+        content: updateFields.content,
+        authorId: updateFields.authorId,
+        featuredImage: updateFields.featuredImage,
+        status: updateFields.status,
+      })
+      .where(eq(articles.id, id))
+      .returning();
+
+    if (!updated.length) {
+      console.warn(`[PATCH] No article found with ID ${id}`);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Article not found',
+      }), { status: 404 });
+    }
+
+    console.info(`[PATCH] Article ID ${id} updated by user ${user.id}`);
+    return new Response(JSON.stringify({
+      success: true,
+      data: updated[0],
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[PATCH] Error updating article:', error);
+    
+    // Handle authentication errors
+    if (error instanceof Error && error.message.includes('Authentication')) {
+      return createAuthErrorResponse(error.message);
+    }
+    
     return new Response(JSON.stringify({
       success: false,
-      error: 'Unauthorized',
-    }), { status: 401 });
+      error: error instanceof Error ? error.message : 'Failed to update article',
+    }), { status: 500 });
   }
-
-  const id = z.coerce.number().int().positive().parse(params.id);
-
-  const body = await request.json();
-  const updateFields = ArticleUpdateSchema.parse(body);
-
-  if (Object.keys(updateFields).length === 0) {
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'No updatable fields provided',
-    }), { status: 400 });
-  }
-
-  const updated = await db
-    .update(articles)
-    .set({
-      title: updateFields.title,
-      slug: updateFields.slug,
-      excerpt: updateFields.excerpt,
-      content: updateFields.content,
-      authorId: updateFields.authorId,
-      featuredImage: updateFields.featuredImage,
-      status: updateFields.status,
-    })
-    .where(eq(articles.id, id))
-    .returning();
-
-  if (!updated.length) {
-    console.warn(`[PATCH] No article found with ID ${id}`);
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Article not found',
-    }), { status: 404 });
-  }
-
-  console.info(`[PATCH] Article ID ${id} updated by user ${user.data.user.id}`);
-  return new Response(JSON.stringify({
-    success: true,
-    data: updated[0],
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
 };
 
 /**

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { requireAuth, createAuthErrorResponse } from '../../utils/require-auth';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
@@ -8,41 +8,15 @@ const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
+    // Authenticate user and get Supabase client
+    const { user, supabase } = await requireAuth(cookies);
+
     const { email } = await request.json();
 
     if (!email) {
       return new Response(
         JSON.stringify({ error: 'Email is required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get authenticated user session
-    const sbAccessToken = cookies.get('sb-access-token')?.value;
-    const sbRefreshToken = cookies.get('sb-refresh-token')?.value;
-
-    if (!sbAccessToken || !sbRefreshToken) {
-      return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Create Supabase client with user session
-    const supabase = createClient(
-      import.meta.env.PUBLIC_SUPABASE_URL,
-      import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-    );
-
-    const { data: { user }, error: authError } = await supabase.auth.setSession({
-      access_token: sbAccessToken,
-      refresh_token: sbRefreshToken
-    });
-
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid session' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -145,6 +119,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   } catch (error) {
     console.error('[create-membership-payment-intent] Error:', error);
+    
+    // Handle authentication errors
+    if (error instanceof Error && error.message.includes('Authentication')) {
+      return createAuthErrorResponse(error.message);
+    }
+    
     return new Response(
       JSON.stringify({
         error: 'Failed to create checkout session',

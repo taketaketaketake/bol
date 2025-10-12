@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { supabase } from '../../../lib/supabase';
+import { requireAuth, createAuthErrorResponse } from '../../../utils/require-auth';
 import { getCustomerId } from '../../../utils/dashboard/customer';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
@@ -9,22 +9,8 @@ const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
 
 export const GET: APIRoute = async ({ request, cookies, redirect }) => {
   try {
-    const accessToken = cookies.get('sb-access-token');
-    const refreshToken = cookies.get('sb-refresh-token');
-
-    if (!accessToken || !refreshToken) {
-      return redirect('/auth/login', 302);
-    }
-
-    // Set up Supabase client with cookies
-    const { data: { session } } = await supabase.auth.setSession({
-      access_token: accessToken.value,
-      refresh_token: refreshToken.value
-    });
-
-    if (!session) {
-      return redirect('/auth/login', 302);
-    }
+    // Authenticate user and get Supabase client
+    const { user, supabase } = await requireAuth(cookies);
 
     // Get order ID from query params
     const url = new URL(request.url);
@@ -35,7 +21,7 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
     }
 
     // Get customer ID to verify ownership
-    const customerId = await getCustomerId(session.user.id, supabase);
+    const customerId = await getCustomerId(user.id, supabase);
 
     if (!customerId) {
       return redirect('/dashboard', 302);
@@ -132,6 +118,12 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
 
   } catch (error) {
     console.error('[Cancel Order] Exception:', error);
+    
+    // Handle authentication errors by redirecting to login
+    if (error instanceof Error && error.message.includes('Authentication')) {
+      return redirect('/auth/login', 302);
+    }
+    
     return redirect('/dashboard?error=unexpected', 302);
   }
 };

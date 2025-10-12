@@ -2,7 +2,7 @@ import { db } from '../../db/client';
 import { articles } from '../../db/schema';
 import { eq, desc } from 'drizzle-orm';
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
+import { requireAuth, createAuthErrorResponse } from '../../utils/require-auth';
 
 export const prerender = false;
 
@@ -48,22 +48,13 @@ export const GET: APIRoute = async () => {
  * @param {Request} request - The request object containing article data in JSON body.
  * @returns {Response} JSON response containing the created article or an error message.
  */
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const user = await supabase.auth.getUser();
-
-    if (!user.data.user) {
-      console.warn('[POST] Unauthorized attempt to create article');
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Unauthorized',
-      }), {
-        status: 401,
-      });
-    }
+    // Authenticate user and get Supabase client
+    const { user } = await requireAuth(cookies);
 
     const articleData = await request.json();
-    articleData.authorId = user.data.user.id;
+    articleData.authorId = user.id;
 
     // Generate slug if not provided
     if (!articleData.slug && articleData.title) {
@@ -94,6 +85,12 @@ export const POST: APIRoute = async ({ request }) => {
     });
   } catch (error) {
     console.error('[POST] Error creating article:', error);
+    
+    // Handle authentication errors
+    if (error instanceof Error && error.message.includes('Authentication')) {
+      return createAuthErrorResponse(error.message);
+    }
+    
     return new Response(JSON.stringify({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create article',

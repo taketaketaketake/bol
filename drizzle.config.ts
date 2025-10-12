@@ -13,5 +13,16 @@ export default {
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
-  tablesFilter: ['!libsql_wasm_func_table'],
+  // ✅ Limit introspection to public schema and ignore Supabase internals
+  introspect: {
+    schemaFilter: ['public'], // only introspect 'public' schema
+  },
+  tablesFilter: [
+    // ignore Supabase system tables
+    '!auth_*',
+    '!storage_*',
+    '!pg_*',
+    '!supabase_*',
+    '!libsql_wasm_func_table',
+  ],
 } satisfies Config;

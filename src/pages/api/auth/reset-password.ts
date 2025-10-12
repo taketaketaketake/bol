@@ -1,8 +1,11 @@
-import { supabase } from '../../../lib/supabase';
 import type { APIRoute } from 'astro';
+import { requireAuth, createAuthErrorResponse } from '../../../utils/require-auth';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
+    // Authenticate user and get Supabase client
+    const { user, supabase } = await requireAuth(cookies);
+    
     const { password } = await request.json();
 
     if (!password || password.length < 6) {
@@ -11,23 +14,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
-
-    // Get the session from cookies
-    const accessToken = cookies.get('sb-access-token');
-    const refreshToken = cookies.get('sb-refresh-token');
-
-    if (!accessToken || !refreshToken) {
-      return new Response(
-        JSON.stringify({ error: 'No session found' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Set the session
-    await supabase.auth.setSession({
-      access_token: accessToken.value,
-      refresh_token: refreshToken.value,
-    });
 
     // Update the password
     const { error } = await supabase.auth.updateUser({
@@ -44,6 +30,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     );
   } catch (error) {
     console.error('Reset password error:', error);
+    
+    // Handle authentication errors
+    if (error instanceof Error && error.message.includes('Authentication')) {
+      return createAuthErrorResponse(error.message);
+    }
+    
     const message = error instanceof Error ? error.message : 'Failed to reset password';
     return new Response(
       JSON.stringify({ error: message }),

@@ -1,30 +1,10 @@
-import { supabase } from '../../../lib/supabase';
 import type { APIRoute } from 'astro';
+import { requireAuth, createAuthErrorResponse } from '../../../utils/require-auth';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const accessToken = cookies.get('sb-access-token');
-    const refreshToken = cookies.get('sb-refresh-token');
-
-    if (!accessToken || !refreshToken) {
-      return new Response(
-        JSON.stringify({ error: 'Not authenticated' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Set session
-    const { data: { session } } = await supabase.auth.setSession({
-      access_token: accessToken.value,
-      refresh_token: refreshToken.value,
-    });
-
-    if (!session) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid session' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    // Authenticate user and get Supabase client
+    const { user, supabase } = await requireAuth(cookies);
 
     const updates = await request.json();
 
@@ -43,6 +23,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     );
   } catch (error) {
     console.error('Profile update error:', error);
+    
+    // Handle authentication errors
+    if (error instanceof Error && error.message.includes('Authentication')) {
+      return createAuthErrorResponse(error.message);
+    }
+    
     const message = error instanceof Error ? error.message : 'Failed to update profile';
     return new Response(
       JSON.stringify({ error: message }),

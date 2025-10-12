@@ -1,25 +1,11 @@
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
+import { requireAuth, createAuthErrorResponse } from '../../utils/require-auth';
 import { checkMembershipStatus } from '../../utils/membership';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    // Create authenticated Supabase client with user session
-    const sbAccessToken = cookies.get('sb-access-token')?.value;
-    const sbRefreshToken = cookies.get('sb-refresh-token')?.value;
-
-    const supabase = createClient(
-      import.meta.env.PUBLIC_SUPABASE_URL,
-      import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-    );
-
-    // Set the session if we have tokens
-    if (sbAccessToken && sbRefreshToken) {
-      await supabase.auth.setSession({
-        access_token: sbAccessToken,
-        refresh_token: sbRefreshToken
-      });
-    }
+    // Authenticate user and get Supabase client
+    const { user, supabase } = await requireAuth(cookies);
 
     const body = await request.json();
 
@@ -41,23 +27,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       preferences = {},
       addons = [],
       addonPrefs = {},
-      estimatedAmount,
-      authUserId // Required - no guest orders
+      estimatedAmount
     } = body;
 
-    // Require authentication - no guest orders allowed
-    // Defense-in-depth: Even though checkout.astro enforces auth,
-    // APIs should validate their own inputs to protect against:
-    // - Direct API calls bypassing the UI
-    // - Future refactoring changes
-    // - Developer errors
-    if (!authUserId) {
-      console.error('[create-order] Unauthenticated request');
-      return new Response(
-        JSON.stringify({ error: 'Authentication required to place an order' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    // Use the authenticated user's ID
+    const authUserId = user.id;
 
     // Validate required fields
     if (!customerEmail || !pickupDate || !pickupTimeWindowId) {
@@ -274,6 +248,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   } catch (error) {
     console.error('Error creating order:', error);
+    
+    // Handle authentication errors
+    if (error instanceof Error && error.message.includes('Authentication')) {
+      return createAuthErrorResponse(error.message);
+    }
+    
     return new Response(
       JSON.stringify({
         error: 'Failed to create order',
