@@ -135,6 +135,40 @@ export const orders = pgTable("orders", {
   deliveryDate: date("delivery_date"),
   deliveryTimeWindowId: uuid("delivery_time_window_id"),
   measuredWeightLb: numeric("measured_weight_lb", { precision: 10, scale: 2 }),
+
+  // === Driver Workflow ===
+  status: text("status", {
+    enum: [
+      "scheduled",
+      "picked_up",
+      "processing",
+      "ready_for_delivery",
+      "en_route_delivery",
+      "delivered",
+      "completed",
+      "canceled",
+    ],
+  }).notNull().default("scheduled"),
+
+  pickupPhoto: text("pickup_photo"),
+  laundryPhoto: text("laundry_photo"),
+  deliveryPhoto: text("delivery_photo"),
+
+  pickedUpAt: timestamp("picked_up_at", { withTimezone: true }),
+  readyForDeliveryAt: timestamp("ready_for_delivery_at", { withTimezone: true }),
+  deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// ------------------------------------------------------------------
+// ORDER STATUS HISTORY (Audit Trail)
+// ------------------------------------------------------------------
+export const orderStatusHistory = pgTable("order_status_history", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => orders.id),
+  status: text("status").notNull(),
+  changedBy: uuid("changed_by"),
+  changedAt: timestamp("changed_at", { withTimezone: true }).defaultNow(),
 });
 
 // ------------------------------------------------------------------
