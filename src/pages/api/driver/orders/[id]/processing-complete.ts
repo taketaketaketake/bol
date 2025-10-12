@@ -5,13 +5,8 @@
  */
 
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '../../../../../utils/require-roles';
-
-const serviceClient = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { updateOrderStatus } from '../../../../../utils/order-status';
 
 const log = (msg: string, data?: any) =>
   import.meta.env.MODE !== 'production' && console.log(`[driver-processing] ${msg}`, data || '');
@@ -28,54 +23,27 @@ export const POST: APIRoute = async ({ params, cookies }) => {
 
     log('Processing-complete request received', { orderId, driverId: user.id });
 
-    // 2️⃣ Retrieve order
-    const { data: order, error: fetchError } = await serviceClient
-      .from('orders')
-      .select('id, status')
-      .eq('id', orderId)
-      .single();
+    const readyForDeliveryAt = new Date().toISOString();
 
-    if (fetchError || !order) {
-      return new Response(JSON.stringify({ error: 'Order not found' }), { status: 404 });
-    }
-
-    // 3️⃣ Validate transition
-    if (order.status !== 'processing') {
-      return new Response(
-        JSON.stringify({
-          error: `Invalid status transition: ${order.status} → ready_for_delivery`,
-          validTransition: 'processing → ready_for_delivery',
-        }),
-        { status: 400 }
-      );
-    }
-
-    // 4️⃣ Update order
-    const { error: updateError } = await serviceClient
-      .from('orders')
-      .update({
-        status: 'ready_for_delivery',
-        ready_for_delivery_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
-
-    if (updateError) {
-      console.error('[driver-processing] Update error:', updateError);
-      return new Response(JSON.stringify({ error: 'Failed to update order' }), { status: 500 });
-    }
-
-    // 5️⃣ Log audit trail
-    const { error: auditError } = await serviceClient.from('order_status_history').insert({
-      order_id: orderId,
-      status: 'ready_for_delivery',
-      changed_by: user.id,
-      changed_at: new Date().toISOString(),
+    // Update order status using centralized utility
+    const result = await updateOrderStatus({
+      orderId,
+      newStatus: 'ready_for_delivery',
+      userId: user.id,
+      additionalData: {
+        ready_for_delivery_at: readyForDeliveryAt
+      }
     });
 
-    if (auditError) {
-      console.error('[driver-processing] Audit log error:', auditError);
-      // Not fatal — continue
+    if (!result.success) {
+      log('Status update failed:', { orderId, error: result.error });
+      return new Response(
+        JSON.stringify({
+          error: result.error || 'Failed to update order status',
+          validTransition: result.validTransition
+        }),
+        { status: result.error?.includes('not found') ? 404 : 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     log('Order marked ready for delivery', { orderId });
@@ -84,11 +52,15 @@ export const POST: APIRoute = async ({ params, cookies }) => {
       JSON.stringify({
         success: true,
         orderId,
-        status: 'ready_for_delivery',
-        readyForDeliveryAt: new Date().toISOString(),
+        status: result.status,
+        readyForDeliveryAt,
+        updatedAt: result.updatedAt,
         message: 'Order marked as ready for delivery successfully',
       }),
-      { status: 200 }
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
   } catch (error) {
     console.error('[driver-processing] Fatal error:', error);

@@ -5,13 +5,8 @@
  */
 
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '../../../../../utils/require-roles';
-
-const serviceClient = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { updateOrderStatus } from '../../../../../utils/order-status';
 
 const log = (msg: string, data?: any) =>
   import.meta.env.MODE !== 'production' && console.log(`[driver-pickup-laundromat] ${msg}`, data || '');
@@ -28,54 +23,23 @@ export const POST: APIRoute = async ({ params, cookies }) => {
 
     log('Pickup from laundromat request received', { orderId, driverId: user.id });
 
-    // 2️⃣ Retrieve order
-    const { data: order, error: fetchError } = await serviceClient
-      .from('orders')
-      .select('id, status')
-      .eq('id', orderId)
-      .single();
-
-    if (fetchError || !order) {
-      return new Response(JSON.stringify({ error: 'Order not found' }), { status: 404 });
-    }
-
-    // 3️⃣ Validate transition
-    if (order.status !== 'ready_for_delivery') {
-      return new Response(
-        JSON.stringify({
-          error: `Invalid status transition: ${order.status} → en_route_delivery`,
-          validTransition: 'ready_for_delivery → en_route_delivery',
-        }),
-        { status: 400 }
-      );
-    }
-
-    const enRouteAt = new Date().toISOString();
-
-    // 4️⃣ Update order (skip updated_at since we have trigger)
-    const { error: updateError } = await serviceClient
-      .from('orders')
-      .update({
-        status: 'en_route_delivery',
-      })
-      .eq('id', orderId);
-
-    if (updateError) {
-      console.error('[driver-pickup-laundromat] Update error:', updateError);
-      return new Response(JSON.stringify({ error: 'Failed to update order' }), { status: 500 });
-    }
-
-    // 5️⃣ Log audit trail
-    const { error: auditError } = await serviceClient.from('order_status_history').insert({
-      order_id: orderId,
-      status: 'en_route_delivery',
-      changed_by: user.id,
-      changed_at: enRouteAt,
+    // Update order status using centralized utility
+    const result = await updateOrderStatus({
+      orderId,
+      newStatus: 'en_route_delivery',
+      userId: user.id
+      // No additional data needed for this transition
     });
 
-    if (auditError) {
-      console.error('[driver-pickup-laundromat] Audit log error:', auditError);
-      // Not fatal — continue
+    if (!result.success) {
+      log('Status update failed:', { orderId, error: result.error });
+      return new Response(
+        JSON.stringify({
+          error: result.error || 'Failed to update order status',
+          validTransition: result.validTransition
+        }),
+        { status: result.error?.includes('not found') ? 404 : 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     log('Order marked as en route for delivery', { orderId });
@@ -84,8 +48,9 @@ export const POST: APIRoute = async ({ params, cookies }) => {
       JSON.stringify({
         success: true,
         orderId,
-        status: 'en_route_delivery',
-        enRouteAt,
+        status: result.status,
+        enRouteAt: result.updatedAt,
+        updatedAt: result.updatedAt,
         message: 'Order picked up from laundromat - en route for delivery',
       }),
       { 

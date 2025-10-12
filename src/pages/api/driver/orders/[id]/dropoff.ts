@@ -5,14 +5,9 @@
  */
 
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '../../../../../utils/require-roles';
 import { uploadImage, generatePhotoPath, validateImageFile } from '../../../../../utils/storage';
-
-const serviceClient = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { updateOrderStatus } from '../../../../../utils/order-status';
 
 const log = (msg: string, data?: any) =>
   import.meta.env.MODE !== 'production' && console.log(`[driver-dropoff] ${msg}`, data || '');
@@ -48,32 +43,7 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
     // 2️⃣ Validate image file
     await validateImageFile(photo);
 
-    // 3️⃣ Retrieve order
-    const { data: order, error: fetchError } = await serviceClient
-      .from('orders')
-      .select('id, status')
-      .eq('id', orderId)
-      .single();
-
-    if (fetchError || !order) {
-      return new Response(JSON.stringify({ error: 'Order not found' }), { 
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // 4️⃣ Validate transition (matches enum in orders_status_check)
-    if (order.status !== 'en_route_delivery') {
-      return new Response(
-        JSON.stringify({
-          error: `Invalid status transition: ${order.status} → delivered`,
-          validTransition: 'en_route_delivery → delivered',
-        }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // 5️⃣ Upload delivery photo with safe extension handling
+    // 3️⃣ Upload delivery photo with safe extension handling
     const ext = (photo.name?.split('.').pop() || 'jpg').toLowerCase();
     const photoPath = generatePhotoPath(orderId, 'delivery', ext);
     const photoUrl = await uploadImage(photo, photoPath);
@@ -82,9 +52,8 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
 
     const deliveredAt = new Date().toISOString();
 
-    // 6️⃣ Update order (skip updated_at since we have database trigger)
-    const updateData: any = {
-      status: 'delivered',
+    // Prepare additional data for status update
+    const additionalData: any = {
       delivery_photo: photoUrl,
       delivered_at: deliveredAt,
       driver_id: user.id // Track which driver completed delivery
@@ -92,33 +61,26 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
 
     // Add delivery notes if provided
     if (deliveryNotes?.trim()) {
-      updateData.delivery_notes = deliveryNotes.trim();
+      additionalData.delivery_notes = deliveryNotes.trim();
     }
 
-    const { error: updateError } = await serviceClient
-      .from('orders')
-      .update(updateData)
-      .eq('id', orderId);
-
-    if (updateError) {
-      console.error('[driver-dropoff] Update error:', updateError);
-      return new Response(JSON.stringify({ error: 'Failed to update order' }), { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // 7️⃣ Log audit trail
-    const { error: auditError } = await serviceClient.from('order_status_history').insert({
-      order_id: orderId,
-      status: 'delivered',
-      changed_by: user.id,
-      changed_at: deliveredAt,
+    // Update order status using centralized utility
+    const result = await updateOrderStatus({
+      orderId,
+      newStatus: 'delivered',
+      userId: user.id,
+      additionalData
     });
 
-    if (auditError) {
-      console.error('[driver-dropoff] Audit log error:', auditError);
-      // Not fatal — continue
+    if (!result.success) {
+      log('Status update failed:', { orderId, error: result.error });
+      return new Response(
+        JSON.stringify({
+          error: result.error || 'Failed to update order status',
+          validTransition: result.validTransition
+        }),
+        { status: result.error?.includes('not found') ? 404 : 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     log('Order delivered successfully', { orderId, photoUrl });
@@ -127,11 +89,12 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
       JSON.stringify({
         success: true,
         orderId,
-        status: 'delivered',
+        status: result.status,
         photoUrl,
         deliveredAt,
-        deliveryNotes: deliveryNotes?.trim() || null,
+        deliveryNotes: additionalData.delivery_notes || null,
         driverId: user.id,
+        updatedAt: result.updatedAt,
         message: 'Order delivered successfully',
       }),
       { 

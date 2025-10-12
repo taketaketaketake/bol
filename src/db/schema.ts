@@ -1,212 +1,163 @@
 // src/db/schema.ts
-import {
-  pgTable,
-  uuid,
-  text,
-  jsonb,
-  integer,
-  boolean,
-  date,
-  timestamp,
-  numeric,
-  doublePrecision,
-} from "drizzle-orm/pg-core";
+// TypeScript type definitions for database tables
+// Used with Supabase (no Drizzle dependencies)
 
 // ------------------------------------------------------------------
-// ADDRESSES
+// ORDER STATUS TYPES
 // ------------------------------------------------------------------
-export const addresses = pgTable("addresses", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  customerId: uuid("customer_id").notNull(),
-  label: text("label"),
-  line1: text("line1"),
-  line2: text("line2"),
-  city: text("city"),
-  state: text("state"),
-  postalCode: text("postal_code"),
-  latitude: doublePrecision("latitude"),
-  longitude: doublePrecision("longitude"),
-  isDefault: boolean("is_default").default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+export const ORDER_STATUSES = [
+  'scheduled',
+  'picked_up', 
+  'processing',
+  'ready_for_delivery',
+  'en_route_delivery',
+  'delivered',
+  'completed',
+  'canceled'
+] as const;
+
+export type OrderStatus = typeof ORDER_STATUSES[number];
 
 // ------------------------------------------------------------------
-// ADMINS
+// DATABASE TABLE TYPES
 // ------------------------------------------------------------------
-export const admins = pgTable("admins", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  authUserId: uuid("auth_user_id").notNull(),
-  fullName: text("full_name"),
-  email: text("email").unique(),
-  permissions: jsonb("permissions"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
 
-// ------------------------------------------------------------------
-// CUSTOMERS
-// ------------------------------------------------------------------
-export const customers = pgTable("customers", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  authUserId: uuid("auth_user_id"),
-  fullName: text("full_name").notNull(),
-  email: text("email").unique().notNull(),
-  phone: text("phone"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  stripeCustomerId: text("stripe_customer_id"),
-});
+export interface Address {
+  id: string;
+  customer_id: string;
+  label?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  latitude?: number;
+  longitude?: number;
+  is_default?: boolean;
+  created_at?: string;
+}
 
-// ------------------------------------------------------------------
-// DAILY CAPACITY
-// ------------------------------------------------------------------
-export const dailyCapacity = pgTable("daily_capacity", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  serviceDate: date("service_date"),
-  zoneId: uuid("zone_id"),
-  timeWindowId: uuid("time_window_id"),
-  pickupCapacity: integer("pickup_capacity"),
-  deliveryCapacity: integer("delivery_capacity"),
-});
+export interface Admin {
+  id: string;
+  auth_user_id: string;
+  full_name?: string;
+  email?: string;
+  permissions?: any;
+  created_at?: string;
+}
 
-// ------------------------------------------------------------------
-// DRIVER ASSIGNMENTS
-// ------------------------------------------------------------------
-export const driverAssignments = pgTable("driver_assignments", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  driverId: uuid("driver_id"),
-  serviceDate: date("service_date"),
-  zoneId: uuid("zone_id"),
-  timeWindowId: uuid("time_window_id"),
-});
+export interface Customer {
+  id: string;
+  auth_user_id?: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  created_at?: string;
+  stripe_customer_id?: string;
+}
 
-// ------------------------------------------------------------------
-// DRIVERS
-// ------------------------------------------------------------------
-export const drivers = pgTable("drivers", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  fullName: text("full_name").notNull(),
-  phone: text("phone"),
-  active: boolean("active").default(true),
-  authUserId: uuid("auth_user_id"),
-});
+export interface DailyCapacity {
+  id: string;
+  service_date?: string;
+  zone_id?: string;
+  time_window_id?: string;
+  pickup_capacity?: number;
+  delivery_capacity?: number;
+}
 
-// ------------------------------------------------------------------
-// MEMBERSHIPS
-// ------------------------------------------------------------------
-export const memberships = pgTable("memberships", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  customerId: uuid("customer_id").notNull(),
-  stripeCustomerId: text("stripe_customer_id"),
-  stripeSubscriptionId: text("stripe_subscription_id"),
-  status: text("status").default("active"),
-  membershipType: text("membership_type"), // e.g. bag, per-pound, premium
-  startDate: date("start_date"),
-  endDate: date("end_date"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+export interface DriverAssignment {
+  id: string;
+  driver_id?: string;
+  service_date?: string;
+  zone_id?: string;
+  time_window_id?: string;
+}
 
-// ------------------------------------------------------------------
-// NOTIFICATIONS
-// ------------------------------------------------------------------
-export const notifications = pgTable("notifications", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  orderId: uuid("order_id"),
-  channel: text("channel"), // e.g. SMS, email, push
-  event: text("event"), // e.g. order_status_update
-  payload: jsonb("payload"),
-  sentAt: timestamp("sent_at", { withTimezone: true }),
-});
+export interface Driver {
+  id: string;
+  full_name: string;
+  phone?: string;
+  active?: boolean;
+  auth_user_id?: string;
+}
 
-// ------------------------------------------------------------------
-// ORDERS
-// ------------------------------------------------------------------
-export const orders = pgTable("orders", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  customerId: uuid("customer_id").notNull(),
-  addressId: uuid("address_id"),
-  serviceType: text("service_type"), // e.g. wash_and_fold
-  planType: text("plan_type"), // e.g. member, non-member
-  notes: text("notes"),
-  preferences: jsonb("preferences"),
-  pickupDate: date("pickup_date"),
-  pickupTimeWindowId: uuid("pickup_time_window_id"),
-  zoneId: uuid("zone_id"),
-  pickupConfirmedAt: timestamp("pickup_confirmed_at", { withTimezone: true }),
-  deliveryDate: date("delivery_date"),
-  deliveryTimeWindowId: uuid("delivery_time_window_id"),
-  measuredWeightLb: numeric("measured_weight_lb", { precision: 10, scale: 2 }),
+export interface Membership {
+  id: string;
+  customer_id: string;
+  stripe_customer_id?: string;
+  stripe_subscription_id?: string;
+  status?: string;
+  membership_type?: string;
+  start_date?: string;
+  end_date?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
-  // === Driver Workflow ===
-  status: text("status", {
-    enum: [
-      "scheduled",
-      "picked_up",
-      "processing",
-      "ready_for_delivery",
-      "en_route_delivery",
-      "delivered",
-      "completed",
-      "canceled",
-    ],
-  }).notNull().default("scheduled"),
+export interface Notification {
+  id: string;
+  order_id?: string;
+  channel?: string;
+  event?: string;
+  payload?: any;
+  sent_at?: string;
+}
 
-  pickupPhoto: text("pickup_photo"),
-  laundryPhoto: text("laundry_photo"),
-  deliveryPhoto: text("delivery_photo"),
+export interface Order {
+  id: string;
+  customer_id: string;
+  address_id?: string;
+  service_type?: string;
+  plan_type?: string;
+  notes?: string;
+  preferences?: any;
+  pickup_date?: string;
+  pickup_time_window_id?: string;
+  zone_id?: string;
+  pickup_confirmed_at?: string;
+  delivery_date?: string;
+  delivery_time_window_id?: string;
+  measured_weight_lb?: number;
+  
+  // Driver Workflow Fields
+  status: OrderStatus;
+  pickup_photo?: string;
+  laundry_photo?: string;
+  delivery_photo?: string;
+  picked_up_at?: string;
+  ready_for_delivery_at?: string;
+  delivered_at?: string;
+  updated_at?: string;
+  
+  // Driver tracking
+  driver_id?: string;
+  delivery_notes?: string;
+}
 
-  pickedUpAt: timestamp("picked_up_at", { withTimezone: true }),
-  readyForDeliveryAt: timestamp("ready_for_delivery_at", { withTimezone: true }),
-  deliveredAt: timestamp("delivered_at", { withTimezone: true }),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+export interface OrderStatusHistory {
+  id: string;
+  order_id: string;
+  status: string;
+  changed_by?: string;
+  changed_at?: string;
+}
 
-// ------------------------------------------------------------------
-// ORDER STATUS HISTORY (Audit Trail)
-// ------------------------------------------------------------------
-export const orderStatusHistory = pgTable("order_status_history", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  orderId: uuid("order_id").notNull().references(() => orders.id),
-  status: text("status").notNull(),
-  changedBy: uuid("changed_by"),
-  changedAt: timestamp("changed_at", { withTimezone: true }).defaultNow(),
-});
+export interface ServiceZone {
+  id: string;
+  name?: string;
+  description?: string;
+}
 
-// ------------------------------------------------------------------
-// SERVICE ZONES
-// ------------------------------------------------------------------
-export const serviceZones = pgTable("service_zones", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name"),
-  description: text("description"),
-});
+export interface TimeWindow {
+  id: string;
+  label?: string;
+  start_time?: string;
+  end_time?: string;
+}
 
-// ------------------------------------------------------------------
-// TASKS
-// ------------------------------------------------------------------
-export const tasks = pgTable("tasks", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  title: text("title"),
-  description: text("description"),
-  completed: boolean("completed").default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
-
-// ------------------------------------------------------------------
-// TIME WINDOWS
-// ------------------------------------------------------------------
-export const timeWindows = pgTable("time_windows", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  label: text("label"), // e.g. "8AM–10AM"
-  startTime: text("start_time"),
-  endTime: text("end_time"),
-});
-
-// ------------------------------------------------------------------
-// USERS
-// ------------------------------------------------------------------
-export const users = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  authUserId: uuid("auth_user_id"),
-  role: text("role").default("customer"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+export interface User {
+  id: string;
+  auth_user_id?: string;
+  role?: string;
+  created_at?: string;
+}

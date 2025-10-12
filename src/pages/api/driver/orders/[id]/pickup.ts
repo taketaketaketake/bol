@@ -7,13 +7,7 @@
 import type { APIRoute } from 'astro';
 import { requireAdmin } from '../../../../../utils/require-roles';
 import { uploadImage, generatePhotoPath, validateImageFile } from '../../../../../utils/storage';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-
-// Service role client for trusted database operations
-const serviceClient: SupabaseClient = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
-);
+import { updateOrderStatus } from '../../../../../utils/order-status';
 
 // Helper for conditional logging
 const log = (message: string, data?: any) => {
@@ -52,33 +46,6 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
     // Validate image file
     await validateImageFile(photo);
 
-    // Retrieve the order from database
-    const { data: order, error: orderError } = await serviceClient
-      .from('orders')
-      .select('id, status, customer_id')
-      .eq('id', orderId)
-      .single();
-
-    if (orderError || !order) {
-      log('Order not found:', { orderId, error: orderError });
-      return new Response(
-        JSON.stringify({ error: 'Order not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Validate status transition
-    if (order.status !== 'scheduled') {
-      return new Response(
-        JSON.stringify({
-          error: `Cannot pickup order with status: ${order.status}`,
-          currentStatus: order.status,
-          validTransition: 'scheduled → picked_up'
-        }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Upload pickup photo with safe extension handling
     const ext = (photo.name?.split('.').pop() || 'jpg').toLowerCase();
     const photoPath = generatePhotoPath(orderId, 'pickup', ext);
@@ -88,9 +55,8 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
 
     const pickedUpAt = new Date().toISOString();
 
-    // Prepare update data (skip updated_at since we have database trigger)
-    const updateData: any = {
-      status: 'picked_up',
+    // Prepare additional data for status update
+    const additionalData: any = {
       pickup_photo: photoUrl,
       picked_up_at: pickedUpAt,
       driver_id: user.id // Track which driver did the pickup
@@ -98,42 +64,32 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
 
     // Add actual weight if provided
     if (actualWeight && !isNaN(Number(actualWeight))) {
-      updateData.measured_weight_lb = Number(actualWeight);
+      additionalData.measured_weight_lb = Number(actualWeight);
     }
 
-    // Update order status and photo
-    const { error: updateError } = await serviceClient
-      .from('orders')
-      .update(updateData)
-      .eq('id', orderId);
+    // Update order status using centralized utility
+    const result = await updateOrderStatus({
+      orderId,
+      newStatus: 'picked_up',
+      userId: user.id,
+      additionalData
+    });
 
-    if (updateError) {
-      console.error('[driver-pickup] Error updating order:', updateError);
+    if (!result.success) {
+      log('Status update failed:', { orderId, error: result.error });
       return new Response(
-        JSON.stringify({ error: 'Failed to update order status' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          error: result.error || 'Failed to update order status',
+          validTransition: result.validTransition
+        }),
+        { status: result.error?.includes('not found') ? 404 : 400, headers: { 'Content-Type': 'application/json' } }
       );
-    }
-
-    // Log status change to audit trail
-    const { error: auditError } = await serviceClient
-      .from('order_status_history')
-      .insert({
-        order_id: orderId,
-        status: 'picked_up',
-        changed_by: user.id,
-        changed_at: pickedUpAt
-      });
-
-    if (auditError) {
-      console.error('[driver-pickup] Error logging status change:', auditError);
-      // Continue anyway - main operation succeeded
     }
 
     log('Driver pickup completed successfully:', {
       orderId,
       photoUrl,
-      actualWeight: updateData.measured_weight_lb,
+      actualWeight: additionalData.measured_weight_lb,
       driverId: user.id
     });
 
@@ -141,11 +97,12 @@ export const POST: APIRoute = async ({ params, request, cookies }) => {
       JSON.stringify({
         success: true,
         orderId,
-        status: 'picked_up',
+        status: result.status,
         photoUrl,
         pickedUpAt,
-        actualWeight: updateData.measured_weight_lb || null,
+        actualWeight: additionalData.measured_weight_lb || null,
         driverId: user.id,
+        updatedAt: result.updatedAt,
         message: 'Order picked up successfully'
       }),
       {
