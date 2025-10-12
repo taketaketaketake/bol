@@ -1,32 +1,42 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { calculatePricing } from '../../utils/pricing';
+import { getMemberIfPresent } from '../../utils/require-roles';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 });
 
+// Use service role key for trusted server-side operations (bypasses RLS)
 const supabase = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
     const {
       orderId,
       paymentIntentId,
       actualWeight,
-      ratePerPound = 249, // $2.49 per pound in cents
-      minimumCharge = 3500, // $35 minimum in cents
       addOns = [],
       rushFee = 0
     } = body;
 
-    // Calculate actual total based on weight
-    const weightCharge = Math.round(actualWeight * ratePerPound);
-    const serviceCharge = Math.max(weightCharge, minimumCharge);
+    // Check membership status to determine correct rate
+    const memberResult = await getMemberIfPresent(cookies);
+    const isMember = memberResult !== null;
+
+    // Use centralized pricing logic for consistency
+    const pricingResult = calculatePricing({
+      weightInPounds: actualWeight,
+      isMember
+    });
+    
+    const serviceCharge = pricingResult.total;
+    const ratePerPound = pricingResult.ratePerPound!;
 
     // Calculate add-ons
     const addOnTotal = addOns.reduce((sum: number, addon: any) => sum + addon.price, 0);
@@ -36,6 +46,27 @@ export const POST: APIRoute = async ({ request }) => {
     // Get the payment intent to check current authorized amount
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     const authorizedAmount = paymentIntent.amount;
+
+    // Log weight differences for monitoring and store anomalies
+    const amountDifference = Math.abs(finalTotal - authorizedAmount);
+    if (amountDifference > 100) { // More than $1 difference
+      console.info(`[CAPTURE] Significant amount change: authorized=${authorizedAmount}, final=${finalTotal}, orderId=${orderId}`);
+      
+      // Store anomaly for analytics (non-blocking)
+      supabase
+        .from('payment_anomalies')
+        .insert({
+          order_id: orderId,
+          payment_intent_id: paymentIntentId,
+          authorized_amount: authorizedAmount,
+          final_amount: finalTotal,
+          difference_cents: finalTotal - authorizedAmount,
+          created_at: new Date().toISOString()
+        })
+        .then(({ error }) => {
+          if (error) console.warn('[CAPTURE] Failed to log anomaly:', error);
+        });
+    }
 
     if (finalTotal > authorizedAmount) {
       // Need to update the payment intent amount before capturing
@@ -56,10 +87,16 @@ export const POST: APIRoute = async ({ request }) => {
         measured_weight_lb: actualWeight,
         unit_rate_cents: ratePerPound,
         subtotal_cents: serviceCharge,
+        add_on_total_cents: addOnTotal,
         rush_fee_cents: rushFee,
         total_cents: finalTotal,
         payment_status: 'paid',
-        status: 'processing'
+        status: 'processing',
+        // Store membership status for record keeping
+        member_rate_applied: isMember,
+        minimum_order_applied: pricingResult.minimumOrderApplied,
+        // Store Stripe charge ID for financial reconciliation
+        stripe_charge_id: capturedPayment.latest_charge || capturedPayment.id
       })
       .eq('id', orderId);
 
@@ -76,6 +113,11 @@ export const POST: APIRoute = async ({ request }) => {
         success: true,
         capturedAmount: finalTotal,
         actualWeight: actualWeight,
+        memberRateApplied: isMember,
+        ratePerPound: ratePerPound,
+        minimumOrderApplied: pricingResult.minimumOrderApplied,
+        memberSavings: pricingResult.savings,
+        stripeChargeId: capturedPayment.latest_charge || capturedPayment.id,
         priceBreakdown: {
           serviceCharge,
           addOns: addOnTotal,

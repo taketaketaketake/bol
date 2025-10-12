@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { requireAuth, createAuthErrorResponse } from "../../../utils/require-auth";
+import { createAuthErrorResponse } from "../../../utils/require-auth";
+import { requireAdmin } from "../../../utils/require-roles";
 import { eq } from "drizzle-orm";
 import { articles } from "../../../db/schema";
 import { db } from "../../../db/client";
@@ -51,15 +52,18 @@ export const GET: APIRoute = async ({ params }) => {
 };
 
 /**
- * @description Handles PATCH requests to update an article. Requires authentication.
+ * @description Handles PATCH requests to update an article. Requires admin access.
  * @route /api/articles/[id]
  * @method PATCH
  */
 export const PATCH: APIRoute = async ({ request, params, cookies }) => {
-  console.info("[PATCH] Incoming article update request");
-  
+  try {
+    console.info("[PATCH] Incoming article update request");
+    
+    // Require admin access for article updates
+    const { user } = await requireAdmin(cookies);
+    
     const id = z.coerce.number().int().positive().parse(params.id);
-
     const body = await request.json();
     const updateFields = ArticleUpdateSchema.parse(body);
 
@@ -70,16 +74,12 @@ export const PATCH: APIRoute = async ({ request, params, cookies }) => {
       }), { status: 400 });
     }
 
+    // Add updated timestamp
     const updated = await db
       .update(articles)
       .set({
-        title: updateFields.title,
-        slug: updateFields.slug,
-        excerpt: updateFields.excerpt,
-        content: updateFields.content,
-        authorId: updateFields.authorId,
-        featuredImage: updateFields.featuredImage,
-        status: updateFields.status,
+        ...updateFields,
+        updatedAt: new Date(),
       })
       .where(eq(articles.id, id))
       .returning();
@@ -103,10 +103,8 @@ export const PATCH: APIRoute = async ({ request, params, cookies }) => {
   } catch (error) {
     console.error('[PATCH] Error updating article:', error);
     
-    // Handle authentication errors
-    if (error instanceof Error && error.message.includes('Authentication')) {
-      return createAuthErrorResponse(error.message);
-    }
+    // Handle authentication/authorization errors
+    if (error instanceof Response) return error;
     
     return new Response(JSON.stringify({
       success: false,
@@ -116,37 +114,57 @@ export const PATCH: APIRoute = async ({ request, params, cookies }) => {
 };
 
 /**
- * @description Handles DELETE requests to mark an article as deleted.
+ * @description Handles DELETE requests to mark an article as deleted. Requires admin access.
  * @route /api/articles/[id]
  * @method DELETE
  */
-export const DELETE: APIRoute = async ({ params }) => {
-  console.info('[DELETE] Incoming article delete request');
-  const id = z.coerce.number().int().positive().parse(params.id);
+export const DELETE: APIRoute = async ({ params, cookies }) => {
+  try {
+    console.info('[DELETE] Incoming article delete request');
+    
+    // Require admin access for article deletion
+    const { user } = await requireAdmin(cookies);
+    
+    const id = z.coerce.number().int().positive().parse(params.id);
 
-  console.debug(`[DELETE] Marking article ID ${id} as deleted`);
-  const now = new Date();
-  const result = await db
-    .update(articles)
-    .set({ isDeleted: true, deletedAt: now })
-    .where(eq(articles.id, id))
-    .returning();
+    console.debug(`[DELETE] Marking article ID ${id} as deleted`);
+    const now = new Date();
+    const result = await db
+      .update(articles)
+      .set({ 
+        isDeleted: true, 
+        updatedAt: now 
+      })
+      .where(eq(articles.id, id))
+      .returning();
 
-  if (!result.length) {
-    console.warn(`[DELETE] No article found with ID ${id} to delete`);
+    if (!result.length) {
+      console.warn(`[DELETE] No article found with ID ${id} to delete`);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Article not found',
+      }), { status: 404 });
+    }
+
+    console.info(`[DELETE] Article ID ${id} marked as deleted by user ${user.id}`);
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Article deleted successfully',
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[DELETE] Error deleting article:', error);
+    
+    // Handle authentication/authorization errors
+    if (error instanceof Response) return error;
+    
     return new Response(JSON.stringify({
       success: false,
-      error: 'Article not found',
-    }), { status: 404 });
+      error: error instanceof Error ? error.message : 'Failed to delete article',
+    }), { status: 500 });
   }
-
-  console.info(`[DELETE] Article ID ${id} marked as deleted`);
-  return new Response(JSON.stringify({
-    success: true,
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
 };
 
 export const prerender = false;
