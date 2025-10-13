@@ -1,0 +1,55 @@
+---
+import Layout from '../layout/Layout.astro';
+---
+
+<Layout title="Page Not Found - Bags of Laundry">
+  <div class="min-h-screen bg-brand-bg flex items-center justify-center px-4">
+    <div class="max-w-md w-full text-center">
+      <!-- 404 Illustration -->
+      <div class="mb-8">
+        <div class="text-8xl font-bold text-brand-primary mb-4">404</div>
+        <div class="text-brand-orange text-4xl mb-4">🧺</div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold text-brand-text mb-4">
+          Oops! This page got lost in the wash
+        </h1>
+        <p class="text-brand-muted text-base leading-relaxed">
+          The page you're looking for doesn't exist. Don't worry though - 
+          we'll help you find your way back to clean laundry!
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-3">
+        <a 
+          href="/" 
+          class="block w-full bg-brand-primary hover:bg-brand-primary/90 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+        >
+          Back to Home
+        </a>
+        
+        <a 
+          href="/start-basic" 
+          class="block w-full bg-brand-orange hover:bg-brand-orange/90 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+        >
+          Start an Order
+        </a>
+        
+        <a 
+          href="/contact" 
+          class="block w-full border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+        >
+          Contact Support
+        </a>
+      </div>
+
+      <!-- Help Text -->
+      <div class="mt-8 text-sm text-brand-muted">
+        <p>Need help? Call us at <a href="tel:8559274224" class="text-brand-primary hover:underline font-medium">(855) WASH-BAGS</a></p>
+      </div>
+    </div>
+  </div>
+</Layout>
