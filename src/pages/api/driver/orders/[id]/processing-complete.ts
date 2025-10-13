@@ -5,7 +5,7 @@
  */
 
 import type { APIRoute } from 'astro';
-import { requireAdmin } from '../../../../../utils/require-roles';
+import { requireRole } from '../../../../../utils/require-role';
 import { updateOrderStatus } from '../../../../../utils/order-status';
 
 const log = (msg: string, data?: any) =>
@@ -13,8 +13,8 @@ const log = (msg: string, data?: any) =>
 
 export const POST: APIRoute = async ({ params, cookies }) => {
   try {
-    // 1️⃣ Auth check (admin or driver)
-    const { user } = await requireAdmin(cookies);
+    // 1️⃣ Auth check (driver or admin)
+    const { user, roles } = await requireRole(cookies, ['driver', 'admin']);
     const { id: orderId } = params;
 
     if (!orderId) {

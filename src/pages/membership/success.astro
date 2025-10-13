@@ -2,6 +2,7 @@
 export const prerender = false;
 import Layout from '../../layout/Layout.astro';
 import { getSession } from '../../utils/auth';
+import { MEMBERSHIP_SUBSCRIPTION_PRICE } from '../../utils/pricing';
 
 const { url } = Astro;
 const sessionId = url.searchParams.get('session_id');
@@ -157,6 +158,6 @@ const description = "Your membership is now active. Start saving on every order!
     console.log('Membership signup successful');
     
     // You can add analytics tracking here, e.g.:
-    // gtag('event', 'purchase', { value: 49.99, currency: 'USD' });
+    // gtag('event', 'purchase', { value: ${MEMBERSHIP_SUBSCRIPTION_PRICE}, currency: 'USD' });
   </script>
 </Layout>

@@ -3,6 +3,7 @@ import Layout from '../layout/Layout.astro';
 import { getSession } from '../utils/auth';
 import { checkMembershipStatus } from '../utils/membership';
 import { supabase } from '../lib/supabase';
+import { MEMBERSHIP_SUBSCRIPTION_PRICE } from '../utils/pricing';
 
 let isMember = false;
 let userEmail = '';
@@ -70,7 +71,7 @@ if (session?.user?.id) {
             <div class="p-8 text-center">
               <div class="mb-6">
                 <div class="text-5xl font-bold text-gray-900 mb-2">
-                  $49.99
+                  ${MEMBERSHIP_SUBSCRIPTION_PRICE.toFixed(2)}
                 </div>
                 <div class="text-gray-600 text-lg">
                   for 6 months
@@ -153,7 +154,7 @@ if (session?.user?.id) {
                   id="checkout-button"
                   class="block w-full max-w-md mx-auto py-4 px-8 bg-gradient-to-r from-orange-500 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-orange-600 hover:to-blue-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span id="button-text">Continue to Checkout — $49.99</span>
+                  <span id="button-text">Continue to Checkout — ${MEMBERSHIP_SUBSCRIPTION_PRICE.toFixed(2)}</span>
                   <span id="button-spinner" class="hidden">Loading...</span>
                 </button>
 

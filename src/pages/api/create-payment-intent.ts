@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
+import { MEMBERSHIP_SUBSCRIPTION_CENTS, MEMBERSHIP_PLAN, MEMBERSHIP_DURATION_MONTHS, MembershipTier, getPerPoundRate, MEMBERSHIP_TIERS, getUserTier } from '../../utils/pricing';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
@@ -56,14 +57,14 @@ export const POST: APIRoute = async ({ request }) => {
         });
       }
 
-      // Create membership subscription (6-month $49.99)
+      // Create membership subscription
       const membershipPrice = await stripe.prices.create({
-        unit_amount: 4999, // $49.99 in cents
+        unit_amount: MEMBERSHIP_SUBSCRIPTION_CENTS,
         currency: 'usd',
-        recurring: { interval: 'month', interval_count: 6 },
+        recurring: { interval: 'month', interval_count: MEMBERSHIP_DURATION_MONTHS },
         product_data: {
-          name: 'Bags of Laundry 6-Month Membership',
-          description: '6-month membership with discounted per-pound pricing and priority booking',
+          name: MEMBERSHIP_PLAN.name,
+          description: MEMBERSHIP_PLAN.description,
         },
       });
 
@@ -74,9 +75,16 @@ export const POST: APIRoute = async ({ request }) => {
         payment_settings: { save_default_payment_method: 'on_subscription' },
         expand: ['latest_invoice.payment_intent'],
         metadata: {
-          membershipType: 'annual',
-          signupOrderAmount: amount.toString(),
-          orderType: orderDetails?.orderType || 'unknown',
+          membership_tier: MembershipTier.MEMBER,
+          tier_label: MEMBERSHIP_TIERS[MembershipTier.MEMBER].label,
+          membership_plan: MEMBERSHIP_PLAN.name,
+          duration_months: MEMBERSHIP_DURATION_MONTHS.toString(),
+          price_per_pound: getPerPoundRate(MembershipTier.MEMBER).toString(),
+          membership_status: 'signup_in_progress',
+          order_type: 'membership_signup',
+          customer_id: customer.id,
+          signup_order_amount: amount.toString(),
+          legacy_membership_type: 'annual', // Keep for backwards compatibility
         },
       });
 
@@ -96,7 +104,7 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(
         JSON.stringify({
           clientSecret: paymentIntent.client_secret,
-          amount: 4999, // Membership subscription amount ($49.99)
+          amount: MEMBERSHIP_SUBSCRIPTION_CENTS, // Membership subscription amount
           orderAmount: discountedOrderAmount, // Discounted order amount (processed separately)
           membershipIncluded: true,
           customerId: customer.id,
@@ -110,10 +118,23 @@ export const POST: APIRoute = async ({ request }) => {
       );
     } else {
       // Regular order without membership
+      // Determine tier for this order (assumes non-member for regular orders)
+      const tier = MembershipTier.NON_MEMBER;
+      const isMember = false;
+      
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency,
         metadata: {
+          membership_tier: tier,
+          tier_label: MEMBERSHIP_TIERS[tier].label,
+          membership_plan: null, // Not applicable for laundry orders
+          duration_months: null, // Not applicable for laundry orders
+          price_per_pound: getPerPoundRate(tier).toString(),
+          membership_status: isMember ? 'active' : 'none',
+          order_type: 'laundry',
+          customer_id: orderDetails?.customerId || 'guest',
+          // Legacy fields for backwards compatibility
           orderType: orderDetails?.orderType || 'unknown',
           addMembership: 'false',
           customerEmail: orderDetails?.customerEmail || '',

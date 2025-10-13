@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { requireAuth, createAuthErrorResponse } from '../../utils/require-auth';
+import { MEMBERSHIP_SUBSCRIPTION_CENTS, MEMBERSHIP_PLAN, MEMBERSHIP_DURATION_MONTHS, MembershipTier, getPerPoundRate, MEMBERSHIP_TIERS } from '../../utils/pricing';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
@@ -86,13 +87,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Bags of Laundry - 6 Month Membership',
+              name: MEMBERSHIP_PLAN.name,
               description: 'Save $0.50/lb + unlock per-bag pricing',
             },
-            unit_amount: 4999, // $49.99
+            unit_amount: MEMBERSHIP_SUBSCRIPTION_CENTS,
             recurring: {
               interval: 'month',
-              interval_count: 6,
+              interval_count: MEMBERSHIP_DURATION_MONTHS,
             },
           },
           quantity: 1,
@@ -101,6 +102,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       success_url: `${new URL(request.url).origin}/membership/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${new URL(request.url).origin}/membership?canceled=true`,
       metadata: {
+        membership_tier: MembershipTier.MEMBER,
+        tier_label: MEMBERSHIP_TIERS[MembershipTier.MEMBER].label,
+        membership_plan: MEMBERSHIP_PLAN.name,
+        duration_months: MEMBERSHIP_DURATION_MONTHS.toString(),
+        price_per_pound: getPerPoundRate(MembershipTier.MEMBER).toString(),
+        membership_status: 'checkout_in_progress',
+        order_type: 'membership_checkout',
         customer_id: customer.id,
         auth_user_id: user.id,
       },

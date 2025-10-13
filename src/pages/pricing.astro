@@ -2,6 +2,7 @@
 import Layout from '../layout/Layout.astro';
 import MemberToggle from '../components/MemberToggle';
 import PriceCalculator from '../components/PriceCalculator';
+import { MEMBERSHIP_SUBSCRIPTION_PRICE } from '../utils/pricing';
 
 // SEO Meta
 const title = "Pricing | Laundry Pickup & Delivery in Detroit | Bags of Laundry";
@@ -113,7 +114,7 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8 sm:mb-12">
           <h2 class="section-title text-brand-text mb-4">Membership Pays for Itself</h2>
-          <p class="text-gray-600 text-sm sm:text-base">See how quickly you'll recover your $49.99 membership fee and start saving</p>
+          <p class="text-gray-600 text-sm sm:text-base">See how quickly you'll recover your ${MEMBERSHIP_SUBSCRIPTION_PRICE.toFixed(2)} membership fee and start saving</p>
           <div class="inline-block bg-orange-100 border border-orange-200 rounded-xl px-6 py-3 mt-4">
             <p class="text-brand-primaryDeep font-semibold text-sm">
               💎 Plus get up to $60 in free rush services (6 months × $10/month)
@@ -174,7 +175,7 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
               <div class="border-t-2 border-orange-300 pt-4 mt-4">
                 <div class="flex justify-between items-center">
                   <span class="text-base font-bold text-brand-text">Membership Cost</span>
-                  <span class="text-2xl font-black text-brand-text">$49.99</span>
+                  <span class="text-2xl font-black text-brand-text">${MEMBERSHIP_SUBSCRIPTION_PRICE.toFixed(2)}</span>
                 </div>
                 <p class="text-xs text-gray-500 mt-2">Just $8.33/month for 6 months of savings</p>
               </div>
@@ -221,7 +222,7 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
             </table>
           </div>
           <p class="text-xs text-gray-500 p-4 bg-gray-50 border-t border-gray-200">
-            * Includes $49.99 membership fee. All calculations based on 6-month period.<br>
+            * Includes ${MEMBERSHIP_SUBSCRIPTION_PRICE.toFixed(2)} membership fee. All calculations based on 6-month period.<br>
             ** Savings include per-pound discount + $60 value from 6 free rush services ($10/month × 6 months)
           </p>
         </div>

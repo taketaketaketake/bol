@@ -7,6 +7,7 @@ export interface PricingInput {
   weightInPounds?: number;
   bagSize?: 'small' | 'medium' | 'large';
   isMember?: boolean;
+  tier?: MembershipTier; // Optional tier parameter for new enum-based pricing
 }
 
 export interface PricingResult {
@@ -65,7 +66,8 @@ export const MINIMUM_ORDER = MINIMUM_ORDER_CENTS / 100;
 export function calculatePricing({
   weightInPounds,
   bagSize,
-  isMember = false
+  isMember = false,
+  tier
 }: PricingInput): PricingResult {
   // ── Handle per-bag pricing ──
   if (bagSize) {
@@ -86,7 +88,10 @@ export function calculatePricing({
   }
 
   // ── Handle per-pound pricing ──
-  const ratePerPound = isMember ? MEMBER_RATE_CENTS : STANDARD_RATE_CENTS;
+  // Use tier if provided, otherwise fallback to isMember boolean
+  const membershipTier = tier ?? getUserTier(isMember);
+  const ratePerPoundDollars = getPerPoundRate(membershipTier);
+  const ratePerPound = Math.round(ratePerPoundDollars * 100); // Convert to cents
   const subtotal = Math.round(weightInPounds * ratePerPound);
   const total = Math.max(subtotal, MINIMUM_ORDER_CENTS);
 
@@ -96,9 +101,9 @@ export function calculatePricing({
     subtotal,
     total,
     minimumOrderApplied: total > subtotal,
-    isMember,
-    savings: isMember
-      ? Math.round(weightInPounds * (STANDARD_RATE_CENTS - MEMBER_RATE_CENTS))
+    isMember: membershipTier === MembershipTier.MEMBER,
+    savings: membershipTier === MembershipTier.MEMBER
+      ? Math.round(weightInPounds * (getPerPoundRate(MembershipTier.NON_MEMBER) - getPerPoundRate(MembershipTier.MEMBER)) * 100)
       : 0
   };
 }
@@ -125,10 +130,12 @@ export function meetsMinimumOrder(amountInCents: number): boolean {
 }
 
 /**
- * Get rate per pound based on membership status
+ * Get rate per pound based on membership status (in cents)
+ * @deprecated Use getPerPoundRate() with MembershipTier enum instead
  */
 export function getRatePerPound(isMember: boolean = false): number {
-  return isMember ? MEMBER_RATE_CENTS : STANDARD_RATE_CENTS;
+  const tier = getUserTier(isMember);
+  return Math.round(getPerPoundRate(tier) * 100);
 }
 
 /**
@@ -197,4 +204,80 @@ export function calculateBagPricingWithOverweight(
     overweightResult,
     total: basePrice + overweightResult.fee,
   };
+}
+
+// =============================
+// Membership Tier Enum
+// =============================
+
+export enum MembershipTier {
+  NON_MEMBER = 'non_member',
+  MEMBER = 'member',
+}
+
+// Map each tier to its attributes
+export const MEMBERSHIP_TIERS = {
+  [MembershipTier.NON_MEMBER]: {
+    label: 'Non-Member',
+    pricePerPound: 2.25,
+    description: 'Standard per-pound pricing with no membership benefits.',
+  },
+  [MembershipTier.MEMBER]: {
+    label: 'Member',
+    pricePerPound: 1.75,
+    membershipPrice: 49.99,
+    durationMonths: 6,
+    description: 'Enjoy discounted rates and priority service for six months.',
+  },
+} as const;
+
+// =============================
+// Membership Subscription Pricing
+// =============================
+
+// $49.99 for 6 months (in Stripe-compatible cents)
+export const MEMBERSHIP_SUBSCRIPTION_CENTS = 4999;
+
+// Duration for one membership cycle (in months)
+export const MEMBERSHIP_DURATION_MONTHS = 6;
+
+// Readable version in dollars
+export const MEMBERSHIP_SUBSCRIPTION_PRICE = MEMBERSHIP_SUBSCRIPTION_CENTS / 100;
+
+// Centralized membership display data
+export const MEMBERSHIP_PLAN = {
+  name: '6-Month Laundry Membership',
+  priceDisplay: `${MEMBERSHIP_SUBSCRIPTION_PRICE.toFixed(2)}`,
+  durationMonths: MEMBERSHIP_DURATION_MONTHS,
+  description: 'Discounted rates and priority service for six months.',
+};
+
+// Date helper for membership expiration (requires date-fns if available)
+export function getMembershipExpiration(startDate = new Date()): Date {
+  // Add 6 months to start date
+  const expiration = new Date(startDate);
+  expiration.setMonth(expiration.getMonth() + MEMBERSHIP_DURATION_MONTHS);
+  return expiration;
+}
+
+// =============================
+// Membership Tier Helper Functions
+// =============================
+
+/**
+ * Get per-pound rate for a membership tier
+ * @param tier - The membership tier
+ * @returns Rate per pound in dollars
+ */
+export function getPerPoundRate(tier: MembershipTier): number {
+  return MEMBERSHIP_TIERS[tier].pricePerPound;
+}
+
+/**
+ * Convert boolean membership status to tier enum
+ * @param isMember - Boolean membership status
+ * @returns Corresponding membership tier
+ */
+export function getUserTier(isMember: boolean): MembershipTier {
+  return isMember ? MembershipTier.MEMBER : MembershipTier.NON_MEMBER;
 }
