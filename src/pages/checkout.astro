@@ -307,6 +307,84 @@ const description = "Review your laundry service order and complete your booking
               <p class="text-gray-600 bg-gray-50 rounded-lg p-3">{w.addonPrefs.notes}</p>
             </div>
           )}
+
+          <!-- Order Summary -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h2 class="text-xl font-semibold text-gray-900">Order Summary</h2>
+            </div>
+
+            <div class="space-y-3">
+              <!-- Base Service -->
+              <div class="flex justify-between items-center py-2">
+                <span class="text-gray-900">{formatOrderType(w.orderType)}</span>
+                <span class="font-medium text-gray-900">
+                  {w.orderType === 'per_pound'
+                    ? `$${(20 * getPerPoundRate(getUserTier(w.isMember || false))).toFixed(2)}`
+                    : w.orderType === 'small_bag' ? '$35.00'
+                    : w.orderType === 'medium_bag' ? '$55.00'
+                    : w.orderType === 'large_bag' ? '$85.00'
+                    : '$0.00'}
+                </span>
+              </div>
+
+              <!-- Specialty Items -->
+              {w.addons && (w.addons.comforter > 0 || w.addons.bedding_bundle > 0 || w.addons.dry_cleaning > 0) && (
+                <>
+                  {w.addons.comforter > 0 && (
+                    <div class="flex justify-between items-center py-2">
+                      <span class="text-gray-900">Comforter × {w.addons.comforter}</span>
+                      <span class="font-medium text-gray-900">${(20 * w.addons.comforter).toFixed(2)}</span>
+                    </div>
+                  )}
+                  {w.addons.bedding_bundle > 0 && (
+                    <div class="flex justify-between items-center py-2">
+                      <span class="text-gray-900">Bedding Bundle × {w.addons.bedding_bundle}</span>
+                      <span class="font-medium text-gray-900">${(25 * w.addons.bedding_bundle).toFixed(2)}</span>
+                    </div>
+                  )}
+                  {w.addons.dry_cleaning > 0 && (
+                    <div class="flex justify-between items-center py-2">
+                      <span class="text-gray-900">Dry Cleaning × {w.addons.dry_cleaning}</span>
+                      <span class="font-medium text-gray-900">${(8 * w.addons.dry_cleaning).toFixed(2)}</span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <!-- Add-on Services -->
+              {w.addonPrefs?.rush && (
+                <div class="flex justify-between items-center py-2">
+                  <span class="text-gray-900">Same-day rush service</span>
+                  <span class="font-medium text-gray-900">$10.00</span>
+                </div>
+              )}
+
+              <!-- Pickup & Delivery -->
+              <div class="flex justify-between items-center py-2">
+                <span class="text-gray-900">Pickup & delivery</span>
+                <span class="font-medium text-green-600">Free</span>
+              </div>
+
+              <!-- Total -->
+              <div class="border-t border-gray-200 pt-3 mt-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-lg font-semibold text-gray-900">Total</span>
+                  <span class="text-lg font-bold text-gray-900">${totals.grandTotal}</span>
+                </div>
+              </div>
+
+              <!-- Disclaimer -->
+              <p class="text-xs text-gray-500 mt-3 italic">
+                Final amount will be based on actual weight
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Payment Sidebar -->
