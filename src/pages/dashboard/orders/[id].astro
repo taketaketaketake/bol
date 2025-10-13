@@ -40,6 +40,12 @@ if (!orderId) {
   return Astro.redirect('/dashboard');
 }
 
+// Handle URL parameters for error/success messages (following dashboard.astro pattern)
+const url = new URL(Astro.request.url);
+const error = url.searchParams.get('error');
+const refundAmount = url.searchParams.get('refund');
+const cancelled = url.searchParams.get('cancelled');
+
 // Get customer ID to verify ownership
 const customerId = await getCustomerId(user.id, supabase);
 
@@ -90,6 +96,28 @@ const addons = order.addons ? (Array.isArray(order.addons) ? order.addons : []) 
           Back to Dashboard
         </a>
       </div>
+
+      <!-- Success/Error Messages (following dashboard.astro pattern) -->
+      {cancelled && (
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <p class="text-green-700 font-medium">
+            Order cancelled successfully.
+            {refundAmount && (
+              <span> A refund of ${refundAmount} has been processed.</span>
+            )}
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p class="text-red-700 font-medium">
+            {error === 'refund_failed' && 'We couldn\'t process your refund automatically. Please contact support for assistance.'}
+            {error === 'cancel_failed' && 'We couldn\'t cancel your order. Please try again or contact support.'}
+            {error === 'unexpected' && 'An unexpected error occurred.'}
+          </p>
+        </div>
+      )}
 
       <!-- Header -->
       <div class="mb-6">
