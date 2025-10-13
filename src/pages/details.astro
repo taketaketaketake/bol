@@ -4,6 +4,8 @@ import ProgressSteps from '../components/ProgressSteps';
 import { z } from "zod";
 import { readWizard, writeWizard } from "../utils/wizard.server";
 import { getSession } from "../utils/auth";
+// Modern membership tier system imports
+import { MembershipTier, getUserTier, getPerPoundRate } from "../utils/pricing";
 
 const Schema = z.object({
   fullName: z.string().min(2),
@@ -46,8 +48,9 @@ const session = await getSession(Astro.cookies);
 const userEmail = session?.user?.email || w.customer?.email || "";
 const userName = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || w.customer?.fullName || "";
 
-// Check membership status
-let isMember = false;
+// Check membership status using modern tier system
+let isMember = false; // Keep for backward compatibility
+let membershipTier = MembershipTier.NON_MEMBER; // Modern enum-based membership
 if (session?.user?.id) {
   const { supabase } = await import('../lib/supabase');
   const { checkMembershipStatus } = await import('../utils/membership');
@@ -58,14 +61,17 @@ if (session?.user?.id) {
     refresh_token: Astro.cookies.get('sb-refresh-token')?.value || ''
   });
 
+  // Check membership using legacy method, then convert to modern tier
   isMember = await checkMembershipStatus(session.user.id, supabase);
+  membershipTier = getUserTier(isMember); // Convert boolean to modern enum
 }
 
-// Determine pricing based on membership
-const perPoundRate = isMember ? '$1.75/lb' : '$2.25/lb';
-const perPoundDescription = isMember
-  ? '$1.75 per lb • 24-hour turnaround • Member pricing'
-  : '$2.25 per lb • 24-hour turnaround';
+// Get pricing using centralized pricing helper
+const perPoundRateValue = getPerPoundRate(membershipTier);
+const perPoundRate = `$${perPoundRateValue.toFixed(2)}/lb`;
+const perPoundDescription = membershipTier === MembershipTier.MEMBER
+  ? `$${perPoundRateValue.toFixed(2)} per lb • 24-hour turnaround • Member pricing`
+  : `$${perPoundRateValue.toFixed(2)} per lb • 24-hour turnaround`;
 
 // Redirect if prerequisites not met
 if (!w.addonPrefs) {
@@ -129,7 +135,7 @@ const description = "Enter your contact information to complete your laundry ser
                 <div>
                   <label class="block font-medium text-gray-900 mb-2">Full Name</label>
                   <input
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all duration-200 text-gray-900 placeholder-gray-500"
                     name="fullName"
                     placeholder="John Doe"
                     value={userName}
@@ -140,7 +146,7 @@ const description = "Enter your contact information to complete your laundry ser
                 <div>
                   <label class="block font-medium text-gray-900 mb-2">Email Address</label>
                   <input
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all duration-200 text-gray-900 placeholder-gray-500"
                     name="email"
                     type="email"
                     placeholder="john@example.com"
@@ -374,7 +380,7 @@ const description = "Enter your contact information to complete your laundry ser
               </a>
               <button
                 type="submit"
-                class="flex-1 bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-lg"
+                class="flex-1 bg-brand-primary text-white px-8 py-4 rounded-xl font-semibold hover:bg-brand-primary/90 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-lg"
               >
                 Continue to Payment
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

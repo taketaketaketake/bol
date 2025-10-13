@@ -4,7 +4,8 @@ import ProgressSteps from '../components/ProgressSteps';
 import StripeElements from '../components/StripeElements';
 import { readWizard, clearWizard, writeWizard } from "../utils/wizard.server";
 import { getSession } from "../utils/auth";
-import { MEMBERSHIP_SUBSCRIPTION_PRICE } from '../utils/pricing';
+// Modern membership tier system imports
+import { MEMBERSHIP_SUBSCRIPTION_PRICE, MembershipTier, getUserTier, getPerPoundRate, calculatePricing } from '../utils/pricing';
 
 // Server-side handling
 let w = {};
@@ -56,18 +57,18 @@ const formatOrderType = (orderType: string) => {
   }
 };
 
-// Calculate itemized total
+// Calculate itemized total using modern pricing system
 const calculateTotal = () => {
   let baseTotal = 3375; // Default $33.75 in cents
 
-  // Determine rate based on membership status
-  const memberRate = 175; // $1.75/lb in cents
-  const nonMemberRate = 225; // $2.25/lb in cents
-  const currentRate = w.isMember ? memberRate : nonMemberRate;
+  // Use modern membership tier system
+  const membershipTier = getUserTier(w.isMember || false);
+  const currentRateDollars = getPerPoundRate(membershipTier);
+  const currentRate = Math.round(currentRateDollars * 100); // Convert to cents
 
-  // Base service pricing
+  // Base service pricing using centralized logic
   if (w.orderType === 'per_pound') {
-    baseTotal = 20 * currentRate; // 20 lbs * current rate
+    baseTotal = 20 * currentRate; // 20 lbs * current rate from centralized pricing
   } else if (w.orderType === 'small_bag') {
     baseTotal = 3500; // $35 (members only)
   } else if (w.orderType === 'medium_bag') {
@@ -176,7 +177,7 @@ const description = "Review your laundry service order and complete your booking
                 <h3 class="font-medium text-gray-900">{formatOrderType(w.orderType)}</h3>
                 <p class="text-sm text-gray-600">
                   {w.orderType === 'per_pound'
-                    ? (w.isMember ? '$1.75 per lb • 24-hour turnaround' : '$2.25 per lb • 24-hour turnaround')
+                    ? `$${getPerPoundRate(getUserTier(w.isMember || false)).toFixed(2)} per lb • 24-hour turnaround`
                     : '24-hour turnaround'}
                 </p>
               </div>
@@ -184,7 +185,7 @@ const description = "Review your laundry service order and complete your booking
                 <span class="text-sm text-gray-500">Starting at</span>
                 <p class="font-semibold text-gray-900">
                   {w.orderType === 'per_pound'
-                    ? (w.isMember ? '$1.75/lb' : '$2.25/lb')
+                    ? `$${getPerPoundRate(getUserTier(w.isMember || false)).toFixed(2)}/lb`
                     : w.orderType === 'small_bag' ? '$35'
                     : w.orderType === 'medium_bag' ? '$55'
                     : w.orderType === 'large_bag' ? '$85'
@@ -428,7 +429,7 @@ const description = "Review your laundry service order and complete your booking
             </div>
 
             <!-- Membership Upsell (Non-Members Only) -->
-            {!w.isMember && (
+            {getUserTier(w.isMember || false) === MembershipTier.NON_MEMBER && (
               <div class="mb-6" id="membership-upsell">
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
                   <div class="flex items-start gap-4">
@@ -494,7 +495,7 @@ const description = "Review your laundry service order and complete your booking
             )}
 
             <!-- Member Status Badge (Members Only) -->
-            {w.isMember && (
+            {getUserTier(w.isMember || false) === MembershipTier.MEMBER && (
               <div class="mb-6">
                 <div class="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-xl p-6">
                   <div class="flex items-center gap-3">

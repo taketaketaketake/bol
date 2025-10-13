@@ -16,14 +16,22 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
     { href: "/laundromat-partners", label: "Partners" },
   ];
 
+  const role = session?.user?.app_metadata?.role || 'customer';
+  const dashboardHref = {
+    admin: '/dashboard/admin',
+    driver: '/dashboard/driver',
+    laundromat_staff: '/dashboard/staff',
+    customer: '/dashboard',
+  }[role] || '/dashboard';
+
   return (
     <header className="sticky top-0 z-50 bg-brand-bg/95 backdrop-blur-sm border-b border-brand-line">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <a href="/" className="flex items-center gap-2 hover:no-underline">
-            <img src="/images/t shirt.PNG" alt="Bags of Laundry" className="h-10 w-auto" />
-            <img src="/images/bags of laundry logo - Copy.png" alt="Bags of Laundry Logo" className="h-10 w-auto" />
+            <img src="/images/t shirt.PNG" alt="Bags of Laundry T-shirt icon" className="h-10 w-auto" />
+            <img src="/images/bags of laundry logo - Copy.png" alt="Bags of Laundry logo" className="h-10 w-auto" />
           </a>
 
           {/* Desktop nav */}
@@ -48,7 +56,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
             {session ? (
               <>
                 <a
-                  href="/dashboard"
+                  href={dashboardHref}
                   className={
                     currentPath === "/dashboard"
                       ? "text-brand-primary font-semibold"
@@ -104,7 +112,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
             {session ? (
               <>
                 <a
-                  href="/dashboard"
+                  href={dashboardHref}
                   className={
                     currentPath === "/dashboard"
                       ? "text-brand-primary font-semibold"
@@ -121,7 +129,7 @@ export default function SiteHeader({ session, currentPath }: SiteHeaderProps) {
             ) : (
               <>
                 <a href="/auth/login" className="btn-ghost">Sign In</a>
-                <a href="/schedule" className="btn w-full text-center">Schedule</a>
+                <a href="/start-basic" className="btn w-full text-center">Schedule</a>
               </>
             )}
           </nav>

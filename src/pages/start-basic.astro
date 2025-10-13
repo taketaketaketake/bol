@@ -177,7 +177,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
             </label>
             <input
               id="address-input"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all duration-200 text-gray-900 placeholder-gray-500"
               name="line1"
               placeholder="Enter your street address"
               value={w.address?.line1 || ""}
@@ -198,7 +198,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
               </label>
               <input
                 id="pickup-date"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all duration-200 text-gray-900"
                 type="date"
                 name="date"
                 min={minDate}
@@ -216,7 +216,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
                 Mobile Number
               </label>
               <input
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all duration-200 text-gray-900 placeholder-gray-500"
                 name="phone"
                 type="tel"
                 placeholder="(555) 123-4567"
@@ -232,7 +232,8 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
               Select Pickup Time Window
             </label>
             <div class="space-y-2">
-              <button type="button" class="time-window-btn w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-300 hover:bg-blue-50 transition-all duration-200" data-window="morning">
+              <!-- Modern design with brand colors -->
+              <button type="button" class="time-window-btn w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-brand-primary hover:bg-brand-primary/10 transition-all duration-200" data-window="morning">
                 <div class="flex justify-between items-center">
                   <div>
                     <div class="font-medium text-gray-900">Morning</div>
@@ -240,7 +241,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
                   </div>
                 </div>
               </button>
-              <button type="button" class="time-window-btn w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-300 hover:bg-blue-50 transition-all duration-200" data-window="afternoon">
+              <button type="button" class="time-window-btn w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-brand-primary hover:bg-brand-primary/10 transition-all duration-200" data-window="afternoon">
                 <div class="flex justify-between items-center">
                   <div>
                     <div class="font-medium text-gray-900">Afternoon</div>
@@ -248,7 +249,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
                   </div>
                 </div>
               </button>
-              <button type="button" class="time-window-btn w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-300 hover:bg-blue-50 transition-all duration-200" data-window="evening">
+              <button type="button" class="time-window-btn w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-brand-primary hover:bg-brand-primary/10 transition-all duration-200" data-window="evening">
                 <div class="flex justify-between items-center">
                   <div>
                     <div class="font-medium text-gray-900">Evening</div>
@@ -268,7 +269,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
               type="checkbox"
               id="sameAsPickup"
               name="sameAsPickup"
-              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              class="h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary"
               checked
             />
             <label for="sameAsPickup" class="ml-3 text-sm font-medium text-gray-900">
@@ -291,7 +292,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
             </label>
             <input
               id="dropoff-address-input"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all duration-200 text-gray-900 placeholder-gray-500"
               name="dropoffLine1"
               placeholder="Enter drop-off street address"
               value={w.dropoffAddress?.line1 || ""}
@@ -309,7 +310,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
             <input
               type="date"
               id="dropoff-date"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 sm:max-w-xs"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all duration-200 text-gray-900 sm:max-w-xs"
               name="dropoffDate"
               min={minDate}
               value={w.dropoffAddress?.date || ""}
@@ -346,7 +347,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
         <div class="flex flex-col sm:flex-row gap-3">
           <button
             type="submit"
-            class="flex-1 bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+            class="flex-1 bg-brand-primary text-white px-8 py-4 rounded-xl font-semibold hover:bg-brand-primary/90 hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
           >
             Continue to Services
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -447,7 +448,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
         }
 
         availabilityStatus.textContent = 'Checking availability...';
-        availabilityStatus.className = 'mt-1 text-xs text-blue-600';
+        availabilityStatus.className = 'mt-1 text-xs text-brand-primary';
 
         try {
           const response = await fetch('/api/check-availability', {
@@ -463,7 +464,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
             currentTimeWindows = data.timeWindows;
             displayTimeWindows(data.timeWindows);
             availabilityStatus.textContent = `✓ Available in ${data.zone.name}`;
-            availabilityStatus.className = 'mt-1 text-xs text-green-600';
+            availabilityStatus.className = 'mt-1 text-xs text-brand-accent';
             timeWindowSection?.classList.remove('hidden');
           } else {
             availabilityStatus.textContent = data.message || data.error || 'No availability for this date/location';
@@ -486,7 +487,7 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
 
           const windowButton = document.createElement('button');
           windowButton.type = 'button';
-          windowButton.className = `w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 time-window-option ${
+          windowButton.className = `w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-brand-primary hover:bg-brand-primary/10 transition-all duration-200 time-window-option ${
             window.availableSlots === 0 ? 'opacity-50 cursor-not-allowed' : ''
           }`;
           windowButton.disabled = window.availableSlots === 0;
@@ -509,12 +510,12 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
           windowButton.addEventListener('click', function() {
             if (this.disabled) return;
 
-            // Clear previous selections
+            // Clear previous selections (updated with brand colors)
             document.querySelectorAll('.time-window-option').forEach(btn => {
               btn.classList.remove('border-blue-500', 'bg-blue-50');
             });
 
-            // Select this window
+            // Select this window (updated with brand colors)
             this.classList.add('border-blue-500', 'bg-blue-50');
             selectedTimeWindow.value = window.id;
           });
