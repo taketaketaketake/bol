@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
-  CardElement,
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
   useStripe,
   useElements
 } from '@stripe/react-stripe-js';
@@ -30,6 +32,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   const [currentAmount, setCurrentAmount] = useState(amount);
   const [membershipSelected, setMembershipSelected] = useState(addMembership);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [cardholderName, setCardholderName] = useState('');
 
   useEffect(() => {
     // Create order and payment intent when component mounts
@@ -161,12 +164,18 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
     setLoading(true);
 
-    const card = elements.getElement(CardElement);
+    const cardNumber = elements.getElement(CardNumberElement);
 
-    if (!card) {
+    if (!cardNumber) {
       setLoading(false);
       return;
     }
+
+    // Sanitize cardholder name
+    const sanitizedName = cardholderName
+      .trim()
+      .replace(/[^a-zA-Z\s\-'\.]/g, '')
+      .substring(0, 50);
 
     if (membershipSelected) {
       // For subscription payments, use confirmPayment
@@ -200,9 +209,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       // For regular payments, use confirmCardPayment
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
-          card: card,
+          card: cardNumber,
           billing_details: {
-            name: orderDetails.customerName,
+            name: sanitizedName || orderDetails.customerName,
             email: orderDetails.customerEmail,
           },
         }
@@ -234,25 +243,75 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
   };
 
-  const cardElementOptions = {
+  const stripeElementOptions = {
     style: {
       base: {
         fontSize: '16px',
-        color: '#424770',
+        color: '#1f2937',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
         '::placeholder': {
-          color: '#aab7c4',
+          color: '#9ca3af',
         },
+        lineHeight: '24px',
       },
       invalid: {
-        color: '#9e2146',
+        color: '#ef4444',
+      },
+      complete: {
+        color: '#10b981',
       },
     },
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="p-4 border border-gray-300 rounded-xl bg-white">
-        <CardElement options={cardElementOptions} />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Cardholder Name */}
+      <div>
+        <label htmlFor="cardholderName" className="block text-sm font-medium text-gray-700 mb-2">
+          Cardholder Name
+        </label>
+        <input
+          type="text"
+          id="cardholderName"
+          value={cardholderName}
+          onChange={(e) => setCardholderName(e.target.value)}
+          placeholder="John Doe"
+          autoComplete="cc-name"
+          maxLength={50}
+          pattern="[a-zA-Z\s\-'\.]*"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all"
+          required
+        />
+      </div>
+
+      {/* Card Number */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Card Number
+        </label>
+        <div className="w-full px-4 py-3 border border-gray-300 rounded-xl focus-within:ring-2 focus-within:ring-brand-primary focus-within:border-brand-primary transition-all bg-white">
+          <CardNumberElement options={stripeElementOptions} />
+        </div>
+      </div>
+
+      {/* Expiry and CVC */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Expiry Date
+          </label>
+          <div className="w-full px-4 py-3 border border-gray-300 rounded-xl focus-within:ring-2 focus-within:ring-brand-primary focus-within:border-brand-primary transition-all bg-white">
+            <CardExpiryElement options={stripeElementOptions} />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            CVC
+          </label>
+          <div className="w-full px-4 py-3 border border-gray-300 rounded-xl focus-within:ring-2 focus-within:ring-brand-primary focus-within:border-brand-primary transition-all bg-white">
+            <CardCvcElement options={stripeElementOptions} />
+          </div>
+        </div>
       </div>
 
       <button

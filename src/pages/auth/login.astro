@@ -22,7 +22,8 @@ const { data: { session } } = await supabase.auth.setSession({
 });
 
 if (session && !hasHashFragment) {
-  return Astro.redirect('/dashboard');
+  const redirectTo = url.searchParams.get('redirect') || '/dashboard';
+  return Astro.redirect(redirectTo);
 }
 ---
 

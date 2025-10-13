@@ -91,44 +91,9 @@ const description = "Select your laundry service type and any specialty items.";
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Choose Your Service</h1>
         <p class="text-gray-600 mb-6">Select your pricing option and add any specialty items.</p>
 
-        <!-- Member Status Badge -->
-        <div id="member-status-badge" class="inline-block mb-4">
-          {membershipTier === MembershipTier.MEMBER ? (
-            <div class="bg-gradient-to-r from-brand-primary to-brand-accent text-white rounded-full px-6 py-2 font-bold">
-              ✨ Member Pricing Active
-            </div>
-          ) : (
-            <div class="bg-gray-100 text-gray-700 border border-gray-200 rounded-full px-6 py-2 font-semibold">
-              Non-Member Pricing
-            </div>
-          )}
-        </div>
 
-        <!-- Pricing Info -->
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-2xl mx-auto mb-4">
-          {membershipTier === MembershipTier.MEMBER ? (
-            <p class="text-sm text-gray-700">
-              <span class="font-bold text-brand-primary">${perPoundRate.toFixed(2)}/lb</span> per-pound pricing OR choose from convenient per-bag options below
-            </p>
-          ) : (
-            <p class="text-sm text-gray-700">
-              <span class="font-bold">${perPoundRate.toFixed(2)}/lb</span> per-pound pricing • <span class="text-brand-primary font-semibold">Become a member</span> to save $0.50/lb and unlock per-bag pricing
-            </p>
-          )}
-        </div>
 
-        <!-- Become Member CTA (Non-Members Only) -->
-        {membershipTier === MembershipTier.NON_MEMBER && (
-          <a
-            href="/pricing"
-            class="inline-flex items-center gap-2 bg-gradient-to-r from-brand-primary to-brand-accent text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-200"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Unlock Member Pricing & Per-Bag Options
-          </a>
-        )}
+        
       </div>
 
       <form method="post" class="space-y-12" id="order-form">
@@ -137,7 +102,12 @@ const description = "Select your laundry service type and any specialty items.";
 
         <!-- Per Pound -->
         <div>
-          <h2 class="text-xl font-bold mb-4">Per Pound</h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold">Per Pound</h2>
+            <span class="inline-block bg-gray-100 text-gray-500 border border-gray-200 rounded-full px-3 py-1 text-xs font-bold">
+              Non-Member Pricing
+            </span>
+          </div>
           <label class="cursor-pointer group block">
             <input
               type="radio"
@@ -313,7 +283,7 @@ const description = "Select your laundry service type and any specialty items.";
                 <div class="text-center">
                   <a
                     href="/pricing"
-                    class="inline-block bg-gradient-to-r from-orange-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold text-base shadow-2xl hover:shadow-orange-500/50 transition-all duration-200 transform hover:scale-105 hover:-translate-y-1"
+                    class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent text-white px-8 py-4 rounded-xl font-bold text-base shadow-2xl hover:shadow-lg transition-all duration-200 transform hover:scale-105 hover:-translate-y-1"
                   >
                     🔓 Become a Member to Unlock Per-Bag Pricing
                   </a>
