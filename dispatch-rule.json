@@ -1,9 +1,0 @@
-{
-  "rule": {
-    "name": "Bags of Laundry Inbound Calls",
-    "dispatchRuleDirect": {
-      "roomName": "call-${caller.number}",
-      "pin": ""
-    }
-  }
-}
