@@ -6,12 +6,12 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import netlify from '@astrojs/netlify';
 import sitemap from '@astrojs/sitemap';
-
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://bagsoflaundry.com', // Replace with your actual domain
+  site: 'https://bagsoflaundry.com',
+
   integrations: [
     react(),
     sitemap({
@@ -22,11 +22,14 @@ export default defineConfig({
         'https://bagsoflaundry.com/how-it-works'
       ],
       serialize(item) {
-        // Set different priorities for different page types
-        if (item.url.includes('/start-basic') || item.url.includes('/order-type') ||
-            item.url.includes('/addons') || item.url.includes('/details') ||
-            item.url.includes('/checkout') || item.url.includes('/confirm')) {
-          // Checkout flow pages - lower priority, noindex
+        if (
+          item.url.includes('/start-basic') ||
+          item.url.includes('/order-type') ||
+          item.url.includes('/addons') ||
+          item.url.includes('/details') ||
+          item.url.includes('/checkout') ||
+          item.url.includes('/confirm')
+        ) {
           return {
             ...item,
             priority: 0.3,
@@ -34,7 +37,6 @@ export default defineConfig({
           };
         }
         if (item.url.includes('/services') || item.url.includes('/pricing')) {
-          // High priority service pages
           return {
             ...item,
             priority: 0.9,
@@ -42,14 +44,12 @@ export default defineConfig({
           };
         }
         if (item.url === 'https://bagsoflaundry.com/') {
-          // Homepage - highest priority
           return {
             ...item,
             priority: 1.0,
             changefreq: 'daily'
           };
         }
-        // Default for other pages
         return {
           ...item,
           priority: 0.7,
@@ -58,10 +58,20 @@ export default defineConfig({
       }
     })
   ],
+
   output: 'server',
   adapter: netlify(),
 
   vite: {
-    plugins: [tailwindcss()]
-  }
+    plugins: [tailwindcss()],
+    server: {
+      allowedHosts: [
+        'localhost',
+        '127.0.0.1',
+        '.ngrok-free.app', // 👈 wildcard for any ngrok subdomain
+      ],
+      host: true, // 👈 ensure external access via ngrok works
+      strictPort: false, // avoid conflicts
+    },
+  },
 });
