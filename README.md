@@ -296,7 +296,6 @@ Order Created → Authorization Hold → Weight Captured → Final Charge
    npm run dev
    # Visit http://localhost:4323
 
-  npm run voice-agent to activate voice agent terminal
    ```
 
 ## 🧪 Testing the System

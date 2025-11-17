@@ -16,7 +16,6 @@ export const POST: APIRoute = async ({ request }) => {
 
     // TODO: Add your logic here:
     // - Save to Supabase or MongoDB
-    // - Trigger an AI reply or LiveKit voice call
     // - Send auto-responses with Telnyx API
 
     return new Response(JSON.stringify({ received: true }), {
