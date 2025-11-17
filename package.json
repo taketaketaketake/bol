@@ -6,16 +6,12 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "voice-agent:dev": "tsx src/voice-agent/index.ts",
-    "voice-agent": "tsx src/voice-agent/index.ts"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/netlify": "^6.5.11",
     "@astrojs/react": "^4.2.7",
     "@astrojs/sitemap": "^3.6.0",
-    "@livekit/agents": "^1.0.15",
-    "@livekit/protocol": "^1.42.2",
     "@stripe/react-stripe-js": "^4.0.2",
     "@stripe/stripe-js": "^7.9.0",
     "@supabase/supabase-js": "^2.49.5",
@@ -26,8 +22,6 @@
     "@types/ws": "^8.18.1",
     "astro": "^5.7.13",
     "dotenv": "^16.6.1",
-    "livekit-server-sdk": "^2.14.0",
-    "openai": "^6.7.0",
     "postgres": "^3.4.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -35,8 +29,6 @@
     "sweetalert2": "^11.21.2",
     "tailwindcss": "^4.1.7",
     "tsx": "^4.20.6",
-    "twilio": "^5.10.4",
-    "ws": "^8.18.3",
     "zod": "^3.25.7"
   }
 }
