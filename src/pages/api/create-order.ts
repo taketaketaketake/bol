@@ -5,6 +5,10 @@ import { calculatePricing, BAG_PRICING_CENTS } from '../../utils/pricing';
 import { PaymentStatus } from '../../utils/payment-status';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { sendOrderConfirmationEmail, sendNewOrderAlertEmail } from '../../utils/email';
+import OrderConfirmationEmail from '../../emails/OrderConfirmation';
+import NewOrderAlertEmail from '../../emails/NewOrderAlert';
+import * as React from 'react';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
@@ -320,6 +324,106 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
 
       log('PaymentIntent created:', paymentIntent.id);
+
+      // Send email notifications (don't block on email failures)
+      try {
+        // Get time window details for emails
+        const { data: timeWindowData } = await serviceClient
+          .from('time_windows')
+          .select('label, start_time, end_time')
+          .eq('id', resolvedTimeWindowId)
+          .single();
+
+        // Format pickup date for display
+        const pickupDateFormatted = new Date(pickupDate).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        // Format time window
+        const formatTime = (time: string) => {
+          const [hours, minutes] = time.split(':');
+          const hour = parseInt(hours);
+          const ampm = hour >= 12 ? 'PM' : 'AM';
+          const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+          return `${displayHour}:${minutes} ${ampm}`;
+        };
+
+        const pickupTimeWindowFormatted = timeWindowData
+          ? `${formatTime(timeWindowData.start_time)} - ${formatTime(timeWindowData.end_time)}`
+          : 'TBD';
+
+        // Format service type for display
+        const serviceTypeDisplay = serviceType === 'wash_fold' ? 'Wash & Fold' :
+                                   serviceType === 'dry_clean' ? 'Dry Cleaning' :
+                                   serviceType;
+
+        // Tracking URL (requires login)
+        const trackingUrl = `${import.meta.env.SITE_URL || 'https://bagsoflaundry.com'}/orders/${order.id}`;
+
+        // Send customer confirmation email
+        await sendOrderConfirmationEmail({
+          to: customerEmail,
+          orderId: order.id,
+          orderNumber: order.id.slice(0, 8),
+          customerName: customerName || 'Customer',
+          pickupAddress: `${pickupAddress.line1}${pickupAddress.line2 ? ', ' + pickupAddress.line2 : ''}, ${pickupAddress.city || 'Detroit'}, ${pickupAddress.state || 'MI'} ${pickupAddress.postal_code}`,
+          pickupDate: pickupDateFormatted,
+          pickupTimeWindow: pickupTimeWindowFormatted,
+          serviceType: serviceTypeDisplay,
+          estimatedTotal: estimatedTotal / 100,
+          trackingUrl,
+          react: React.createElement(OrderConfirmationEmail, {
+            orderNumber: order.id.slice(0, 8),
+            customerName: customerName || 'Customer',
+            pickupAddress: `${pickupAddress.line1}${pickupAddress.line2 ? ', ' + pickupAddress.line2 : ''}, ${pickupAddress.city || 'Detroit'}, ${pickupAddress.state || 'MI'} ${pickupAddress.postal_code}`,
+            pickupDate: pickupDateFormatted,
+            pickupTimeWindow: pickupTimeWindowFormatted,
+            serviceType: serviceTypeDisplay,
+            estimatedTotal: estimatedTotal / 100,
+            trackingUrl
+          })
+        });
+
+        log('Customer confirmation email sent');
+
+        // Send new order alert to admin
+        await sendNewOrderAlertEmail({
+          orderId: order.id,
+          orderNumber: order.id.slice(0, 8),
+          customerName: customerName || 'Customer',
+          customerEmail: customerEmail,
+          customerPhone: customerPhone,
+          pickupAddress: `${pickupAddress.line1}${pickupAddress.line2 ? ', ' + pickupAddress.line2 : ''}, ${pickupAddress.city || 'Detroit'}, ${pickupAddress.state || 'MI'} ${pickupAddress.postal_code}`,
+          pickupDate: pickupDateFormatted,
+          pickupTimeWindow: pickupTimeWindowFormatted,
+          serviceType: serviceTypeDisplay,
+          notes: notes,
+          estimatedTotal: estimatedTotal / 100,
+          react: React.createElement(NewOrderAlertEmail, {
+            orderNumber: order.id.slice(0, 8),
+            orderId: order.id,
+            customerName: customerName || 'Customer',
+            customerEmail: customerEmail,
+            customerPhone: customerPhone,
+            pickupAddress: `${pickupAddress.line1}${pickupAddress.line2 ? ', ' + pickupAddress.line2 : ''}, ${pickupAddress.city || 'Detroit'}, ${pickupAddress.state || 'MI'} ${pickupAddress.postal_code}`,
+            pickupDate: pickupDateFormatted,
+            pickupTimeWindow: pickupTimeWindowFormatted,
+            serviceType: serviceTypeDisplay,
+            notes: notes,
+            estimatedTotal: estimatedTotal / 100
+          })
+        });
+
+        log('Admin alert email sent');
+
+      } catch (emailError) {
+        // Log email errors but don't fail the order creation
+        console.error('[create-order] Email notification error:', emailError);
+        // Continue with success response - order was created successfully
+      }
 
       return new Response(
         JSON.stringify({
