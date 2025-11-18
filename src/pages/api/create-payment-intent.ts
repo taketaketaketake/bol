@@ -1,8 +1,12 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { MEMBERSHIP_SUBSCRIPTION_CENTS, MEMBERSHIP_PLAN, MEMBERSHIP_DURATION_MONTHS, MembershipTier, getPerPoundRate, MEMBERSHIP_TIERS, getUserTier } from '../../utils/pricing';
+import { getConfig } from '../../utils/env';
 
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
+// Get validated configuration
+const config = getConfig();
+
+const stripe = new Stripe(config.stripeSecretKey, {
   apiVersion: '2024-12-18.acacia',
 });
 
