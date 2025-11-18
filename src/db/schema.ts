@@ -52,6 +52,7 @@ export interface Customer {
   full_name: string;
   email: string;
   phone?: string;
+  sms_opt_in?: boolean;
   created_at?: string;
   stripe_customer_id?: string;
 }

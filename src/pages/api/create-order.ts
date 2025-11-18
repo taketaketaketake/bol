@@ -6,6 +6,7 @@ import { PaymentStatus } from '../../utils/payment-status';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { sendOrderConfirmationEmail, sendNewOrderAlertEmail } from '../../utils/email';
+import { sendOrderConfirmationSMS } from '../../utils/sms';
 import OrderConfirmationEmail from '../../emails/OrderConfirmation';
 import NewOrderAlertEmail from '../../emails/NewOrderAlert';
 import * as React from 'react';
@@ -392,6 +393,24 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         });
 
         log('Customer confirmation email sent');
+
+        // Send SMS confirmation if customer has phone and opted in
+        if (customerPhone && customer.sms_opt_in) {
+          try {
+            await sendOrderConfirmationSMS({
+              to: customerPhone,
+              orderId: order.id,
+              orderNumber: order.id.slice(0, 8),
+              customerName: customerName || 'Customer',
+              pickupDate: pickupDateFormatted,
+              pickupTimeWindow: pickupTimeWindowFormatted
+            });
+            log('Customer confirmation SMS sent');
+          } catch (smsError) {
+            // Log SMS errors but don't fail the order creation
+            console.error('[create-order] SMS notification error:', smsError);
+          }
+        }
 
         // Send new order alert to admin
         await sendNewOrderAlertEmail({
