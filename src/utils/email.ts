@@ -67,7 +67,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
     
     if (react) {
       try {
-        emailHtml = render(react);
+        emailHtml = await render(react);
         // Generate simple text version from HTML or use provided text
         emailText = text || `Please view this email in an HTML-capable email client.`;
         
