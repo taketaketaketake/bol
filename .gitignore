@@ -21,6 +21,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# test scripts with credentials
+test-email.js
+
 # macOS-specific files
 .DS_Store
 
