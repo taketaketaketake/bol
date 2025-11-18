@@ -4,8 +4,8 @@
 
   [build.environment]
     # Allow these public variables to be included in build output
-    # These are client-side tokens that need to be in the build output
-    SECRETS_SCAN_OMIT_KEYS = "PUBLIC_SUPABASE_URL,PUBLIC_SUPABASE_ANON_KEY,PUBLIC_MAPBOX_ACCESS_TOKEN,MAPBOX_ACCESS_TOKEN,PUBLIC_SITE_URL,NODE_ENV,PUBLIC_STRIPE_PUBLISHABLE_KEY,SUPABASE_ANON_KEY"
+    # These are client-side tokens and public contact info that need to be in the build output
+    SECRETS_SCAN_OMIT_KEYS = "PUBLIC_SUPABASE_URL,PUBLIC_SUPABASE_ANON_KEY,PUBLIC_MAPBOX_ACCESS_TOKEN,MAPBOX_ACCESS_TOKEN,PUBLIC_SITE_URL,NODE_ENV,PUBLIC_STRIPE_PUBLISHABLE_KEY,SUPABASE_ANON_KEY,YOUR_NOTIFICATION_EMAIL,RESEND_FROM_EMAIL"
     # Exclude build output directories from secrets scanning
     SECRETS_SCAN_OMIT_PATHS = "dist/**,build/**,.netlify/**"
     # Set production environment
