@@ -94,9 +94,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           const errorMessage = errorData.details
             ? `${errorData.error}: ${errorData.details}`
             : errorData.error || 'Failed to create order';
-          onPaymentError(errorMessage);
+          if (typeof onPaymentError === 'function') {
+            onPaymentError(errorMessage);
+          }
         } catch (e) {
-          onPaymentError(`Failed to create order: ${orderResponse.status} ${errorText}`);
+          if (typeof onPaymentError === 'function') {
+            onPaymentError(`Failed to create order: ${orderResponse.status} ${errorText}`);
+          }
         }
         return;
       }
@@ -105,7 +109,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
       if (!orderData.success) {
         console.error('[StripeElements] Order creation failed:', orderData);
-        onPaymentError(orderData.error || 'Failed to create order');
+        if (typeof onPaymentError === 'function') {
+          onPaymentError(orderData.error || 'Failed to create order');
+        }
         return;
       }
 
@@ -133,7 +139,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       const paymentData = await paymentResponse.json();
 
       if (paymentData.error) {
-        onPaymentError(paymentData.error);
+        if (typeof onPaymentError === 'function') {
+          onPaymentError(paymentData.error);
+        }
         return;
       }
 
@@ -151,7 +159,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       }
     } catch (error) {
       console.error('[StripeElements] Error initializing payment:', error);
-      onPaymentError('Failed to initialize payment');
+      if (typeof onPaymentError === 'function') {
+        onPaymentError('Failed to initialize payment');
+      }
     }
   };
 
@@ -191,7 +201,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       setLoading(false);
 
       if (result.error) {
-        onPaymentError(result.error.message || 'Payment failed');
+        if (typeof onPaymentError === 'function') {
+          onPaymentError(result.error.message || 'Payment failed');
+        }
       } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
         // Subscription payment succeeded
         console.log('[StripeElements] Subscription payment succeeded');
@@ -223,7 +235,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
       if (result.error) {
         console.error('[StripeElements] Stripe payment error:', result.error);
-        onPaymentError(result.error.message || 'Payment failed');
+        if (typeof onPaymentError === 'function') {
+          onPaymentError(result.error.message || 'Payment failed');
+        }
       } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
         console.log('[StripeElements] Payment succeeded!', result.paymentIntent);
         
@@ -238,7 +252,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         }
       } else {
         console.error('[StripeElements] Unknown payment result:', result);
-        onPaymentError('Payment failed - please try again');
+        if (typeof onPaymentError === 'function') {
+          onPaymentError('Payment failed - please try again');
+        }
       }
     }
   };
@@ -252,7 +268,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         '::placeholder': {
           color: '#9ca3af',
         },
-        lineHeight: '24px',
+        padding: '12px 0',
       },
       invalid: {
         color: '#ef4444',
