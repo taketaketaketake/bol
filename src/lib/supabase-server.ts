@@ -1,23 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
+import { getConfig } from '../utils/env';
 
-// Validate environment variables
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl) {
-  throw new Error('Missing PUBLIC_SUPABASE_URL environment variable');
-}
-
-if (!supabaseAnonKey) {
-  throw new Error('Missing PUBLIC_SUPABASE_ANON_KEY environment variable');
-}
+// Get validated configuration
+const config = getConfig();
 
 /**
  * Server-side Supabase client for API routes
  * Configured for server-side authentication patterns
  */
 export const createServerClient = () => {
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createClient(config.supabaseUrl, config.supabaseAnonKey, {
     auth: {
       // Disable automatic token refresh on server
       autoRefreshToken: false,

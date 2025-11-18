@@ -1,17 +1,21 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { getConfig } from '../../utils/env';
 
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
+// Get validated configuration
+const config = getConfig();
+
+const stripe = new Stripe(config.stripeSecretKey, {
   apiVersion: '2024-12-18.acacia',
 });
 
-const endpointSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
+const endpointSecret = config.stripeWebhookSecret;
 
 // Create Supabase admin client for webhooks (bypasses RLS)
 const supabaseAdmin = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+  config.supabaseUrl,
+  config.supabaseServiceRoleKey,
   {
     auth: {
       autoRefreshToken: false,
@@ -21,8 +25,8 @@ const supabaseAdmin = createClient(
 );
 
 // Validate configuration on startup
-console.log('[Webhook] Supabase URL configured:', !!import.meta.env.PUBLIC_SUPABASE_URL);
-console.log('[Webhook] Service role key configured:', !!import.meta.env.SUPABASE_SERVICE_ROLE_KEY);
+console.log('[Webhook] Supabase URL configured:', !!config.supabaseUrl);
+console.log('[Webhook] Service role key configured:', !!config.supabaseServiceRoleKey);
 console.log('[Webhook] Stripe webhook secret configured:', !!endpointSecret);
 
 export const POST: APIRoute = async ({ request }) => {

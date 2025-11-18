@@ -3,15 +3,19 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { calculatePricing } from '../../utils/pricing';
 import { getMemberIfPresent } from '../../utils/require-roles';
+import { getConfig } from '../../utils/env';
 
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
+// Get validated configuration
+const config = getConfig();
+
+const stripe = new Stripe(config.stripeSecretKey, {
   apiVersion: '2024-12-18.acacia',
 });
 
 // Use service role key for trusted server-side operations (bypasses RLS)
 const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+  config.supabaseUrl,
+  config.supabaseServiceRoleKey
 );
 
 export const POST: APIRoute = async ({ request, cookies }) => {

@@ -9,15 +9,19 @@ import { sendOrderConfirmationEmail, sendNewOrderAlertEmail } from '../../utils/
 import OrderConfirmationEmail from '../../emails/OrderConfirmation';
 import NewOrderAlertEmail from '../../emails/NewOrderAlert';
 import * as React from 'react';
+import { getConfig } from '../../utils/env';
 
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
+// Get validated configuration
+const config = getConfig();
+
+const stripe = new Stripe(config.stripeSecretKey, {
   apiVersion: '2024-12-18.acacia',
 });
 
 // Service role client for trusted system writes (bypasses RLS)
 const serviceClient = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+  config.supabaseUrl,
+  config.supabaseServiceRoleKey
 );
 
 // Payment status enum is now imported from shared utility
@@ -361,7 +365,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
                                    serviceType;
 
         // Tracking URL (requires login)
-        const trackingUrl = `${import.meta.env.SITE_URL || 'https://bagsoflaundry.com'}/orders/${order.id}`;
+        const trackingUrl = `${config.siteUrl}/orders/${order.id}`;
 
         // Send customer confirmation email
         await sendOrderConfirmationEmail({
