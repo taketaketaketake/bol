@@ -86,6 +86,51 @@ const userMetadata = user.user_metadata || {};
         </div>
       </div>
 
+      <!-- SMS Preferences -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="p-4 border-b border-gray-200">
+          <h2 class="font-semibold text-brand-text">SMS Notifications</h2>
+          <p class="text-sm text-gray-500 mt-1">Control when we send you text messages</p>
+        </div>
+        <div class="p-4">
+          <div class="flex items-start gap-3">
+            <div class="flex items-center h-5">
+              <input
+                type="checkbox"
+                id="smsOptIn"
+                name="smsOptIn"
+                class="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded"
+              />
+            </div>
+            <div class="flex-1">
+              <label for="smsOptIn" class="block text-sm font-medium text-gray-700">
+                Receive SMS notifications
+              </label>
+              <p class="text-xs text-gray-500 mt-1">
+                Get text messages for pickup/delivery updates. Message and data rates may apply. 
+                <span class="font-medium">Reply STOP to unsubscribe anytime.</span>
+              </p>
+              <div id="sms-phone-warning" class="text-xs text-amber-600 mt-2 hidden">
+                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Add a phone number above to receive SMS notifications
+              </div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <button
+              type="button"
+              id="save-sms-preferences"
+              class="bg-brand-primary hover:bg-orange-600 text-white px-4 py-2 rounded-md shadow-sm transition font-medium text-sm"
+              disabled
+            >
+              Save SMS Preferences
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Delivery Address -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
         <div class="p-4 border-b border-gray-200">
@@ -194,6 +239,97 @@ const userMetadata = user.user_metadata || {};
   </div>
 
   <script>
+    // Load SMS preferences on page load
+    let currentSmsOptIn = false;
+    let currentPhone = '';
+
+    async function loadSmsPreferences() {
+      try {
+        const res = await fetch('/api/profile/sms-preferences');
+        if (res.ok) {
+          const data = await res.json();
+          currentSmsOptIn = data.sms_opt_in;
+          currentPhone = data.phone;
+          
+          const checkbox = document.getElementById('smsOptIn');
+          const saveButton = document.getElementById('save-sms-preferences');
+          
+          if (checkbox) {
+            checkbox.checked = currentSmsOptIn;
+            updateSmsButtonState();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load SMS preferences:', err);
+      }
+    }
+
+    function updateSmsButtonState() {
+      const checkbox = document.getElementById('smsOptIn');
+      const saveButton = document.getElementById('save-sms-preferences');
+      const phoneInput = document.getElementById('phone');
+      const phoneWarning = document.getElementById('sms-phone-warning');
+      
+      const hasChanged = checkbox?.checked !== currentSmsOptIn;
+      const phoneValue = phoneInput?.value?.trim() || '';
+      const hasPhone = phoneValue.length > 0;
+      
+      // Show/hide phone warning
+      if (checkbox?.checked && !hasPhone) {
+        phoneWarning?.classList.remove('hidden');
+      } else {
+        phoneWarning?.classList.add('hidden');
+      }
+      
+      // Enable save button if changed
+      if (saveButton) {
+        saveButton.disabled = !hasChanged;
+      }
+    }
+
+    // SMS preferences handler
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSmsPreferences();
+      
+      const checkbox = document.getElementById('smsOptIn');
+      const saveButton = document.getElementById('save-sms-preferences');
+      const phoneInput = document.getElementById('phone');
+      
+      // Update button state when checkbox or phone changes
+      checkbox?.addEventListener('change', updateSmsButtonState);
+      phoneInput?.addEventListener('input', updateSmsButtonState);
+      
+      saveButton?.addEventListener('click', async () => {
+        const isChecked = checkbox?.checked || false;
+        
+        try {
+          saveButton.disabled = true;
+          saveButton.textContent = 'Saving...';
+          
+          const res = await fetch('/api/profile/sms-preferences', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sms_opt_in: isChecked }),
+          });
+
+          if (res.ok) {
+            currentSmsOptIn = isChecked;
+            alert(isChecked ? 'SMS notifications enabled!' : 'SMS notifications disabled');
+            updateSmsButtonState();
+          } else {
+            const error = await res.json();
+            alert(`Failed to update SMS preferences: ${error.error || 'Unknown error'}`);
+          }
+        } catch (err) {
+          alert('An error occurred while updating SMS preferences');
+          console.error('SMS preferences error:', err);
+        } finally {
+          saveButton.textContent = 'Save SMS Preferences';
+          updateSmsButtonState();
+        }
+      });
+    });
+
     // Profile form handler
     const profileForm = document.getElementById('profile-form');
     profileForm?.addEventListener('submit', async (e) => {
