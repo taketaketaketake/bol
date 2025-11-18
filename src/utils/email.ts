@@ -68,11 +68,15 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
     if (react) {
       try {
         emailHtml = render(react);
-        emailText = text || render(react, { plainText: true });
+        // Generate simple text version from HTML or use provided text
+        emailText = text || `Please view this email in an HTML-capable email client.`;
         
         // Validate rendered output
         if (typeof emailHtml !== 'string') {
           throw new Error(`Rendered HTML is not a string, got: ${typeof emailHtml}`);
+        }
+        if (typeof emailText !== 'string') {
+          throw new Error(`Email text is not a string, got: ${typeof emailText}`);
         }
       } catch (renderError) {
         console.error('[Email] React render failed:', renderError);

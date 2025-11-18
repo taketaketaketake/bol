@@ -216,7 +216,7 @@ export async function getOrderStats(
       totalSpent,
       totalWeight,
       ordersThisMonth,
-      averageOrderValue,
+      averageOrderValue: avgOrderValue,
     };
   } catch (error) {
     console.error('[Dashboard] Exception in getOrderStats:', error);
