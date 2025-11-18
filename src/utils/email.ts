@@ -62,8 +62,26 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
     }
 
     // Render React component to HTML if provided
-    const emailHtml = react ? render(react) : html;
-    const emailText = text || (react ? render(react, { plainText: true }) : undefined);
+    let emailHtml;
+    let emailText;
+    
+    if (react) {
+      try {
+        emailHtml = render(react);
+        emailText = text || render(react, { plainText: true });
+        
+        // Validate rendered output
+        if (typeof emailHtml !== 'string') {
+          throw new Error(`Rendered HTML is not a string, got: ${typeof emailHtml}`);
+        }
+      } catch (renderError) {
+        console.error('[Email] React render failed:', renderError);
+        throw new Error(`Email template render failed: ${renderError.message}`);
+      }
+    } else {
+      emailHtml = html;
+      emailText = text;
+    }
 
     // Send email via Resend
     const { data, error } = await resend.emails.send({

@@ -268,7 +268,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         '::placeholder': {
           color: '#9ca3af',
         },
-        padding: '12px 0',
       },
       invalid: {
         color: '#ef4444',
