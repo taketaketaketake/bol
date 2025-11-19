@@ -6,7 +6,9 @@ import Telnyx from 'telnyx';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Telnyx client with correct v4 API syntax
-const telnyx = Telnyx(process.env.TELNYX_API_KEY || '');
+const telnyx = new Telnyx({
+  apiKey: process.env.TELNYX_API_KEY || ''
+});
 
 // Service client for logging notifications
 const getServiceClient = () => {

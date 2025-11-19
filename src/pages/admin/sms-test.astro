@@ -1,0 +1,116 @@
+---
+// Simple test page for sending SMS messages
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Test - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">SMS Test</h1>
+        
+        <form id="smsForm" class="space-y-4">
+            <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                </label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone"
+                    placeholder="+1234567890 or 234-567-8901"
+                    class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                />
+            </div>
+            
+            <div>
+                <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                    Message
+                </label>
+                <textarea 
+                    id="message" 
+                    name="message"
+                    rows="3"
+                    placeholder="Enter your test message here..."
+                    class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                ></textarea>
+            </div>
+            
+            <button 
+                type="submit"
+                class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+                Send Test SMS
+            </button>
+        </form>
+        
+        <div id="result" class="mt-6 hidden"></div>
+    </div>
+
+    <script>
+        document.getElementById('smsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('phone').value;
+            const message = document.getElementById('message').value;
+            const resultDiv = document.getElementById('result');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            // Show loading state
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            resultDiv.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/admin/test-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        to: phone,
+                        message: message
+                    })
+                });
+                
+                const result = await response.json();
+                
+                resultDiv.classList.remove('hidden');
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                            <strong>Success!</strong> SMS sent successfully.
+                            ${result.id ? `<br><small>Telnyx ID: ${result.id}</small>` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                            <strong>Error:</strong> ${result.error || 'Unknown error occurred'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.classList.remove('hidden');
+                resultDiv.innerHTML = `
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        <strong>Error:</strong> Failed to send request: ${error.message}
+                    </div>
+                `;
+            }
+            
+            // Reset button state
+            submitBtn.textContent = 'Send Test SMS';
+            submitBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>
