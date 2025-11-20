@@ -14,78 +14,27 @@ const description = "Place your order online. We handle pickup, washing, and del
   <main>
     <!-- HERO -->
     <section class="py-16 lg:py-20 bg-white">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <div class="inline-block bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-bold mb-4">
-              Laundry Delivery, Simplified
-            </div>
-            <h1 class="text-4xl sm:text-5xl font-black text-brand-text mb-6">How it works</h1>
-            <p class="sub text-lg leading-relaxed mb-6">
-              Place your order online. We handle pickup, washing, and delivery — with photo updates at every step so you always know what's happening.
-            </p>
-            <ul class="space-y-3 mb-8">
-              <li class="flex gap-3 items-start">
-                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                <span class="sub">Secure payment authorization (no charge until weighed)</span>
-              </li>
-              <li class="flex gap-3 items-start">
-                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                <span class="sub">Live status in your dashboard</span>
-              </li>
-              <li class="flex gap-3 items-start">
-                <span class="mt-1 inline-block h-5 w-5 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                <span class="sub">Trained drivers & partner laundromats</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Order Preview Card -->
-          <div class="relative">
-            <div class="card p-6">
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <p class="text-sm text-gray-500">Example checkout</p>
-                  <h3 class="text-xl font-bold text-brand-text">Pay per pound</h3>
-                </div>
-                <div class="text-right">
-                  <p class="text-xs text-gray-500">Authorization hold</p>
-                  <p class="text-lg font-bold text-brand-text">${perPoundHold}.00</p>
-                </div>
-              </div>
-              <div class="grid grid-cols-3 gap-3 text-center mb-4">
-                <div class="rounded-xl border border-gray-200 p-3">
-                  <p class="text-xs text-gray-500 mb-1">Small bag hold</p>
-                  <p class="font-semibold text-brand-text">${perBagHolds.small}</p>
-                </div>
-                <div class="rounded-xl border border-gray-200 p-3">
-                  <p class="text-xs text-gray-500 mb-1">Medium bag hold</p>
-                  <p class="font-semibold text-brand-text">${perBagHolds.medium}</p>
-                </div>
-                <div class="rounded-xl border border-gray-200 p-3">
-                  <p class="text-xs text-gray-500 mb-1">Large bag hold</p>
-                  <p class="font-semibold text-brand-text">${perBagHolds.large}</p>
-                </div>
-              </div>
-              <p class="text-xs text-gray-500">
-                Holds verify funds only. Final charge is based on the weighed total (or selected bag) after service.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-brand-text mb-6">
+          Laundry Made Simple
+        </h1>
+        <p class="text-xl text-gray-600 leading-relaxed mb-8">
+          Schedule pickup, we handle the rest. Your clean laundry comes back folded and ready to put away.
+        </p>
+        <a href="/schedule" class="btn text-lg px-8 py-4">Schedule Pickup</a>
       </div>
     </section>
 
-    <!-- INFO CALL-OUT -->
+    <!-- PRICING INFO -->
     <section class="py-12 bg-brand-bg">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="card p-6">
           <div class="flex items-start gap-4">
             <div class="mt-1 h-6 w-6 rounded-full bg-brand-primary flex-shrink-0"></div>
             <div>
-              <p class="font-bold text-brand-text mb-2">Payment holds</p>
+              <p class="font-bold text-brand-text mb-2">Simple bag pricing</p>
               <p class="sub">
-                When you select <span class="font-semibold text-brand-text">pay per pound</span>, a <span class="font-bold text-brand-text">${perPoundHold} USD</span> authorization hold is placed. For <span class="font-semibold text-brand-text">pay per bag</span>, we hold the selected bag price (e.g., ${perBagHolds.small}/${perBagHolds.medium}/${perBagHolds.large}). Holds are not charges and will adjust to your final total at completion.
+                Choose your bag size and pay one fixed price. Small bags are $35, medium bags are $55, and large bags are $85. If your laundry weighs more than the bag limit, you'll pay our standard rate of $2.25 per pound (or $1.75 for <a href="/membership" class="text-blue-600 hover:text-blue-800 underline">members</a>).
               </p>
             </div>
           </div>
@@ -171,6 +120,7 @@ const description = "Place your order online. We handle pickup, washing, and del
       </div>
     </section>
 
+
     <!-- FAQ -->
     <section class="py-16 lg:py-20 bg-brand-bg">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -219,26 +169,25 @@ const description = "Place your order online. We handle pickup, washing, and del
             </p>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="text-center mt-12 pt-8">
-          <a href="/start-basic" class="btn">Schedule Pickup</a>
-        </div>
-
-        {/* PARTNER FOOTNOTE */}
-        <div class="max-w-4xl mx-auto mt-16 pt-8 border-t border-gray-200">
-          <div class="card p-6 bg-gradient-to-r from-orange-50 to-blue-50 border border-gray-200">
-            <div class="flex items-center gap-4">
-              <svg class="w-12 h-12 text-brand-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-              <div class="flex-1">
-                <p class="sub text-sm">
-                  <strong class="text-brand-text">Laundromat owners:</strong> We work with professional laundromat partners across Detroit.
-                  <a href="/laundromat-partners" class="text-brand-primary hover:underline font-semibold">Learn about partnership opportunities →</a>
-                </p>
-              </div>
-            </div>
+    <!-- PARTNER CTA -->
+    <section class="py-16 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="card p-8 bg-gradient-to-r from-orange-50 to-blue-50 border border-gray-200 text-center">
+          <div class="mb-4">
+            <svg class="w-16 h-16 text-brand-primary mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
           </div>
+          <h3 class="text-xl font-bold text-brand-text mb-2">Own a laundromat?</h3>
+          <p class="text-gray-600 mb-6">
+            We work with professional laundromat partners across Detroit to provide reliable wash & fold services.
+          </p>
+          <a href="/laundromat-partners" class="btn px-6 py-3">
+            Learn About Partnership Opportunities
+          </a>
         </div>
       </div>
     </section>
