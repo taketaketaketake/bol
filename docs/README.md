@@ -213,7 +213,10 @@ Order Created → Authorization Hold → Weight Captured → Final Charge
 │   │   └── require-auth.ts     # Base authentication helper
 │   └── db/
 │       └── schema.ts           # TypeScript database types
-├── unified-roles-migration.sql # Database role system setup
+├── sql/
+│   ├── unified-roles-migration.sql # Database role system setup
+│   ├── add-refund-columns-to-orders.sql
+│   └── add-sms-support-migration.sql
 └── CLAUDE.md                   # Development guide
 ```
 
@@ -257,7 +260,7 @@ Order Created → Authorization Hold → Weight Captured → Final Charge
 2. **Database Setup**
    ```bash
    # Run in Supabase SQL Editor
-   # 1. Execute unified-roles-migration.sql
+   # 1. Execute sql/unified-roles-migration.sql
    # 2. Set up RLS policies and storage buckets
    ```
 
@@ -372,7 +375,7 @@ Order Created → Authorization Hold → Weight Captured → Final Charge
 ## 🚀 Production Deployment
 
 ### Database Configuration
-1. Run `unified-roles-migration.sql` for role system
+1. Run `sql/unified-roles-migration.sql` for role system
 2. Set up Supabase storage buckets for photos
 3. Configure RLS policies for data security
 4. Set up daily capacity for service areas
@@ -406,8 +409,8 @@ Order Created → Authorization Hold → Weight Captured → Final Charge
 ## 📝 Documentation
 
 - **`CLAUDE.md`** - Complete development guide and architecture notes
-- **`unified-roles-migration.sql`** - Database setup for role system
-- **`laundromat-role-examples.md`** - Role system usage examples
+- **`sql/unified-roles-migration.sql`** - Database setup for role system
+- **`docs/laundromat-role-examples.md`** - Role system usage examples
 
 ## 📞 Support & Development
 

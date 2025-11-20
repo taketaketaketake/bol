@@ -73,7 +73,7 @@ export function validateEnvironment(): void {
     throw new Error(
       `Missing required environment variables:\n${missing.map(v => `  - ${v}`).join('\n')}\n\n` +
       'Please check your .env file and ensure all required variables are set.\n' +
-      'See ENVIRONMENT-SETUP.md for detailed setup instructions.'
+      'See docs/ENVIRONMENT-SETUP.md for detailed setup instructions.'
     );
   }
 }

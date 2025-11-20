@@ -281,3 +281,18 @@ export function getPerPoundRate(tier: MembershipTier): number {
 export function getUserTier(isMember: boolean): MembershipTier {
   return isMember ? MembershipTier.MEMBER : MembershipTier.NON_MEMBER;
 }
+
+/**
+ * Calculate bag weight limits based on pricing and membership status
+ * @param isMember - Whether the user is a member
+ * @returns Object with weight limits for each bag size
+ */
+export function getBagWeightLimits(isMember: boolean) {
+  const ratePerPound = isMember ? MEMBER_RATE : STANDARD_RATE;
+  
+  return {
+    small: Math.ceil((BAG_PRICING_CENTS.small / 100) / ratePerPound),
+    medium: Math.ceil((BAG_PRICING_CENTS.medium / 100) / ratePerPound), 
+    large: Math.ceil((BAG_PRICING_CENTS.large / 100) / ratePerPound)
+  };
+}
