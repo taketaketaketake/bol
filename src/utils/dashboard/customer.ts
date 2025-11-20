@@ -174,10 +174,10 @@ export async function getOrderStats(
   supabase: SupabaseClient
 ) {
   try {
-    // Get all orders for stats (adjust when completion statuses are added)
+    // Get orders for stats (exclude cancelled orders from total spent)
     const { data: orders, error } = await supabase
       .from('orders')
-      .select('total_cents, measured_weight_lb, created_at')
+      .select('total_cents, measured_weight_lb, created_at, status')
       .eq('customer_id', customerId);
 
     if (error) {
@@ -192,8 +192,12 @@ export async function getOrderStats(
     }
 
     const allOrders = orders || [];
+    
+    // Exclude cancelled orders from total spent calculation
+    const paidOrders = allOrders.filter(order => order.status !== 'cancelled');
+    
     const totalOrders = allOrders.length;
-    const totalSpent = allOrders.reduce(
+    const totalSpent = paidOrders.reduce(
       (sum, order) => sum + (order.total_cents || 0),
       0
     );
@@ -209,7 +213,7 @@ export async function getOrderStats(
       (order) => new Date(order.created_at) >= firstDayOfMonth
     ).length;
 
-    const avgOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
+    const avgOrderValue = paidOrders.length > 0 ? totalSpent / paidOrders.length : 0;
 
     return {
       totalOrders,
