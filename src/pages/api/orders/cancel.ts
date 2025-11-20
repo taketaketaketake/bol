@@ -73,24 +73,36 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
       refundReason = '50% refund (cancelled after scheduled pickup time)';
     }
 
-    // Process Stripe refund if payment intent exists
+    // Process Stripe refund/cancellation if payment intent exists
     let stripeRefundId = null;
     if (order.stripe_payment_intent_id && refundAmount > 0) {
       try {
-        const refund = await stripe.refunds.create({
-          payment_intent: order.stripe_payment_intent_id,
-          amount: refundAmount,
-          reason: 'requested_by_customer',
-          metadata: {
-            order_id: orderId,
-            refund_reason: refundReason
-          }
-        });
+        // First, check the PaymentIntent status
+        const paymentIntent = await stripe.paymentIntents.retrieve(order.stripe_payment_intent_id);
+        
+        if (paymentIntent.status === 'requires_capture') {
+          // PaymentIntent is authorized but not captured - cancel it
+          await stripe.paymentIntents.cancel(order.stripe_payment_intent_id);
+          console.log('[Cancel Order] Stripe PaymentIntent cancelled (was authorized but not captured):', order.stripe_payment_intent_id);
+        } else if (paymentIntent.status === 'succeeded') {
+          // PaymentIntent has been captured - create a refund
+          const refund = await stripe.refunds.create({
+            payment_intent: order.stripe_payment_intent_id,
+            amount: refundAmount,
+            reason: 'requested_by_customer',
+            metadata: {
+              order_id: orderId,
+              refund_reason: refundReason
+            }
+          });
 
-        stripeRefundId = refund.id;
-        console.log('[Cancel Order] Stripe refund created:', refund.id, 'Amount:', refundAmount);
+          stripeRefundId = refund.id;
+          console.log('[Cancel Order] Stripe refund created:', refund.id, 'Amount:', refundAmount);
+        } else {
+          console.log('[Cancel Order] PaymentIntent status does not require refund/cancellation:', paymentIntent.status);
+        }
       } catch (stripeError) {
-        console.error('[Cancel Order] Stripe refund failed:', stripeError);
+        console.error('[Cancel Order] Stripe refund/cancellation failed:', stripeError);
         return redirect(`/dashboard/orders/${orderId}?error=refund_failed`, 302);
       }
     }
