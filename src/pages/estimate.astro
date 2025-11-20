@@ -1,0 +1,14 @@
+---
+import Layout from '../layout/Layout.astro';
+import PricingFunnel from '../components/PricingFunnel';
+
+// SEO Meta - Optimized for conversion
+const title = "Save 30% on Laundry | Get Your Free Estimate | Bags of Laundry Detroit";
+const description = "See exactly how much you'll save with our membership! Compare standard vs member pricing. Most Detroit families save $50+ monthly. Get your free estimate in 30 seconds.";
+---
+
+<Layout title={title} description={description}>
+  <main>
+    <PricingFunnel client:load />
+  </main>
+</Layout>

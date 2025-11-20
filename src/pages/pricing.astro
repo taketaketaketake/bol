@@ -14,135 +14,29 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
   <main>
     <BagPricingSection client:idle />
 
-    {/* PRICE CALCULATOR */}
+    {/* WHAT'S INCLUDED */}
     <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Quick estimate</h2>
-        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">Enter your best guess in pounds — an average family load is ~8–12 lb. This isn't a quote; exact totals show at checkout.</p>
-
-        <PriceCalculator client:load isMember={false} />
-      </div>
-    </section>
-
-    {/* CORE PRICING */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-white">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="section-title text-center text-brand-text mb-4 sm:mb-6">Per-pound pricing</h2>
-        <p class="text-center text-gray-500 mb-8 sm:mb-12 text-sm sm:text-base">
-          Simple, transparent pricing based on the actual weight of your laundry
-        </p>
-
-        <div class="card p-8 sm:p-12 text-center mb-8">
-          <div class="mb-8">
-            <div class="text-6xl sm:text-7xl font-black text-brand-text mb-4">
-              $2.25<span class="text-3xl text-gray-500">/lb</span>
-            </div>
-            <p class="text-lg text-gray-600">Standard per-pound rate</p>
-          </div>
-
-          <div class="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
-              <p class="text-sm font-semibold text-gray-600 mb-3">15 lbs</p>
-              <p class="text-3xl font-bold text-brand-text mb-2">$35.00</p>
-              <p class="text-xs text-gray-500">$35 minimum applies</p>
-            </div>
-
-            <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 ring-2 ring-brand-primary">
-              <p class="text-sm font-semibold text-gray-600 mb-3">20 lbs</p>
-              <p class="text-3xl font-bold text-brand-text mb-2">$45.00</p>
-              <p class="text-xs text-gray-500">Average load size</p>
-            </div>
-
-            <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
-              <p class="text-sm font-semibold text-gray-600 mb-3">30 lbs</p>
-              <p class="text-3xl font-bold text-brand-text mb-2">$67.50</p>
-              <p class="text-xs text-gray-500">Family load</p>
-            </div>
+        <div class="text-center mb-8 sm:mb-12">
+          <div class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent px-6 py-3 rounded-2xl mb-4 shadow-lg">
+            <h2 class="font-bold text-xl sm:text-2xl text-black">✨ All orders include:</h2>
           </div>
         </div>
-
-        <div class="bg-white border-2 border-brand-primary rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="text-3xl">💡</div>
-            <h3 class="text-xl font-bold text-brand-text">How it works</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">🚚</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Free pickup & delivery</h3>
+            <p class="text-sm text-gray-500">Convenient door-to-door service with no extra fees</p>
           </div>
-          <ul class="space-y-3 text-sm sm:text-base text-gray-600">
-            <li class="flex items-start gap-3">
-              <span class="text-brand-primary font-bold">1.</span>
-              <span>We pick up your laundry at your door</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-brand-primary font-bold">2.</span>
-              <span>Your items are weighed at our facility</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-brand-primary font-bold">3.</span>
-              <span>You're charged $2.25 per pound (minimum $35)</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-brand-primary font-bold">4.</span>
-              <span>Clean, folded laundry delivered back to you</span>
-            </li>
-          </ul>
-        </div>
-
-        <p class="text-center text-gray-500 text-sm mt-8 max-w-2xl mx-auto">
-          The $35 minimum helps cover pickup & delivery costs for smaller loads. Most customers exceed this with a typical week's laundry.
-        </p>
-      </div>
-    </section>
-
-    {/* COMMERCIAL PRICING */}
-    <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-8 sm:gap-12 items-start">
-
-          <div>
-            <h2 class="section-title text-brand-text mb-4 sm:mb-6">Commercial pricing</h2>
-            <p class="text-gray-500 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
-              Running an Airbnb portfolio, gym, spa, restaurant, or clinic? We build simple, volume-based quotes with dedicated pickup windows and delivery manifests.
-            </p>
-            <ul class="text-gray-500 mb-6 sm:mb-8 space-y-2 pl-4 text-sm sm:text-base">
-              <li>• Recurring routes (weekly or multi-week)</li>
-              <li>• Inventory counts & bag barcodes</li>
-              <li>• Preferred turnaround & rush capacity</li>
-            </ul>
-            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <a href="/contact" class="btn w-full sm:w-auto">Talk to Sales</a>
-              <a href="/service-areas" class="btn-alt w-full sm:w-auto">Check Coverage</a>
-            </div>
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">👕</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Professional wash & fold</h3>
+            <p class="text-sm text-gray-500">Expert care for all your everyday clothing</p>
           </div>
-
-          <div>
-            <div class="overflow-x-auto">
-              <table class="w-full border border-gray-200 rounded-xl overflow-hidden">
-                <thead>
-                  <tr class="bg-orange-50">
-                    <th class="p-2 sm:p-4 text-left text-xs sm:text-sm font-bold text-brand-text">Approx. weekly volume</th>
-                    <th class="p-2 sm:p-4 text-left text-xs sm:text-sm font-bold text-brand-text">Indicative rate</th>
-                    <th class="p-2 sm:p-4 text-left text-xs sm:text-sm font-bold text-brand-text">Notes</th>
-                  </tr>
-                </thead>
-                <tbody class="text-xs sm:text-sm">
-                  <tr class="border-t border-gray-200">
-                    <td class="p-2 sm:p-4 text-brand-text">50–100 lb</td>
-                    <td class="p-2 sm:p-4 text-brand-text">$2.05–$2.15/lb</td>
-                    <td class="p-2 sm:p-4 text-gray-500">Standard next-day</td>
-                  </tr>
-                  <tr class="border-t border-gray-200">
-                    <td class="p-2 sm:p-4 text-brand-text">100–250 lb</td>
-                    <td class="p-2 sm:p-4 text-brand-text">$1.90–$2.05/lb</td>
-                    <td class="p-2 sm:p-4 text-gray-500">Route day required</td>
-                  </tr>
-                  <tr class="border-t border-gray-200">
-                    <td class="p-2 sm:p-4 text-brand-text">250+ lb</td>
-                    <td class="p-2 sm:p-4 text-brand-text">Custom</td>
-                    <td class="p-2 sm:p-4 text-gray-500">Dedicated windows</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p class="text-xs text-gray-500 mt-3 sm:mt-4">Final pricing depends on mix (towels/linens), bagging, and turnaround needs.</p>
+          <div class="card p-6 sm:p-8 text-center">
+            <div class="text-4xl sm:text-5xl mb-4">💰</div>
+            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">$35 minimum order</h3>
+            <p class="text-sm text-gray-500">Fair pricing that covers our quality service</p>
           </div>
         </div>
       </div>
@@ -177,32 +71,19 @@ const description = "Simple, transparent pricing from Bags of Laundry. $2.25/lb 
       </div>
     </section>
 
-    {/* WHAT'S INCLUDED */}
+    {/* COMMERCIAL PRICING CTA */}
     <section class="py-8 sm:py-12 lg:py-20 bg-brand-bg">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8 sm:mb-12">
-          <div class="inline-block bg-gradient-to-r from-brand-primary to-brand-accent px-6 py-3 rounded-2xl mb-4 shadow-lg">
-            <h2 class="font-bold text-xl sm:text-2xl text-black">✨ All orders include:</h2>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
-          <div class="card p-6 sm:p-8 text-center">
-            <div class="text-4xl sm:text-5xl mb-4">🚚</div>
-            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Free pickup & delivery</h3>
-            <p class="text-sm text-gray-500">Convenient door-to-door service with no extra fees</p>
-          </div>
-          <div class="card p-6 sm:p-8 text-center">
-            <div class="text-4xl sm:text-5xl mb-4">👕</div>
-            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">Professional wash & fold</h3>
-            <p class="text-sm text-gray-500">Expert care for all your everyday clothing</p>
-          </div>
-          <div class="card p-6 sm:p-8 text-center">
-            <div class="text-4xl sm:text-5xl mb-4">💰</div>
-            <h3 class="font-bold text-lg sm:text-xl text-brand-text mb-2">$35 minimum order</h3>
-            <p class="text-sm text-gray-500">Fair pricing that covers our quality service</p>
-          </div>
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="section-title text-brand-text mb-4 sm:mb-6">Need Commercial Pricing?</h2>
+        <p class="text-gray-500 mb-6 sm:mb-8 text-lg max-w-2xl mx-auto">
+          Running an Airbnb, gym, spa, restaurant, or clinic? Get volume-based quotes with dedicated pickup windows.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+          <a href="/contact" class="btn w-full sm:w-auto">Get Commercial Quote</a>
+          <a href="/commercial-laundry" class="btn-alt w-full sm:w-auto">Learn More</a>
         </div>
       </div>
     </section>
+
   </main>
 </Layout>
