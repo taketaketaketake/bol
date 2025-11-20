@@ -35,7 +35,7 @@ export async function getCustomerId(
 
 /**
  * Get customer's active orders
- * Includes orders that are scheduled, picked up, or in progress
+ * Includes orders that are scheduled, confirmed, picked up, in progress, ready for delivery, or out for delivery
  */
 export async function getActiveOrders(
   customerId: string,
@@ -62,7 +62,7 @@ export async function getActiveOrders(
         time_windows!pickup_time_window_id(label)
       `)
       .eq('customer_id', customerId)
-      .eq('status', 'scheduled') // Currently only 'scheduled' exists in your schema
+      .in('status', ['scheduled', 'confirmed', 'picked_up', 'in_progress', 'ready_for_delivery', 'out_for_delivery'])
       .order('pickup_date', { ascending: true })
       .limit(10);
 
@@ -122,8 +122,7 @@ export async function getUpcomingPickups(
 
 /**
  * Get customer's order history (completed orders)
- * NOTE: Currently only 'scheduled' status exists in schema
- * This will return empty until you implement completion flow
+ * Shows delivered, completed, and cancelled orders
  */
 export async function getOrderHistory(
   customerId: string,
@@ -148,8 +147,7 @@ export async function getOrderHistory(
         time_windows!pickup_time_window_id(label)
       `)
       .eq('customer_id', customerId)
-      // Future: Add other completion statuses here when implemented
-      // .in('status', ['completed', 'delivered', 'cancelled'])
+      .in('status', ['delivered', 'completed', 'cancelled'])
       .order('updated_at', { ascending: false })
       .limit(limit);
 
