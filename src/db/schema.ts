@@ -57,21 +57,36 @@ export interface Customer {
   stripe_customer_id?: string;
 }
 
-export interface DailyCapacity {
+export interface Laundromat {
   id: string;
-  service_date?: string;
-  zone_id?: string;
-  time_window_id?: string;
-  pickup_capacity?: number;
-  delivery_capacity?: number;
+  name: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  zip_code?: string;
+  phone?: string;
+  contact_email?: string;
+  notification_phone?: string;
+  radius_miles?: number;
+  latitude?: number;
+  longitude?: number;
+  is_active?: boolean;
+  max_daily_orders?: number;
+  today_orders?: number;
+  stripe_connect_id?: string;
+  operates_morning?: boolean;
+  operates_afternoon?: boolean;
+  operates_evening?: boolean;
+  avg_turnaround_hours?: number;
+  created_at?: string;
 }
 
-export interface DriverAssignment {
+export interface LaundromateServiceArea {
   id: string;
-  driver_id?: string;
-  service_date?: string;
-  zone_id?: string;
-  time_window_id?: string;
+  laundromat_id: string;
+  zip_code: string;
+  created_at?: string;
 }
 
 export interface Driver {
@@ -114,7 +129,9 @@ export interface Order {
   preferences?: any;
   pickup_date?: string;
   pickup_time_window_id?: string;
-  zone_id?: string;
+  assigned_laundromat_id?: string;
+  routing_method?: string;
+  assigned_at?: string;
   pickup_confirmed_at?: string;
   delivery_date?: string;
   delivery_time_window_id?: string;
@@ -141,12 +158,6 @@ export interface OrderStatusHistory {
   status: string;
   changed_by?: string;
   changed_at?: string;
-}
-
-export interface ServiceZone {
-  id: string;
-  name?: string;
-  description?: string;
 }
 
 export interface TimeWindow {

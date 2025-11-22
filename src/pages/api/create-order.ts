@@ -293,6 +293,42 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     log('Order created successfully:', order.id);
 
+    // Automatic laundromat assignment based on pickup ZIP code
+    let assignedLaundromat = null;
+    try {
+      const pickupZip = pickupAddress.postal_code || pickupAddress.zip;
+      if (pickupZip) {
+        log('Finding laundromat for ZIP:', pickupZip);
+        
+        const { data: availableLaundromats, error: routingError } = await serviceClient
+          .rpc('find_laundromat_by_zip', { incoming_zip: pickupZip });
+
+        if (routingError) {
+          console.warn('[create-order] Routing function error:', routingError);
+        } else if (availableLaundromats && availableLaundromats.length > 0) {
+          assignedLaundromat = availableLaundromats[0]; // Get least busy laundromat
+          
+          // Assign the order to the laundromat
+          const { data: assignmentResult, error: assignmentError } = await serviceClient
+            .rpc('assign_order_to_laundromat', { 
+              order_id: order.id, 
+              laundromat_id: assignedLaundromat.id 
+            });
+
+          if (assignmentError) {
+            console.error('[create-order] Laundromat assignment error:', assignmentError);
+          } else {
+            log('Order assigned to laundromat:', assignedLaundromat.name);
+          }
+        } else {
+          console.warn('[create-order] No available laundromats for ZIP:', pickupZip);
+        }
+      }
+    } catch (routingError) {
+      // Log routing errors but don't fail order creation
+      console.error('[create-order] Laundromat routing error:', routingError);
+    }
+
     // Create Stripe PaymentIntent with idempotency protection
     try {
       // Generate idempotency key to prevent duplicate payment intents on retry
