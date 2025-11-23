@@ -53,7 +53,6 @@ const { data: orders } = await supabase
   .select(`
     *,
     customers(full_name, phone),
-    addresses(line1, line2, city, state, postal_code),
     time_windows!pickup_time_window_id(label, start_time, end_time),
     delivery_time_windows:time_windows!delivery_time_window_id(label, start_time, end_time),
     drivers(full_name)
@@ -75,15 +74,20 @@ const inProcessTasks = orders?.filter(order =>
   ['picked_up', 'processing'].includes(order.status)
 ) || [];
 
-// Helper functions
-function formatAddress(address: any) {
-  if (!address) return 'Address not available';
-  return `${address.line1}${address.line2 ? ', ' + address.line2 : ''}, ${address.city}, ${address.state} ${address.postal_code}`;
+// Helper functions - updated to use order pickup address fields
+function formatAddress(order: any) {
+  if (!order || !order.pickup_address_line1) return 'Address not available';
+  const line1 = order.pickup_address_line1;
+  const line2 = order.pickup_address_line2 ? `, ${order.pickup_address_line2}` : '';
+  const city = order.pickup_address_city || '';
+  const state = order.pickup_address_state || '';
+  const postal = order.pickup_address_postal_code || '';
+  return `${line1}${line2}, ${city}, ${state} ${postal}`;
 }
 
-function getGoogleMapsUrl(address: any) {
-  if (!address) return '#';
-  const addressString = formatAddress(address);
+function getGoogleMapsUrl(order: any) {
+  if (!order || !order.pickup_address_line1) return '#';
+  const addressString = formatAddress(order);
   return `https://maps.google.com/?q=${encodeURIComponent(addressString)}`;
 }
 
@@ -244,7 +248,7 @@ function getNextAction(status: string) {
                       </div>
                       <div>
                         <h3 class="font-semibold text-brand-text mb-1">Address</h3>
-                        <p class="text-brand-text">{formatAddress(order.addresses)}</p>
+                        <p class="text-brand-text">{formatAddress(order)}</p>
                       </div>
                       <div>
                         <h3 class="font-semibold text-brand-text mb-1">Assigned Driver</h3>
@@ -256,7 +260,7 @@ function getNextAction(status: string) {
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                      <a href={getGoogleMapsUrl(order.addresses)}
+                      <a href={getGoogleMapsUrl(order)}
                          target="_blank"
                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,7 +316,7 @@ function getNextAction(status: string) {
                       </div>
                       <div>
                         <h3 class="font-semibold text-brand-text mb-1">Address</h3>
-                        <p class="text-brand-text">{formatAddress(order.addresses)}</p>
+                        <p class="text-brand-text">{formatAddress(order)}</p>
                       </div>
                       <div>
                         <h3 class="font-semibold text-brand-text mb-1">Assigned Driver</h3>
@@ -324,7 +328,7 @@ function getNextAction(status: string) {
                     </div>
 
                     <div class="flex flex-wrap gap-2">
-                      <a href={getGoogleMapsUrl(order.addresses)}
+                      <a href={getGoogleMapsUrl(order)}
                          target="_blank"
                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
