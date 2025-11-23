@@ -7,7 +7,9 @@
 // ------------------------------------------------------------------
 export const ORDER_STATUSES = [
   'scheduled',
+  'en_route_pickup',
   'picked_up', 
+  'en_route_laundromat',
   'processing',
   'ready_for_delivery',
   'en_route_delivery',
@@ -91,10 +93,18 @@ export interface LaundromateServiceArea {
 
 export interface Driver {
   id: string;
+  auth_user_id?: string;
   full_name: string;
   phone?: string;
   active?: boolean;
-  auth_user_id?: string;
+  assigned_laundromat_id?: string;
+  max_daily_orders?: number;
+  today_orders?: number;
+  availability_status?: 'available' | 'busy' | 'offline';
+  location_lat?: number;
+  location_lng?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Membership {
