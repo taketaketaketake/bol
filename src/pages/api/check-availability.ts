@@ -1,9 +1,14 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
+import { getConfig } from '../../utils/env';
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+// Get validated configuration
+const config = getConfig();
+
+// Use service role client for trusted operations
+const serviceClient = createClient(
+  config.supabaseUrl,
+  config.supabaseServiceRoleKey
 );
 
 export const POST: APIRoute = async ({ request }) => {
@@ -24,62 +29,89 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Check if we service this area
-    const { data: zone, error: zoneError } = await supabase
-      .from('service_zones')
-      .select('id, name, postal_codes')
-      .contains('postal_codes', [postalCode])
-      .single();
+    // Check if any laundromats service this ZIP code
+    const { data: availableLaundromats, error: laundromatError } = await serviceClient
+      .rpc('find_laundromat_by_zip', { incoming_zip: postalCode });
 
-    if (zoneError || !zone) {
+    if (laundromatError) {
+      console.error('Error finding laundromats:', laundromatError);
       return new Response(
         JSON.stringify({
           available: false,
-          message: 'Sorry, we don\'t service this area yet. We\'ll notify you when we expand!'
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get available time windows for the date and zone
-    const { data: availableWindows, error: windowError } = await supabase
-      .rpc('get_available_windows', {
-        service_date: date,
-        zone_id: zone.id
-      });
-
-    if (windowError) {
-      console.error('Error getting available windows:', windowError);
-      return new Response(
-        JSON.stringify({
-          available: false,
-          error: 'Error checking availability'
+          error: 'Error checking service availability'
         }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Format time windows for frontend
-    const timeWindows = availableWindows?.map((window: any) => ({
-      id: window.time_window_id,
-      label: window.label,
-      startTime: window.start_time,
-      endTime: window.end_time,
-      availableSlots: window.available_slots,
-      totalCapacity: window.total_capacity
-    })) || [];
+    if (!availableLaundromats || availableLaundromats.length === 0) {
+      return new Response(
+        JSON.stringify({
+          available: false,
+          message: `Sorry, we don't service ZIP code ${postalCode} yet. We'll notify you when we expand!`,
+          zipCode: postalCode
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get available time windows from database
+    const { data: timeWindows, error: windowError } = await serviceClient
+      .from('time_windows')
+      .select('id, label, start_time, end_time')
+      .eq('is_active', true)
+      .order('start_time');
+
+    if (windowError) {
+      console.error('Error getting time windows:', windowError);
+      return new Response(
+        JSON.stringify({
+          available: false,
+          error: 'Error loading time windows'
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Calculate capacity for each time window across all available laundromats
+    const timeWindowsWithCapacity = timeWindows?.map(window => {
+      const totalCapacity = availableLaundromats.reduce((sum: number, laundromat: any) => {
+        // Check if laundromat operates during this time window
+        const isOperating = 
+          (window.label.toLowerCase().includes('morning') && laundromat.operates_morning !== false) ||
+          (window.label.toLowerCase().includes('afternoon') && laundromat.operates_afternoon !== false) ||
+          (window.label.toLowerCase().includes('evening') && laundromat.operates_evening !== false) ||
+          (!window.label.toLowerCase().match(/(morning|afternoon|evening)/)); // Default to operating if not specified
+
+        return sum + (isOperating ? laundromat.capacity_remaining : 0);
+      }, 0);
+
+      return {
+        id: window.id,
+        label: window.label,
+        startTime: window.start_time,
+        endTime: window.end_time,
+        availableSlots: totalCapacity,
+        totalCapacity: totalCapacity
+      };
+    }).filter(window => window.availableSlots > 0) || []; // Only return windows with capacity
+
+    // Get summary of serving laundromats
+    const laundromatSummary = availableLaundromats.map((l: any) => ({
+      name: l.name,
+      capacity: l.capacity_remaining,
+      maxCapacity: l.max_daily_orders
+    }));
 
     return new Response(
       JSON.stringify({
         available: true,
-        zone: {
-          id: zone.id,
-          name: zone.name
-        },
-        timeWindows: timeWindows,
-        message: timeWindows.length > 0 ?
-          `Great! We have ${timeWindows.length} time windows available.` :
-          'No available time slots for this date. Please try another date.'
+        zipCode: postalCode,
+        laundromats: laundromatSummary,
+        timeWindows: timeWindowsWithCapacity,
+        message: timeWindowsWithCapacity.length > 0 ?
+          `Great! We have ${availableLaundromats.length} partner laundromat(s) available with ${timeWindowsWithCapacity.length} time window(s).` :
+          'All partner laundromats are at capacity for this date. Please try another date.'
       }),
       {
         status: 200,

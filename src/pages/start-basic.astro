@@ -463,7 +463,8 @@ const description = "Schedule your laundry pickup. Enter your address, date, and
           if (data.available && data.timeWindows?.length > 0) {
             currentTimeWindows = data.timeWindows;
             displayTimeWindows(data.timeWindows);
-            availabilityStatus.textContent = `✓ Available in ${data.zone.name}`;
+            const laundromatCount = data.laundromats?.length || 1;
+            availabilityStatus.textContent = `✓ Available - ${laundromatCount} partner laundromat(s) in ZIP ${data.zipCode}`;
             availabilityStatus.className = 'mt-1 text-xs text-brand-accent';
             timeWindowSection?.classList.remove('hidden');
           } else {

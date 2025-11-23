@@ -1,315 +1,411 @@
-# Capacity Management System
+# Laundromat Capacity Management System
 
 ## Overview
 
-The capacity management system controls how many orders can be scheduled for pickup/delivery at specific times in different service zones. This prevents overbooking and ensures operational efficiency.
+The capacity management system controls how many orders each partner laundromat can handle per day. Orders are automatically assigned to the least busy laundromat serving the customer's ZIP code, ensuring optimal load balancing and preventing overbooking.
 
 ## Database Schema
 
 ### Core Tables
 
-#### `time_windows`
-Defines available time slots for pickups and deliveries.
+#### `laundromats`
+Partner laundromat locations with capacity management fields.
 
 ```sql
-CREATE TABLE time_windows (
+CREATE TABLE laundromats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  label TEXT NOT NULL,           -- e.g., "Morning", "Afternoon", "Evening"
-  start_time TIME NOT NULL,      -- e.g., "08:00:00"
-  end_time TIME NOT NULL,        -- e.g., "12:00:00"
+  name TEXT NOT NULL,                    -- e.g., "Midtown Wash & Fold"
+  address TEXT,
+  city TEXT,
+  state TEXT,
+  postal_code TEXT,
+  zip_code TEXT,                         -- Primary ZIP where laundromat is located
+  phone TEXT,
+  contact_email TEXT,
+  notification_phone TEXT,
+  
+  -- Capacity Management
+  max_daily_orders INTEGER DEFAULT 50,   -- Maximum orders per day
+  today_orders INTEGER DEFAULT 0,        -- Current daily order count
+  
+  -- Operational Settings
   is_active BOOLEAN DEFAULT true,
+  radius_miles INTEGER DEFAULT 5,
+  operates_morning BOOLEAN DEFAULT true,
+  operates_afternoon BOOLEAN DEFAULT true,
+  operates_evening BOOLEAN DEFAULT true,
+  avg_turnaround_hours INTEGER DEFAULT 24,
+  
+  -- Payment Integration
+  stripe_connect_id TEXT,               -- For partner payouts
+  
+  -- Geographic Data
+  latitude DOUBLE PRECISION,
+  longitude DOUBLE PRECISION,
+  
   created_at TIMESTAMPTZ DEFAULT now()
 );
 ```
 
-#### `service_zones`
-Geographic areas where service is available.
+#### `laundromat_service_areas`
+Many-to-many mapping of laundromats to ZIP codes they serve.
 
 ```sql
-CREATE TABLE service_zones (
+CREATE TABLE laundromat_service_areas (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,            -- e.g., "Downtown Detroit"
-  postal_codes TEXT[] NOT NULL,  -- Array of ZIP codes
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-```
-
-#### `daily_capacity`
-Controls how many orders can be accepted for each time window/zone/date combination.
-
-```sql
-CREATE TABLE daily_capacity (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  service_date DATE NOT NULL,
-  zone_id UUID REFERENCES service_zones(id),
-  time_window_id UUID REFERENCES time_windows(id),
-  pickup_capacity INTEGER NOT NULL DEFAULT 10,  -- Max orders for this slot
-  delivery_capacity INTEGER NOT NULL DEFAULT 10,
+  laundromat_id UUID NOT NULL REFERENCES laundromats(id) ON DELETE CASCADE,
+  zip_code TEXT NOT NULL,               -- ZIP code served by this laundromat
   created_at TIMESTAMPTZ DEFAULT now(),
-
-  UNIQUE(service_date, zone_id, time_window_id)
+  
+  UNIQUE(laundromat_id, zip_code)
 );
 ```
 
-## SQL Functions
-
-### `get_available_windows(service_date, zone_id)`
-
-Returns available time windows with slot counts for a specific date and zone.
+#### `orders` (Updated)
+Orders table now includes laundromat assignment fields.
 
 ```sql
-SELECT * FROM get_available_windows('2025-10-15', 'zone-uuid-here');
+-- New fields added to existing orders table
+ALTER TABLE orders 
+ADD COLUMN assigned_laundromat_id UUID REFERENCES laundromats(id),
+ADD COLUMN routing_method TEXT DEFAULT 'zip_match',
+ADD COLUMN assigned_at TIMESTAMPTZ;
+```
+
+## Routing Functions
+
+### `find_laundromat_by_zip(incoming_zip)`
+
+Returns available laundromats for a ZIP code, ordered by current capacity (least busy first).
+
+```sql
+SELECT * FROM find_laundromat_by_zip('48201');
 ```
 
 Returns:
-- `time_window_id` - UUID of the time window
-- `label` - Human readable name (Morning, Afternoon, etc.)
-- `start_time` / `end_time` - Time range
-- `total_capacity` - Maximum orders allowed
-- `booked_orders` - Current number of orders
-- `available_slots` - Remaining capacity
+- `id` - Laundromat UUID
+- `name` - Laundromat name
+- `today_orders` - Current daily order count
+- `max_daily_orders` - Maximum capacity
+- `capacity_remaining` - Available slots today
+- `stripe_connect_id` - Payment routing ID
+- `contact_email` - Notification email
+- `avg_turnaround_hours` - Expected completion time
 
-### `reserve_capacity(service_date, zone_id, time_window_id)`
+### `assign_order_to_laundromat(order_id, laundromat_id)`
 
-Checks if capacity is available before creating an order.
+Assigns an order to a laundromat and increments their daily counter.
 
 ```sql
-SELECT reserve_capacity('2025-10-15', 'zone-uuid', 'window-uuid');
+SELECT assign_order_to_laundromat('order-uuid', 'laundromat-uuid');
 ```
 
-Returns `TRUE` if capacity is available, `FALSE` otherwise.
+Returns `TRUE` if successful, `FALSE` otherwise.
 
-## Capacity Validation Trigger
+### `get_laundromat_capacity(laundromat_id)`
 
-The database uses a trigger to automatically validate capacity when orders are created:
+Get current capacity status for a specific laundromat.
 
 ```sql
--- Function that validates capacity
-CREATE OR REPLACE FUNCTION validate_order_capacity()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-DECLARE
-  v_zone_id UUID;
-  has_capacity BOOLEAN;
-BEGIN
-  -- Determine zone from address
-  SELECT sz.id INTO v_zone_id
-  FROM service_zones sz, addresses a
-  WHERE a.id = NEW.address_id
-    AND a.postal_code = ANY(sz.postal_codes);
+SELECT * FROM get_laundromat_capacity('laundromat-uuid');
+```
 
-  -- Check if capacity exists
-  IF NOT reserve_capacity(NEW.pickup_date, v_zone_id, NEW.pickup_time_window_id) THEN
-    RAISE EXCEPTION 'No capacity configured for this date/zone/window'
-      USING ERRCODE = 'P0001';
-  END IF;
+Returns:
+- `name` - Laundromat name
+- `today_orders` - Current daily orders
+- `max_daily_orders` - Maximum capacity
+- `capacity_remaining` - Available slots
+- `utilization_percent` - Current utilization percentage
 
-  -- Set zone_id on the order
-  NEW.zone_id := v_zone_id;
+### `reset_daily_laundromat_counters()`
 
-  RETURN NEW;
-END;
-$$;
+Resets all daily order counters to 0. Should be run via cron daily at midnight.
 
--- Trigger that runs before order insert
-CREATE TRIGGER check_capacity_before_order
-  BEFORE INSERT ON orders
-  FOR EACH ROW
-  EXECUTE FUNCTION validate_order_capacity();
+```sql
+SELECT reset_daily_laundromat_counters();
+```
+
+## Automatic Order Routing
+
+### How It Works
+
+1. **Customer places order** with pickup ZIP code
+2. **System finds laundromats** serving that ZIP using `laundromat_service_areas`
+3. **Filters by availability** - only laundromats with `today_orders < max_daily_orders`
+4. **Sorts by load** - least busy laundromat gets the order
+5. **Assigns automatically** and increments counter
+
+### API Integration
+
+The routing happens automatically in the order creation API (`/api/create-order`):
+
+```typescript
+// Automatic laundromat assignment based on pickup ZIP code
+const pickupZip = pickupAddress.postal_code || pickupAddress.zip;
+if (pickupZip) {
+  const { data: availableLaundromats } = await serviceClient
+    .rpc('find_laundromat_by_zip', { incoming_zip: pickupZip });
+
+  if (availableLaundromats && availableLaundromats.length > 0) {
+    const assignedLaundromat = availableLaundromats[0]; // Least busy
+    await serviceClient.rpc('assign_order_to_laundromat', { 
+      order_id: order.id, 
+      laundromat_id: assignedLaundromat.id 
+    });
+  }
+}
 ```
 
 ## Setting Up Capacity for Production
 
-### 1. Create Time Windows
+### 1. Add Laundromats
 
 ```sql
-INSERT INTO time_windows (label, start_time, end_time, is_active) VALUES
-  ('Morning', '08:00:00', '12:00:00', true),
-  ('Afternoon', '12:00:00', '16:00:00', true),
-  ('Evening', '16:00:00', '20:00:00', true);
+INSERT INTO laundromats (name, address, city, state, zip_code, phone, max_daily_orders, is_active) VALUES
+('Downtown Express Wash', '1234 Griswold St', 'Detroit', 'MI', '48226', '(313) 555-0103', 50, true),
+('Midtown Wash & Fold', '4801 Cass Ave', 'Detroit', 'MI', '48201', '(313) 555-0101', 40, true),
+('Westside Laundry Hub', '8200 W Vernor Hwy', 'Detroit', 'MI', '48209', '(313) 555-0102', 35, true);
 ```
 
-### 2. Create Service Zones
+### 2. Set Up Service Areas
+
+Map each laundromat to the ZIP codes they can serve:
 
 ```sql
-INSERT INTO service_zones (name, postal_codes, is_active) VALUES
-  ('Downtown Detroit', ARRAY['48201', '48202', '48226'], true),
-  ('Midtown Detroit', ARRAY['48201', '48202'], true),
-  ('East Detroit', ARRAY['48205', '48207', '48213'], true);
+-- Get laundromat IDs
+SELECT id, name FROM laundromats;
+
+-- Assign service areas
+INSERT INTO laundromat_service_areas (laundromat_id, zip_code) VALUES
+-- Downtown Express Wash serves downtown and nearby
+('downtown-laundromat-uuid', '48226'),
+('downtown-laundromat-uuid', '48201'),
+('downtown-laundromat-uuid', '48243'),
+
+-- Midtown serves midtown area
+('midtown-laundromat-uuid', '48201'),
+('midtown-laundromat-uuid', '48202'),
+('midtown-laundromat-uuid', '48226'),
+
+-- Westside serves western Detroit
+('westside-laundromat-uuid', '48209'),
+('westside-laundromat-uuid', '48210'),
+('westside-laundromat-uuid', '48228');
 ```
 
-### 3. Set Up Daily Capacity
+### 3. Set Daily Capacity Limits
 
-You need to create capacity records for each date you want to accept orders.
-
-#### Option A: Manual for Specific Dates
+Adjust maximum daily orders based on each laundromat's capacity:
 
 ```sql
--- Get zone and time window IDs first
-SELECT id, name FROM service_zones;
-SELECT id, label FROM time_windows;
+-- High-volume locations
+UPDATE laundromats SET max_daily_orders = 60 WHERE name = 'Downtown Express Wash';
 
--- Insert capacity for a specific date
-INSERT INTO daily_capacity (service_date, zone_id, time_window_id, pickup_capacity, delivery_capacity)
-VALUES
-  ('2025-10-15', 'zone-uuid-here', 'morning-window-uuid', 20, 20),
-  ('2025-10-15', 'zone-uuid-here', 'afternoon-window-uuid', 15, 15),
-  ('2025-10-15', 'zone-uuid-here', 'evening-window-uuid', 10, 10);
+-- Medium-volume locations  
+UPDATE laundromats SET max_daily_orders = 40 WHERE name = 'Midtown Wash & Fold';
+
+-- Smaller operations
+UPDATE laundromats SET max_daily_orders = 25 WHERE name = 'Westside Laundry Hub';
 ```
 
-#### Option B: Bulk Creation for Date Range
+### 4. Set Up Daily Reset (Cron Job)
 
-```sql
--- Create capacity for next 30 days for all zones/windows
-INSERT INTO daily_capacity (service_date, zone_id, time_window_id, pickup_capacity, delivery_capacity)
-SELECT
-  d.service_date,
-  sz.id as zone_id,
-  tw.id as time_window_id,
-  15 as pickup_capacity,    -- Default 15 pickups per window
-  15 as delivery_capacity
-FROM
-  generate_series(
-    CURRENT_DATE,
-    CURRENT_DATE + INTERVAL '30 days',
-    INTERVAL '1 day'
-  ) d(service_date)
-CROSS JOIN service_zones sz
-CROSS JOIN time_windows tw
-WHERE
-  sz.is_active = true
-  AND tw.is_active = true
-  -- Skip Sundays (optional)
-  AND EXTRACT(DOW FROM d.service_date) != 0
-ON CONFLICT (service_date, zone_id, time_window_id)
-DO NOTHING;
+Create a cron job to reset daily counters at midnight:
+
+```bash
+# Add to crontab (crontab -e)
+0 0 * * * psql "$DATABASE_URL" -c "SELECT reset_daily_laundromat_counters();"
 ```
 
-### 4. Adjust Capacity for Specific Dates
-
-```sql
--- Increase capacity for a busy date
-UPDATE daily_capacity
-SET pickup_capacity = 30, delivery_capacity = 30
-WHERE service_date = '2025-12-24'  -- Christmas Eve
-  AND zone_id = 'downtown-zone-uuid';
-
--- Reduce capacity for a slow day
-UPDATE daily_capacity
-SET pickup_capacity = 5, delivery_capacity = 5
-WHERE service_date = '2025-07-04'  -- Independence Day
-  AND zone_id = 'downtown-zone-uuid';
-
--- Block a specific time window
-UPDATE daily_capacity
-SET pickup_capacity = 0, delivery_capacity = 0
-WHERE service_date = '2025-11-23'  -- Thanksgiving
-  AND time_window_id = 'morning-window-uuid';
-```
-
-## Re-enabling Capacity Validation
-
-Once you've set up capacity records, re-enable the trigger:
-
-```sql
--- Run the SQL from the "Capacity Validation Trigger" section above
--- This will recreate the function and trigger
-```
+Or use a scheduled function in your hosting platform.
 
 ## Monitoring Capacity
 
-### Check Current Availability
+### Check Current Load Distribution
 
 ```sql
--- See available slots for a specific date and zone
-SELECT
-  tw.label as time_window,
-  dc.pickup_capacity as max_capacity,
-  COUNT(o.id) as booked_orders,
-  dc.pickup_capacity - COUNT(o.id) as available_slots
-FROM daily_capacity dc
-JOIN time_windows tw ON tw.id = dc.time_window_id
-LEFT JOIN orders o ON (
-  o.pickup_date = dc.service_date
-  AND o.pickup_time_window_id = dc.time_window_id
-  AND o.zone_id = dc.zone_id
-  AND o.status NOT IN ('canceled_by_customer', 'canceled_by_ops', 'no_show')
-)
-WHERE
-  dc.service_date = '2025-10-15'
-  AND dc.zone_id = 'zone-uuid-here'
-GROUP BY tw.label, dc.pickup_capacity, tw.start_time
-ORDER BY tw.start_time;
+-- See current capacity utilization across all laundromats
+SELECT 
+  name,
+  today_orders,
+  max_daily_orders,
+  (max_daily_orders - today_orders) as remaining_capacity,
+  ROUND((today_orders::numeric / max_daily_orders::numeric) * 100, 1) as utilization_percent
+FROM laundromats 
+WHERE is_active = true
+ORDER BY utilization_percent DESC;
 ```
 
-### Find Dates Missing Capacity
+### Check Service Coverage
 
 ```sql
--- Find upcoming dates that don't have capacity configured
-SELECT DISTINCT service_date
-FROM generate_series(
-  CURRENT_DATE,
-  CURRENT_DATE + INTERVAL '14 days',
-  INTERVAL '1 day'
-) d(service_date)
-WHERE NOT EXISTS (
-  SELECT 1 FROM daily_capacity dc
-  WHERE dc.service_date = d.service_date
-);
+-- See which ZIP codes are covered and by how many laundromats
+SELECT 
+  lsa.zip_code,
+  COUNT(*) as laundromat_count,
+  string_agg(l.name, ', ') as served_by
+FROM laundromat_service_areas lsa
+JOIN laundromats l ON lsa.laundromat_id = l.id
+WHERE l.is_active = true
+GROUP BY lsa.zip_code
+ORDER BY lsa.zip_code;
+```
+
+### Find Uncovered ZIP Codes
+
+```sql
+-- Check recent orders that couldn't be routed (no laundromat assigned)
+SELECT 
+  pickup_address_postal_code as zip_code,
+  COUNT(*) as unrouted_orders
+FROM orders 
+WHERE assigned_laundromat_id IS NULL 
+  AND created_at > NOW() - INTERVAL '7 days'
+  AND pickup_address_postal_code IS NOT NULL
+GROUP BY pickup_address_postal_code
+ORDER BY unrouted_orders DESC;
+```
+
+### Daily Capacity Report
+
+```sql
+-- Daily capacity summary
+WITH capacity_stats AS (
+  SELECT 
+    l.name,
+    l.today_orders,
+    l.max_daily_orders,
+    (l.max_daily_orders - l.today_orders) as remaining,
+    ROUND((l.today_orders::numeric / l.max_daily_orders::numeric) * 100, 1) as utilization
+  FROM laundromats l 
+  WHERE l.is_active = true
+)
+SELECT 
+  'Total Orders Today' as metric,
+  SUM(today_orders)::text as value
+FROM capacity_stats
+UNION ALL
+SELECT 
+  'Total Capacity',
+  SUM(max_daily_orders)::text
+FROM capacity_stats
+UNION ALL
+SELECT 
+  'Available Slots',
+  SUM(remaining)::text  
+FROM capacity_stats
+UNION ALL
+SELECT 
+  'Average Utilization',
+  ROUND(AVG(utilization), 1)::text || '%'
+FROM capacity_stats;
+```
+
+## Managing Capacity
+
+### Temporarily Increase Capacity
+
+```sql
+-- For busy days or special events
+UPDATE laundromats 
+SET max_daily_orders = max_daily_orders + 10
+WHERE name = 'Downtown Express Wash';
+```
+
+### Temporarily Disable a Laundromat
+
+```sql
+-- For maintenance or holidays
+UPDATE laundromats 
+SET is_active = false 
+WHERE name = 'Midtown Wash & Fold';
+
+-- Re-enable later
+UPDATE laundromats 
+SET is_active = true 
+WHERE name = 'Midtown Wash & Fold';
+```
+
+### Add New Service Areas
+
+```sql
+-- Expand a laundromat's service area
+INSERT INTO laundromat_service_areas (laundromat_id, zip_code) 
+SELECT id, '48204' 
+FROM laundromats 
+WHERE name = 'Downtown Express Wash';
+```
+
+### Manual Order Reassignment
+
+Use the assignment API endpoint to manually assign orders:
+
+```bash
+# Assign specific order to specific laundromat
+curl -X POST /api/assign-laundromat \
+  -H "Content-Type: application/json" \
+  -d '{"orderId": "order-uuid", "laundromatId": "laundromat-uuid"}'
+
+# Auto-assign based on ZIP code
+curl -X POST /api/assign-laundromat \
+  -H "Content-Type: application/json" \
+  -d '{"orderId": "order-uuid", "zipCode": "48201"}'
 ```
 
 ## Best Practices
 
-1. **Set up rolling capacity** - Use a scheduled job to automatically create capacity for 30-60 days ahead
-2. **Monitor utilization** - Track which time windows fill up quickly to adjust capacity
-3. **Seasonal adjustments** - Increase capacity during busy seasons, reduce during slow periods
-4. **Holiday planning** - Block or reduce capacity for holidays in advance
-5. **Zone balancing** - Distribute capacity based on driver availability per zone
-6. **Backup capacity** - Keep 10-20% buffer capacity for same-day urgent orders
+1. **Load Balancing** - System automatically assigns to least busy laundromat
+2. **Redundancy** - Have multiple laundromats serve overlapping ZIP codes
+3. **Capacity Monitoring** - Set up alerts when utilization > 80%
+4. **Partner Communication** - Send daily capacity reports to partner laundromats
+5. **Seasonal Adjustments** - Temporarily increase capacity during busy periods
+6. **Geographic Optimization** - Assign laundromats to ZIP codes based on proximity
 
 ## Troubleshooting
 
-### Orders Failing with "No capacity configured"
+### Orders Not Getting Assigned
 
-1. Check if capacity record exists:
+1. **Check service area coverage**:
    ```sql
-   SELECT * FROM daily_capacity
-   WHERE service_date = 'date-here'
-     AND zone_id = 'zone-here'
-     AND time_window_id = 'window-here';
+   SELECT * FROM find_laundromat_by_zip('zip-code-here');
    ```
 
-2. If missing, create it:
+2. **If no results, add service area**:
    ```sql
-   INSERT INTO daily_capacity (service_date, zone_id, time_window_id, pickup_capacity, delivery_capacity)
-   VALUES ('date-here', 'zone-uuid', 'window-uuid', 15, 15);
+   INSERT INTO laundromat_service_areas (laundromat_id, zip_code) 
+   VALUES ('nearest-laundromat-uuid', 'zip-code-here');
    ```
 
-### Time Window Not Showing as Available
+### Laundromat at Full Capacity
 
-1. Check if slots are full:
+1. **Check current load**:
    ```sql
-   SELECT * FROM get_available_windows('date-here', 'zone-uuid-here');
+   SELECT * FROM get_laundromat_capacity('laundromat-uuid');
    ```
 
-2. Increase capacity if needed:
+2. **Temporarily increase capacity**:
    ```sql
-   UPDATE daily_capacity
-   SET pickup_capacity = pickup_capacity + 10
-   WHERE service_date = 'date-here'
-     AND zone_id = 'zone-uuid'
-     AND time_window_id = 'window-uuid';
+   UPDATE laundromats SET max_daily_orders = max_daily_orders + 5
+   WHERE id = 'laundromat-uuid';
    ```
 
-## For Development/Testing
+### Daily Counters Not Resetting
 
-To temporarily disable capacity validation (already done via `disable-capacity-check.sql`):
+1. **Manually reset**:
+   ```sql
+   SELECT reset_daily_laundromat_counters();
+   ```
 
-```sql
-DROP TRIGGER IF EXISTS check_capacity_before_order ON orders;
-DROP FUNCTION IF EXISTS validate_order_capacity() CASCADE;
-```
+2. **Check cron job is running** or set up scheduled function
 
-⚠️ **WARNING**: Only use this in development. In production, always have capacity validation enabled to prevent overbooking.
+## Migration from Zone-Based System
+
+The old zone-based capacity system (`service_zones`, `daily_capacity`) has been completely replaced with this laundromat-centric approach. Key differences:
+
+- ✅ **Automatic load balancing** instead of manual capacity planning
+- ✅ **Real-time capacity tracking** instead of pre-allocated slots  
+- ✅ **Partner-focused** routing for better business relationships
+- ✅ **Simplified operations** - no daily capacity setup required
+- ✅ **Better scalability** - easy to add new partners and service areas
+
+All existing orders have been migrated to use the new `assigned_laundromat_id` field.
