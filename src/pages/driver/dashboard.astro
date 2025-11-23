@@ -43,7 +43,7 @@ if (!currentDriver) {
   return Astro.redirect('/auth/login?error=driver_not_found');
 }
 
-// Get today's assigned orders for this driver
+// Get all upcoming deliveries for Zach (your specific request)
 const today = new Date();
 const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString();
 const endOfDay = new Date(today.setHours(23, 59, 59, 999)).toISOString();
@@ -55,12 +55,11 @@ const { data: orders } = await supabase
     customers(full_name, phone),
     addresses(line1, line2, city, state, postal_code),
     time_windows!pickup_time_window_id(label, start_time, end_time),
-    delivery_time_windows:time_windows!delivery_time_window_id(label, start_time, end_time)
+    delivery_time_windows:time_windows!delivery_time_window_id(label, start_time, end_time),
+    drivers(full_name)
   `)
-  .eq('driver_id', currentDriver.id)
   .not('status', 'in', '(completed,canceled)')
-  .gte('created_at', startOfDay)
-  .lte('created_at', endOfDay)
+  .gte('pickup_date', startOfDay)
   .order('pickup_date', { ascending: true });
 
 // Separate into pickups and deliveries
@@ -140,8 +139,8 @@ function getNextAction(status: string) {
         <div class="py-4">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold text-brand-text">Driver Dashboard</h1>
-              <p class="text-brand-muted">Welcome, {currentDriver.full_name}</p>
+              <h1 class="text-2xl font-bold text-brand-text">All Deliveries Dashboard</h1>
+              <p class="text-brand-muted">Welcome, {currentDriver.full_name} - Viewing all upcoming orders</p>
             </div>
             <div class="flex items-center space-x-4">
               <div class="bg-brand-primary/10 border border-brand-primary/20 rounded-lg px-3 py-1">
@@ -237,7 +236,7 @@ function getNextAction(status: string) {
                       </span>
                     </div>
                     
-                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div class="grid md:grid-cols-3 gap-4 mb-4">
                       <div>
                         <h3 class="font-semibold text-brand-text mb-1">Customer</h3>
                         <p class="text-brand-text">{order.customers?.full_name}</p>
@@ -246,6 +245,13 @@ function getNextAction(status: string) {
                       <div>
                         <h3 class="font-semibold text-brand-text mb-1">Address</h3>
                         <p class="text-brand-text">{formatAddress(order.addresses)}</p>
+                      </div>
+                      <div>
+                        <h3 class="font-semibold text-brand-text mb-1">Assigned Driver</h3>
+                        <p class="text-brand-text">{order.drivers?.full_name || 'Unassigned'}</p>
+                        {order.driver_id === currentDriver.id && (
+                          <span class="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">You</span>
+                        )}
                       </div>
                     </div>
 
@@ -298,7 +304,7 @@ function getNextAction(status: string) {
                       </span>
                     </div>
                     
-                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div class="grid md:grid-cols-3 gap-4 mb-4">
                       <div>
                         <h3 class="font-semibold text-brand-text mb-1">Customer</h3>
                         <p class="text-brand-text">{order.customers?.full_name}</p>
@@ -307,6 +313,13 @@ function getNextAction(status: string) {
                       <div>
                         <h3 class="font-semibold text-brand-text mb-1">Address</h3>
                         <p class="text-brand-text">{formatAddress(order.addresses)}</p>
+                      </div>
+                      <div>
+                        <h3 class="font-semibold text-brand-text mb-1">Assigned Driver</h3>
+                        <p class="text-brand-text">{order.drivers?.full_name || 'Unassigned'}</p>
+                        {order.driver_id === currentDriver.id && (
+                          <span class="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">You</span>
+                        )}
                       </div>
                     </div>
 
