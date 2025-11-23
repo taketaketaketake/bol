@@ -6,8 +6,8 @@
  */
 
 import type { APIRoute } from 'astro';
-import { requireRole } from '../../utils/require-role';
-import { supabase } from '../../lib/supabase';
+import { requireRole } from '../../../utils/require-role';
+import { supabase } from '../../../lib/supabase';
 
 const log = (msg: string, data?: any) =>
   import.meta.env.MODE !== 'production' && console.log(`[driver-tasks] ${msg}`, data || '');
