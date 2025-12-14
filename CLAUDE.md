@@ -49,12 +49,50 @@ npx drizzle-kit studio     # Open Drizzle Studio for database inspection
 
 **Availability Checking**: `/api/check-availability.ts` calls `get_available_windows()` SQL function for real-time slot availability based on postal code → service zone mapping.
 
-**Order Creation**: `/api/create-order.ts` handles guest order creation with token generation and email notifications via Supabase functions.
+**Order Creation**: `/api/create-order.ts` handles authenticated order creation with automatic laundromat routing and email notifications.
 
 **Payment Processing**: 
 - `/api/create-payment-intent.ts` - Initial authorization hold
 - `/api/capture-payment.ts` - Final charge after weight measurement
 - `/api/stripe-webhook.ts` - Payment confirmations and subscription updates
+
+### Authentication Patterns
+
+**Role-Based Access Control**: The platform uses a unified role-based authentication system with hierarchy support.
+
+**Role Hierarchy**: `admin` → `driver` | `laundromat_staff` → `customer`
+- Admins inherit all permissions from lower roles
+- Drivers can access customer features but not admin features
+- All roles can access customer-level functionality
+
+**Authentication Utilities**:
+- **Preferred**: `require-role.ts` - Modern unified system for all new endpoints
+- **Legacy**: `require-auth.ts` - Basic authentication (being phased out)
+- **Legacy**: `require-roles.ts` - Admin/member specific (being phased out)
+
+**Usage Guidelines**:
+```typescript
+// ✅ For new endpoints - use unified system
+import { requireRole } from '../utils/require-role';
+const { user, roles } = await requireRole(cookies, ['driver', 'admin']);
+
+// ⚠️ Legacy patterns - migrate when touching these files
+import { requireAuth } from '../utils/require-auth';
+import { requireAdmin } from '../utils/require-roles';
+```
+
+**API Route Organization**:
+- `/api/driver/*` - Driver-specific operations (pickup, delivery, status updates)
+- `/api/orders/*` - General order operations (cancel, adjust-weight, etc.)
+- `/api/profile/*` - Customer profile management
+- `/api/admin/*` - Administrative operations
+- `/api/auth/*` - Authentication flows
+
+**Current Migration Status**:
+- Driver endpoints: ✅ Using unified role system
+- Admin endpoints: ⚠️ Using legacy `requireAdmin()` 
+- Customer endpoints: ⚠️ Using legacy `requireAuth()`
+- **Strategy**: Migrate opportunistically when modifying existing endpoints
 
 ### Key File Locations
 

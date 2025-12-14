@@ -1,0 +1,227 @@
+---
+import Layout from '../../layout/Layout.astro';
+import { getLaundromatRevenueData } from '../../utils/dashboard/laundromat-revenue';
+
+// Mock user for development (no auth required)
+const user = { id: 'mock-user-id' };
+
+// Get revenue data
+const revenueData = await getLaundromatRevenueData(user.id);
+
+// Fallback data for development if no laundromat found
+const { 
+  laundromat = { name: 'Demo Laundromat' },
+  dailyRevenue = { total: 0, orderCount: 0, totalWeight: 0, last7Days: [] },
+  weeklyRevenue = { total: 0, orderCount: 0, averagePerOrder: 0 },
+  monthlyRevenue = { total: 0, orderCount: 0, growthPercent: 0, byServiceType: [] },
+  recentCompletedOrders = [],
+  payoutSchedule = { 
+    pendingAmount: 0, 
+    nextPayoutDate: 'TBD', 
+    weekEnding: 'TBD',
+    paymentMethod: 'Direct Deposit',
+    frequency: 'Weekly'
+  }
+} = revenueData;
+---
+
+<Layout title={`${laundromat.name} - Revenue Dashboard`}>
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div>
+          <a href="/laundromat/dashboard" class="text-blue-600 hover:text-blue-800 text-sm">← Back to Dashboard</a>
+          <h1 class="text-2xl font-bold text-gray-900">{laundromat.name}</h1>
+          <p class="text-sm text-gray-600">Revenue & Financial Tracking</p>
+        </div>
+        <div class="text-sm text-gray-600">
+          <span class="font-medium">Next Payout:</span>
+          <span class="ml-1">{payoutSchedule.nextPayoutDate}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Revenue Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <!-- Today's Revenue -->
+      <div class="bg-white rounded-lg shadow-sm border p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Today's Revenue</p>
+            <p class="text-3xl font-bold text-green-600">${dailyRevenue.total.toFixed(2)}</p>
+          </div>
+          <div class="text-right text-sm text-gray-600">
+            <p>{dailyRevenue.orderCount} orders</p>
+            <p>{dailyRevenue.totalWeight} lbs</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- This Week -->
+      <div class="bg-white rounded-lg shadow-sm border p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">This Week</p>
+            <p class="text-3xl font-bold text-blue-600">${weeklyRevenue.total.toFixed(2)}</p>
+          </div>
+          <div class="text-right text-sm text-gray-600">
+            <p>{weeklyRevenue.orderCount} orders</p>
+            <p>Avg: ${weeklyRevenue.averagePerOrder.toFixed(2)}/order</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- This Month -->
+      <div class="bg-white rounded-lg shadow-sm border p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">This Month</p>
+            <p class="text-3xl font-bold text-purple-600">${monthlyRevenue.total.toFixed(2)}</p>
+          </div>
+          <div class="text-right text-sm text-gray-600">
+            <p>{monthlyRevenue.orderCount} orders</p>
+            <p>Growth: {monthlyRevenue.growthPercent > 0 ? '+' : ''}{monthlyRevenue.growthPercent.toFixed(1)}%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payout Information -->
+    <div class="bg-white rounded-lg shadow-sm border mb-6 p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Payout Schedule</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <div class="text-sm text-gray-600 mb-2">Pending Payout</div>
+          <div class="text-2xl font-bold text-orange-600">${payoutSchedule.pendingAmount.toFixed(2)}</div>
+          <div class="text-sm text-gray-600 mt-1">
+            For week ending {payoutSchedule.weekEnding}
+          </div>
+        </div>
+        <div>
+          <div class="text-sm text-gray-600 mb-2">Payment Method</div>
+          <div class="text-lg font-semibold text-gray-900">
+            {payoutSchedule.paymentMethod || 'Direct Deposit'}
+          </div>
+          <div class="text-sm text-gray-600 mt-1">
+            Paid every {payoutSchedule.frequency}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Completed Orders -->
+    <div class="bg-white rounded-lg shadow-sm border mb-6">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Recent Completed Orders</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completed</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {recentCompletedOrders.map((order) => (
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  #{order.id.slice(-8)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {order.customer?.full_name || 'Guest'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {order.measured_weight_lb} lbs
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                  ${order.revenue.toFixed(2)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {new Date(order.delivered_at).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Revenue Breakdown -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Daily Breakdown -->
+      <div class="bg-white rounded-lg shadow-sm border p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Last 7 Days</h3>
+        <div class="space-y-3">
+          {dailyRevenue.last7Days?.map((day) => (
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">{day.date}</span>
+              <div class="text-right">
+                <span class="font-medium">${day.revenue.toFixed(2)}</span>
+                <span class="text-sm text-gray-500 ml-2">({day.orders} orders)</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Service Type Breakdown -->
+      <div class="bg-white rounded-lg shadow-sm border p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue by Service</h3>
+        <div class="space-y-3">
+          {monthlyRevenue.byServiceType?.map((service) => (
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600 capitalize">{service.type.replace('_', ' ')}</span>
+              <div class="text-right">
+                <span class="font-medium">${service.revenue.toFixed(2)}</span>
+                <span class="text-sm text-gray-500 ml-2">({service.orders} orders)</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-6 bg-white rounded-lg shadow-sm border p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Financial Actions</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button onclick="downloadStatement()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Download Statement
+        </button>
+        <button onclick="viewTaxDocuments()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          Tax Documents
+        </button>
+        <button onclick="updatePaymentInfo()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+          Payment Settings
+        </button>
+        <a href="/laundromat/dashboard" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 text-center">
+          Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function downloadStatement() {
+      // TODO: Implement statement download
+      alert('Statement download feature coming soon!');
+    }
+
+    function viewTaxDocuments() {
+      // TODO: Implement tax document viewer
+      alert('Tax document viewer coming soon!');
+    }
+
+    function updatePaymentInfo() {
+      // TODO: Implement payment settings
+      alert('Payment settings coming soon!');
+    }
+  </script>
+</Layout>

@@ -1,0 +1,330 @@
+---
+import Layout from '../../layout/Layout.astro';
+import { getLaundromatOrders } from '../../utils/dashboard/laundromat-orders';
+
+// Mock user for development (no auth required)
+const user = { id: 'mock-user-id' };
+
+// Get query parameters for filtering
+const url = new URL(Astro.request.url);
+const status = url.searchParams.get('status') || '';
+const startDate = url.searchParams.get('start') || '';
+const endDate = url.searchParams.get('end') || '';
+const page = parseInt(url.searchParams.get('page') || '1');
+const limit = 25;
+const offset = (page - 1) * limit;
+
+// Get orders data
+const ordersData = await getLaundromatOrders(user.id, {
+  status: status || undefined,
+  startDate: startDate || undefined,
+  endDate: endDate || undefined,
+  limit,
+  offset
+});
+
+const { orders, totalCount, laundromat } = ordersData;
+
+// Calculate pagination
+const totalPages = Math.ceil(totalCount / limit);
+const hasNextPage = page < totalPages;
+const hasPrevPage = page > 1;
+
+// Status options for filter
+const statusOptions = [
+  { value: '', label: 'All Orders' },
+  { value: 'scheduled', label: 'Scheduled' },
+  { value: 'en_route_pickup', label: 'En Route Pickup' },
+  { value: 'picked_up', label: 'Picked Up' },
+  { value: 'processing', label: 'Processing' },
+  { value: 'ready_for_delivery', label: 'Ready for Delivery' },
+  { value: 'en_route_delivery', label: 'En Route Delivery' },
+  { value: 'delivered', label: 'Delivered' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'canceled', label: 'Canceled' }
+];
+
+function getStatusBadgeClass(status: string): string {
+  switch (status) {
+    case 'scheduled': return 'bg-yellow-100 text-yellow-800';
+    case 'en_route_pickup': return 'bg-blue-100 text-blue-800';
+    case 'picked_up': return 'bg-purple-100 text-purple-800';
+    case 'processing': return 'bg-orange-100 text-orange-800';
+    case 'ready_for_delivery': return 'bg-green-100 text-green-800';
+    case 'en_route_delivery': return 'bg-blue-100 text-blue-800';
+    case 'delivered': return 'bg-green-100 text-green-800';
+    case 'completed': return 'bg-gray-100 text-gray-800';
+    case 'canceled': return 'bg-red-100 text-red-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+}
+
+const pageTitle = `${laundromat?.name || 'Laundromat'} - All Orders`;
+---
+
+<Layout title={pageTitle}>
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div>
+          <a href="/laundromat/dashboard" class="text-blue-600 hover:text-blue-800 text-sm">← Back to Dashboard</a>
+          <h1 class="text-2xl font-bold text-gray-900">{laundromat?.name || 'Laundromat'}</h1>
+          <p class="text-sm text-gray-600">Order Management</p>
+        </div>
+        <div class="text-sm text-gray-600">
+          <span class="font-medium">Total Orders:</span>
+          <span class="ml-1">{totalCount}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-sm border mb-6 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Filter Orders</h2>
+      
+      <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Status Filter -->
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select 
+            id="status" 
+            name="status" 
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            {statusOptions.map((option) => (
+              <option value={option.value} selected={status === option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <!-- Start Date -->
+        <div>
+          <label for="start" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+          <input 
+            type="date" 
+            id="start" 
+            name="start" 
+            value={startDate}
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- End Date -->
+        <div>
+          <label for="end" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+          <input 
+            type="date" 
+            id="end" 
+            name="end" 
+            value={endDate}
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Filter Button -->
+        <div class="flex items-end">
+          <button 
+            type="submit"
+            class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium"
+          >
+            Filter
+          </button>
+        </div>
+      </form>
+
+      <!-- Clear Filters -->
+      {(status || startDate || endDate) && (
+        <div class="mt-4">
+          <a 
+            href="/laundromat/orders" 
+            class="text-sm text-gray-600 hover:text-gray-800"
+          >
+            Clear all filters
+          </a>
+        </div>
+      )}
+    </div>
+
+    <!-- Orders Table -->
+    <div class="bg-white rounded-lg shadow-sm border">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">
+          Orders ({totalCount} total)
+          {status && (
+            <span class="text-sm font-normal text-gray-600">
+              - filtered by {statusOptions.find(opt => opt.value === status)?.label}
+            </span>
+          )}
+        </h3>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Order ID
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Customer
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Service
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Pickup Date
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Weight
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {orders.length === 0 ? (
+              <tr>
+                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                  No orders found for the selected filters.
+                </td>
+              </tr>
+            ) : (
+              orders.map((order) => (
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">
+                      #{order.id.slice(-8)}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      {order.service_type || 'Standard'}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">
+                      {order.customer?.full_name || 'Guest'}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      {order.customer?.email || 'N/A'}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900 capitalize">
+                      {order.service_type?.replace('_', ' ') || 'Standard'}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      {order.plan_type?.replace('_', ' ') || 'Pay per load'}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}>
+                      {order.status.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {order.pickup_date ? new Date(order.pickup_date).toLocaleDateString() : 'TBD'}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {order.measured_weight_lb ? `${order.measured_weight_lb} lbs` : 'TBD'}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <a 
+                      href={`/laundromat/orders/${order.id}`}
+                      class="text-blue-600 hover:text-blue-900"
+                    >
+                      View
+                    </a>
+                    {(order.status === 'scheduled' || order.status === 'processing') && (
+                      <button 
+                        onclick={`updateOrderStatus('${order.id}')`}
+                        class="text-green-600 hover:text-green-900"
+                      >
+                        Update
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {totalPages > 1 && (
+        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            Showing {offset + 1} to {Math.min(offset + limit, totalCount)} of {totalCount} results
+          </div>
+          
+          <div class="flex space-x-2">
+            {hasPrevPage && (
+              <a 
+                href={`/laundromat/orders?page=${page - 1}${status ? `&status=${status}` : ''}${startDate ? `&start=${startDate}` : ''}${endDate ? `&end=${endDate}` : ''}`}
+                class="px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Previous
+              </a>
+            )}
+            
+            <span class="px-3 py-2 text-sm text-gray-700">
+              Page {page} of {totalPages}
+            </span>
+            
+            {hasNextPage && (
+              <a 
+                href={`/laundromat/orders?page=${page + 1}${status ? `&status=${status}` : ''}${startDate ? `&start=${startDate}` : ''}${endDate ? `&end=${endDate}` : ''}`}
+                class="px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Next
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-6 bg-white rounded-lg shadow-sm border p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button onclick="exportOrders()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          Export to CSV
+        </button>
+        <button onclick="printOrderList()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+          Print List
+        </button>
+        <a href="/laundromat/dashboard" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">
+          Back to Dashboard
+        </a>
+        <a href="/laundromat/revenue" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-center">
+          View Revenue
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateOrderStatus(orderId) {
+      // Redirect to order detail page for status updates
+      window.location.href = `/laundromat/orders/${orderId}`;
+    }
+
+    function exportOrders() {
+      // TODO: Implement CSV export
+      alert('CSV export feature coming soon!');
+    }
+
+    function printOrderList() {
+      window.print();
+    }
+  </script>
+</Layout>

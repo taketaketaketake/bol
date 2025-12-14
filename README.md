@@ -19,6 +19,14 @@ A comprehensive, production-ready laundry service platform built with modern web
 - **Weight Management**: Actual weight capture with automatic payment adjustments
 - **Audit Trail**: Complete order timeline with driver accountability
 
+### 🏪 **Laundromat Partner Dashboard System**
+- **Operations Command Center**: Real-time overview with 10-second status assessment
+- **Order Queue Management**: Categorized workflow (Pickup → Processing → Ready for Delivery)
+- **Revenue Tracking**: Daily/weekly/monthly financial analytics with payout scheduling
+- **Customer Communication**: SMS templates, click-to-call, custom messaging tools
+- **Order Management**: Comprehensive filtering, pagination, and bulk operations
+- **Weight Adjustments**: Real-time weight updates with automatic pricing recalculation
+
 ### 🔐 **Unified Role-Based Access Control**
 - **Role Hierarchy**: Admin → Driver/Laundromat Staff → Customer with inheritance
 - **Secure Authentication**: Server-side validation with Supabase service role
@@ -148,6 +156,38 @@ if (isLaundromatStaff(roles)) {
   // Laundromat staff or admin access
 }
 ```
+
+## 🖥️ Dashboard Routes & Interfaces
+
+### Customer Dashboard
+- **`/dashboard`** - Main customer overview with active orders and history
+- **`/dashboard/profile`** - Account settings, SMS preferences, address management
+- **`/dashboard/orders/[id]`** - Individual order details and tracking
+- **`/dashboard/orders/[id]/reschedule`** - Reschedule pickup/delivery times
+
+### Laundromat Partner Dashboard
+- **`/laundromat/dashboard`** - Operations command center with real-time order status
+- **`/laundromat/orders`** - Complete order management with filtering and pagination
+- **`/laundromat/orders/[id]`** - Individual order details with customer communication tools
+- **`/laundromat/revenue`** - Financial tracking, revenue analytics, and payout scheduling
+
+### Driver Dashboard
+- **`/driver/dashboard`** - Daily task overview with pickup/delivery assignments
+- **`/driver/tasks/[id]`** - Individual task management with photo upload and status updates
+
+### Admin Dashboard
+- **`/admin/sms-test`** - SMS notification testing interface
+
+### API Endpoints
+
+#### Laundromat Management
+- **`POST /api/laundromat/orders/[id]/status`** - Update order status with timestamp tracking
+- **`POST /api/laundromat/orders/[id]/weight`** - Adjust measured weight with payment recalculation
+- **`POST /api/laundromat/orders/[id]/message`** - Send SMS notifications with template support
+
+#### Driver Workflow
+- **`POST /api/driver/orders/[id]/pickup`** - Mark order picked up with photo proof
+- **`POST /api/driver/orders/[id]/dropoff`** - Complete delivery with photo documentation
 
 ### Access Patterns
 
