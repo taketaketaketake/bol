@@ -52,38 +52,64 @@ interface LaundromatOperationsData {
 export async function getLaundromatOperationsData(authUserId: string): Promise<LaundromatOperationsData> {
   const serviceClient = getServiceClient();
 
-  // Get the first active laundromat for development
-  const { data: laundromats } = await serviceClient
-    .from('laundromats')
-    .select('*')
+  // Get the staff member's assigned laundromat
+  const { data: staffAssignment, error: staffError } = await serviceClient
+    .from('laundromat_staff')
+    .select(`
+      laundromat_id,
+      can_manage_orders,
+      can_view_revenue,
+      can_contact_customers,
+      laundromat:laundromats (
+        *
+      )
+    `)
+    .eq('auth_user_id', authUserId)
     .eq('is_active', true)
-    .limit(1);
+    .single();
 
-  if (!laundromats || laundromats.length === 0) {
-    return {
-      laundromat: null,
-      todayOrders: [],
-      ordersByStatus: {
-        pickupQueue: [],
-        processing: [],
-        readyForDelivery: [],
-        outForDelivery: [],
-        onTrack: 0,
-        atRisk: 0,
-        late: 0
-      },
-      todayStats: {
-        totalOrders: 0,
-        completedOrders: 0,
-        totalWeight: 0,
-        averageWeight: 0
-      },
-      revenueToday: 0
-    };
+  console.log('Staff assignment query result:', { staffAssignment, staffError });
+
+  let laundromat, laundromatId;
+
+  if (!staffAssignment || !staffAssignment.laundromat) {
+    // Development fallback: Use first available laundromat
+    console.warn('No staff assignment found, using development fallback');
+    const { data: laundromats } = await serviceClient
+      .from('laundromats')
+      .select('*')
+      .eq('is_active', true)
+      .limit(1);
+
+    if (!laundromats || laundromats.length === 0) {
+      return {
+        laundromat: null,
+        todayOrders: [],
+        ordersByStatus: {
+          pickupQueue: [],
+          processing: [],
+          readyForDelivery: [],
+          outForDelivery: [],
+          onTrack: 0,
+          atRisk: 0,
+          late: 0
+        },
+        todayStats: {
+          totalOrders: 0,
+          completedOrders: 0,
+          totalWeight: 0,
+          averageWeight: 0
+        },
+        revenueToday: 0
+      };
+    }
+    
+    laundromat = laundromats[0];
+    laundromatId = laundromat.id;
+  } else {
+    laundromat = staffAssignment.laundromat;
+    laundromatId = laundromat.id;
   }
-
-  const laundromat = laundromats[0];
-  const laundromatId = laundromat.id;
 
   // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];

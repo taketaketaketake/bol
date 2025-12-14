@@ -2,8 +2,21 @@
 import { requireRole } from '../../../utils/require-role';
 import { getLaundromatOrderDetails } from '../../../utils/dashboard/laundromat-orders';
 
-// Authenticate as laundromat staff or admin
-const { user, roles } = await requireRole(Astro.cookies, ['laundromat_staff', 'admin']);
+// Development mode bypass - remove this in production
+const isDevelopment = import.meta.env.DEV;
+let user, roles;
+
+if (isDevelopment) {
+  // Development bypass with mock user
+  console.log('🚨 Development mode: Using mock authentication');
+  user = { id: 'dev-mock-user-id' };
+  roles = ['laundromat_staff'];
+} else {
+  // Production authentication
+  const authResult = await requireRole(Astro.cookies, ['laundromat_staff', 'admin']);
+  user = authResult.user;
+  roles = authResult.roles;
+}
 
 const orderId = Astro.params.id;
 if (!orderId) {

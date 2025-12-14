@@ -102,8 +102,8 @@ export default function BagPricingSection() {
           <article className="card overflow-hidden">
             <div className="w-full overflow-hidden" style={{ aspectRatio: '1' }}>
               <img
-                src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=600&auto=format&fit=crop"
-                alt="Small laundry bag"
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/25lbs.png"
+                alt="Small laundry bag - 16 lbs capacity"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -125,8 +125,8 @@ export default function BagPricingSection() {
           <article className="card overflow-hidden">
             <div className="w-full overflow-hidden" style={{ aspectRatio: '1' }}>
               <img
-                src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?q=80&w=600&auto=format&fit=crop"
-                alt="Medium laundry bag"
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/16lbs.png"
+                alt="Medium laundry bag - 25 lbs capacity"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -148,8 +148,8 @@ export default function BagPricingSection() {
           <article className="card overflow-hidden">
             <div className="w-full overflow-hidden" style={{ aspectRatio: '1' }}>
               <img
-                src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?q=80&w=600&auto=format&fit=crop"
-                alt="Large laundry bag"
+                src="https://hjkefmlxjyonfjxewkko.supabase.co/storage/v1/object/public/bol-images/40lbs.png"
+                alt="Large laundry bag - 40 lbs capacity"
                 className="w-full h-full object-cover"
               />
             </div>

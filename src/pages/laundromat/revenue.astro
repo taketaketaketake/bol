@@ -1,12 +1,33 @@
 ---
 import Layout from '../../layout/Layout.astro';
 import { getLaundromatRevenueData } from '../../utils/dashboard/laundromat-revenue';
+import { requireRole } from '../../utils/require-role';
 
-// Mock user for development (no auth required)
-const user = { id: 'mock-user-id' };
+// Development mode bypass - remove this in production
+const isDevelopment = import.meta.env.DEV;
+let user, roles, revenueData;
 
-// Get revenue data
-const revenueData = await getLaundromatRevenueData(user.id);
+if (isDevelopment) {
+  // Development bypass with mock user
+  console.log('🚨 Development mode: Using mock authentication');
+  user = { id: 'dev-mock-user-id' };
+  roles = ['laundromat_staff'];
+  revenueData = await getLaundromatRevenueData(user.id);
+} else {
+  // Production authentication
+  try {
+    const authResult = await requireRole(Astro.cookies, ['laundromat_staff', 'admin']);
+    user = authResult.user;
+    roles = authResult.roles;
+    revenueData = await getLaundromatRevenueData(user.id);
+  } catch (error) {
+    // Handle authentication/authorization errors
+    if (error instanceof Response) {
+      return error;
+    }
+    throw new Error('Authentication failed');
+  }
+}
 
 // Fallback data for development if no laundromat found
 const { 

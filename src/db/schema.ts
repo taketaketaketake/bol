@@ -91,6 +91,23 @@ export interface LaundromateServiceArea {
   created_at?: string;
 }
 
+export interface LaundromatStaff {
+  id: string;
+  auth_user_id: string;
+  laundromat_id: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  position?: string;
+  is_active?: boolean;
+  can_manage_orders?: boolean;
+  can_view_revenue?: boolean;
+  can_contact_customers?: boolean;
+  hired_date?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Driver {
   id: string;
   auth_user_id?: string;

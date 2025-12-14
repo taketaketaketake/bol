@@ -66,19 +66,46 @@ interface LaundromatRevenueData {
 export async function getLaundromatRevenueData(authUserId: string): Promise<LaundromatRevenueData> {
   const serviceClient = getServiceClient();
 
-  // Get the first active laundromat for development
-  const { data: laundromats } = await serviceClient
-    .from('laundromats')
-    .select('*')
+  // Get the staff member's assigned laundromat and check revenue permissions
+  const { data: staffAssignment, error: staffError } = await serviceClient
+    .from('laundromat_staff')
+    .select(`
+      laundromat_id,
+      can_view_revenue,
+      laundromat:laundromats (
+        *
+      )
+    `)
+    .eq('auth_user_id', authUserId)
     .eq('is_active', true)
-    .limit(1);
+    .single();
 
-  if (!laundromats || laundromats.length === 0) {
+  console.log('Revenue staff assignment query result:', { staffAssignment, staffError });
+
+  let laundromat, laundromatId;
+
+  if (!staffAssignment || !staffAssignment.laundromat) {
+    // Development fallback: Use first available laundromat
+    console.warn('No staff assignment found for revenue, using development fallback');
+    const { data: laundromats } = await serviceClient
+      .from('laundromats')
+      .select('*')
+      .eq('is_active', true)
+      .limit(1);
+
+    if (!laundromats || laundromats.length === 0) {
+      return createEmptyRevenueData();
+    }
+    
+    laundromat = laundromats[0];
+    laundromatId = laundromat.id;
+  } else if (!staffAssignment.can_view_revenue) {
+    // Staff member doesn't have revenue viewing permission
     return createEmptyRevenueData();
+  } else {
+    laundromat = staffAssignment.laundromat;
+    laundromatId = laundromat.id;
   }
-
-  const laundromat = laundromats[0];
-  const laundromatId = laundromat.id;
 
   // Get date ranges
   const today = new Date();
