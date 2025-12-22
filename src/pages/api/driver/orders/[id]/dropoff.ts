@@ -8,11 +8,15 @@ import type { APIRoute } from 'astro';
 import { requireRole } from '../../../../../utils/require-role';
 import { uploadImage, generatePhotoPath, validateImageFile } from '../../../../../utils/storage';
 import { updateOrderStatus } from '../../../../../utils/order-status';
+import { rateLimit, RATE_LIMITS } from '../../../../../utils/rate-limit';
 
 const log = (msg: string, data?: any) =>
   import.meta.env.MODE !== 'production' && console.log(`[driver-dropoff] ${msg}`, data || '');
 
 export const POST: APIRoute = async ({ params, request, cookies }) => {
+  // Apply general rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.GENERAL);
+  if (rateLimitResponse) return rateLimitResponse;
   try {
     // 1️⃣ Auth check (driver or admin)
     const { user, roles } = await requireRole(cookies, ['driver', 'admin']);

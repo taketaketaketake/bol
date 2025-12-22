@@ -44,13 +44,12 @@ export const BAG_PRICING_CENTS = {
 // Bag weight limits (in pounds)
 export const BAG_WEIGHT_LIMITS = {
   small: 20,   // 20 lbs
-  medium: 35,  // 35 lbs  
-  large: 50    // 50 lbs
+  medium: 30,  // 30 lbs
+  large: 40    // 40 lbs
 };
 
-// Overweight fee: $5 per 5lb increment (in cents)
-export const OVERWEIGHT_FEE_PER_INCREMENT = 500; // $5
-export const OVERWEIGHT_INCREMENT_LBS = 5;
+// Overweight pricing: charged per pound at member/non-member rate
+// Fee calculated as: overage_lbs × rate_per_pound
 
 // ───────────────────────────────
 // Display versions (in dollars)
@@ -142,11 +141,13 @@ export function getRatePerPound(isMember: boolean = false): number {
  * Check if a bag order exceeds weight limits and calculate overweight fees
  * @param bagSize - Size of the bag ('small', 'medium', 'large')
  * @param actualWeight - Actual weight in pounds
+ * @param isMember - Whether customer is a member (affects per-pound rate)
  * @returns Overweight calculation result
  */
 export function checkBagOverweight(
-  bagSize: 'small' | 'medium' | 'large', 
-  actualWeight: number
+  bagSize: 'small' | 'medium' | 'large',
+  actualWeight: number,
+  isMember: boolean = false
 ): OverweightResult {
   // Validate actual weight input
   if (!Number.isFinite(actualWeight) || actualWeight <= 0) {
@@ -154,7 +155,7 @@ export function checkBagOverweight(
   }
 
   const weightLimit = BAG_WEIGHT_LIMITS[bagSize];
-  
+
   if (!weightLimit || actualWeight <= weightLimit) {
     return {
       overweight: false,
@@ -165,9 +166,10 @@ export function checkBagOverweight(
     };
   }
 
+  // Calculate overage fee: overage_lbs × per_pound_rate
   const overageLbs = actualWeight - weightLimit;
-  const incrementsOver = Math.ceil(overageLbs / OVERWEIGHT_INCREMENT_LBS);
-  const fee = Math.round(incrementsOver * OVERWEIGHT_FEE_PER_INCREMENT);
+  const ratePerPound = isMember ? MEMBER_RATE_CENTS : STANDARD_RATE_CENTS;
+  const fee = Math.round(overageLbs * ratePerPound);
 
   return {
     overweight: true,
@@ -182,11 +184,13 @@ export function checkBagOverweight(
  * Calculate total cost for a bag order including overweight fees
  * @param bagSize - Size of the bag ('small', 'medium', 'large')
  * @param actualWeight - Actual weight (optional, for overweight calculation)
+ * @param isMember - Whether customer is a member (affects per-pound rate)
  * @returns Complete pricing breakdown
  */
 export function calculateBagPricingWithOverweight(
   bagSize: 'small' | 'medium' | 'large',
-  actualWeight?: number
+  actualWeight?: number,
+  isMember: boolean = false
 ): {
   basePrice: number;
   overweightResult: OverweightResult;
@@ -196,7 +200,7 @@ export function calculateBagPricingWithOverweight(
   let overweightResult: OverweightResult = { overweight: false, overageLbs: 0, fee: 0 };
 
   if (typeof actualWeight === 'number' && Number.isFinite(actualWeight) && actualWeight > 0) {
-    overweightResult = checkBagOverweight(bagSize, actualWeight);
+    overweightResult = checkBagOverweight(bagSize, actualWeight, isMember);
   }
 
   return {

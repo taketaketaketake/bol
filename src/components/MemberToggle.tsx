@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MEMBER_RATE, STANDARD_RATE } from '../utils/pricing';
 
 interface MemberToggleProps {
   onToggle: (isMember: boolean) => void;
@@ -6,9 +7,10 @@ interface MemberToggleProps {
 
 export default function MemberToggle({ onToggle }: MemberToggleProps) {
   const [isMember, setIsMember] = useState(false);
-  const memberRate = 1.99;
-  const standardRate = 2.25;
+  const memberRate = MEMBER_RATE; // $1.75/lb
+  const standardRate = STANDARD_RATE; // $2.25/lb
   const currentRate = isMember ? memberRate : standardRate;
+  const savings = (standardRate - memberRate).toFixed(2);
 
   const handleToggle = (memberStatus: boolean) => {
     setIsMember(memberStatus);
@@ -56,7 +58,7 @@ export default function MemberToggle({ onToggle }: MemberToggleProps) {
         </p>
         {!isMember && (
           <p className="text-xs sm:text-sm text-green-600 font-medium">
-            (Save $0.26/lb with membership!)
+            (Save ${savings}/lb with membership!)
           </p>
         )}
       </div>

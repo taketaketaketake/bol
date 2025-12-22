@@ -2,12 +2,17 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { supabase } from '../../lib/supabase';
 import { getSession } from '../../utils/auth';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 });
 
 export const GET: APIRoute = async ({ request, cookies, redirect }) => {
+  // Apply payment rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.PAYMENT);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const url = new URL(request.url);
   const sessionId = url.searchParams.get('session_id');
   const redirectTo = url.searchParams.get('redirect') || '/order-type';

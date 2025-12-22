@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { MEMBERSHIP_SUBSCRIPTION_CENTS, MEMBERSHIP_PLAN, MEMBERSHIP_DURATION_MONTHS, MembershipTier, getPerPoundRate, MEMBERSHIP_TIERS, getUserTier } from '../../utils/pricing';
 import { getConfig } from '../../utils/env';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 // Get validated configuration
 const config = getConfig();
@@ -11,6 +12,10 @@ const stripe = new Stripe(config.stripeSecretKey, {
 });
 
 export const POST: APIRoute = async ({ request }) => {
+  // Apply payment rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.PAYMENT);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     console.log('[create-payment-intent] Received request:', JSON.stringify(body, null, 2));

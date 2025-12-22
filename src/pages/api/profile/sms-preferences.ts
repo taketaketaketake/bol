@@ -3,6 +3,7 @@ import { requireRole } from '../../../utils/require-role';
 import { createAuthErrorResponse } from '../../../utils/require-auth';
 import { createClient } from '@supabase/supabase-js';
 import { getConfig } from '../../../utils/env';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 const config = getConfig();
 
@@ -13,6 +14,10 @@ const serviceClient = createClient(
 );
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply general rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.GENERAL);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Authenticate user
     const { user, roles } = await requireRole(cookies, ['customer']);

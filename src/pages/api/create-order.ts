@@ -12,6 +12,7 @@ import OrderConfirmationEmail from '../../emails/OrderConfirmation';
 import NewOrderAlertEmail from '../../emails/NewOrderAlert';
 import * as React from 'react';
 import { getConfig } from '../../utils/env';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 // Get validated configuration
 const config = getConfig();
@@ -36,6 +37,10 @@ const log = (message: string, data?: any) => {
 };
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply order creation rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.ORDER_CREATE);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Authenticate user and get Supabase client
     const { user, roles, supabase } = await requireRole(cookies, ['customer']);
@@ -207,28 +212,26 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const pricingModel = pricingModelMap[orderType] || 'per_lb';
 
     // Calculate estimated pricing using centralized system
+    // ALL orders use manual capture - charge happens after laundromat weighs the items
     let estimatedTotal: number;
     let paymentIntentAmount: number;
-    let captureMethod: 'automatic' | 'manual';
-    
+    const captureMethod: 'manual' = 'manual'; // All orders use manual capture
+
     if (isPerBagOrder) {
-      // Per-bag pricing: immediate charge
-      const bagSize = orderType.includes('small') ? 'small' : 
+      // Per-bag pricing: hold bag amount, capture after weighing
+      const bagSize = orderType.includes('small') ? 'small' :
                      orderType.includes('medium') ? 'medium' : 'large';
       estimatedTotal = BAG_PRICING_CENTS[bagSize as keyof typeof BAG_PRICING_CENTS];
-      paymentIntentAmount = estimatedTotal;
-      captureMethod = 'automatic';
+      paymentIntentAmount = estimatedTotal; // Hold the bag price
     } else {
-      // Per-pound pricing: $35 hold, capture later
-      // TODO: Make configurable per user/membership tier/settings
+      // Fallback: per-pound pricing (not currently used in production)
       const estimatedWeight = 15; // Default estimate
       const pricingResult = calculatePricing({
         weightInPounds: estimatedWeight,
         isMember
       });
       estimatedTotal = pricingResult.total;
-      paymentIntentAmount = 3500; // $35 hold for per-pound orders
-      captureMethod = 'manual';
+      paymentIntentAmount = 3500; // $35 hold
     }
 
     // Create the order with address data stored directly

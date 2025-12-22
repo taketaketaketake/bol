@@ -2,8 +2,13 @@ import type { APIRoute } from 'astro';
 import { requireRole } from '../../../../../utils/require-role';
 import { getServiceClient } from '../../../../../utils/order-status';
 import { ORDER_STATUSES } from '../../../../../db/schema';
+import { rateLimit, RATE_LIMITS } from '../../../../../utils/rate-limit';
 
 export const POST: APIRoute = async ({ request, cookies, params }) => {
+  // Apply general rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.GENERAL);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Authenticate as laundromat staff or admin
     const { user, roles } = await requireRole(cookies, ['laundromat_staff', 'admin']);

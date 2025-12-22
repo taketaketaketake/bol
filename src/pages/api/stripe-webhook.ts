@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { getConfig } from '../../utils/env';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 // Get validated configuration
 const config = getConfig();
@@ -30,6 +31,10 @@ console.log('[Webhook] Service role key configured:', !!config.supabaseServiceRo
 console.log('[Webhook] Stripe webhook secret configured:', !!endpointSecret);
 
 export const POST: APIRoute = async ({ request }) => {
+  // Apply lenient webhook rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.WEBHOOK);
+  if (rateLimitResponse) return rateLimitResponse;
+
   console.log('[Webhook] ========== NEW WEBHOOK REQUEST ==========');
   console.log('[Webhook] Time:', new Date().toISOString());
 
@@ -102,37 +107,72 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
-  console.log('Payment succeeded:', paymentIntent.id);
+  console.log('[Webhook] Payment succeeded:', paymentIntent.id);
 
-  const metadata = paymentIntent.metadata;
+  try {
+    // Update order payment status in database
+    const { data: order, error: updateError } = await supabaseAdmin
+      .from('orders')
+      .update({
+        payment_status: 'paid',
+        stripe_charge_id: paymentIntent.latest_charge as string || null,
+        paid_at: new Date().toISOString()
+      })
+      .eq('stripe_payment_intent_id', paymentIntent.id)
+      .select('id, customer_id')
+      .single();
 
-  // TODO: Update your database with successful payment
-  // - Create order record
-  // - Update customer status
-  // - Send confirmation email
-  // - If membership was included, activate membership
+    if (updateError) {
+      console.error('[Webhook] Failed to update order payment status:', updateError);
+      throw updateError;
+    }
 
-  if (metadata.addMembership === 'true') {
-    console.log('Membership included in payment, activating membership...');
-    // TODO: Activate membership for customer
+    console.log(`[Webhook] Order ${order?.id} marked as paid`);
+
+    // Log metadata for debugging (order was already created by /api/create-order.ts)
+    const metadata = paymentIntent.metadata;
+    console.log('[Webhook] Payment metadata:', {
+      amount: paymentIntent.amount / 100,
+      order_id: metadata.order_id,
+      customer_id: metadata.customer_id,
+      pricing_model: metadata.pricing_model
+    });
+
+  } catch (error) {
+    console.error('[Webhook] Error in handlePaymentSuccess:', error);
+    // Don't throw - we don't want to fail the webhook if DB update fails
+    // The payment succeeded in Stripe, which is the source of truth
   }
-
-  console.log('Order details:', {
-    amount: paymentIntent.amount,
-    orderType: metadata.orderType,
-    customerEmail: metadata.customerEmail,
-    pickupAddress: metadata.pickupAddress,
-    pickupDate: metadata.pickupDate,
-  });
 }
 
 async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
-  console.log('Payment failed:', paymentIntent.id);
+  console.log('[Webhook] Payment failed:', paymentIntent.id);
 
-  // TODO: Handle payment failure
-  // - Log the failure
-  // - Notify customer
-  // - Update order status
+  try {
+    // Update order payment status to failed
+    const { error: updateError } = await supabaseAdmin
+      .from('orders')
+      .update({
+        payment_status: 'failed',
+        updated_at: new Date().toISOString()
+      })
+      .eq('stripe_payment_intent_id', paymentIntent.id);
+
+    if (updateError) {
+      console.error('[Webhook] Failed to update order payment failure status:', updateError);
+    } else {
+      console.log('[Webhook] Order marked as payment failed');
+    }
+
+    // Log failure reason for debugging
+    console.error('[Webhook] Payment failure reason:', {
+      paymentIntentId: paymentIntent.id,
+      lastPaymentError: paymentIntent.last_payment_error?.message || 'Unknown'
+    });
+
+  } catch (error) {
+    console.error('[Webhook] Error in handlePaymentFailure:', error);
+  }
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {

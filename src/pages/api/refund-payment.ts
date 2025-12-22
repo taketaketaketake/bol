@@ -4,6 +4,7 @@ import { createAuthErrorResponse } from '../../utils/require-auth';
 import { PaymentStatus, isRefundable } from '../../utils/payment-status';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
@@ -23,6 +24,10 @@ const log = (message: string, data?: any) => {
 };
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply payment rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.PAYMENT);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Require admin access for refund operations
     const { user, roles } = await requireRole(cookies, ['admin']);

@@ -1,7 +1,12 @@
 import { supabase } from '../../../lib/supabase';
 import type { APIRoute } from 'astro';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 export const POST: APIRoute = async ({ request }) => {
+  // Apply strict rate limiting for password reset
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.PASSWORD_RESET);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { email } = await request.json();
 

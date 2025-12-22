@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { requireRole } from '../../../../../utils/require-role';
 import { getServiceClient } from '../../../../../utils/order-status';
+import { STANDARD_RATE } from '../../../../../utils/pricing';
+import { rateLimit, RATE_LIMITS } from '../../../../../utils/rate-limit';
 
 // Message templates for quick communication
 const MESSAGE_TEMPLATES = {
@@ -15,6 +17,10 @@ const MESSAGE_TEMPLATES = {
 };
 
 export const POST: APIRoute = async ({ request, cookies, params }) => {
+  // Apply general rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.GENERAL);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Authenticate as laundromat staff or admin
     const { user, roles } = await requireRole(cookies, ['laundromat_staff', 'admin']);
@@ -233,7 +239,7 @@ async function sendSMSMessage(
  * This is a simplified calculation - in production you'd consider service type, membership, etc.
  */
 function calculateOrderTotal(weight: number): number {
-  const basePricePerPound = 2.49;
+  const basePricePerPound = STANDARD_RATE; // $2.25/lb
   return weight * basePricePerPound;
 }
 

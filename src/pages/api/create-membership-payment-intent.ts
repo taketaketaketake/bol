@@ -3,12 +3,17 @@ import Stripe from 'stripe';
 import { requireRole } from '../../utils/require-role';
 import { createAuthErrorResponse } from '../../utils/require-auth';
 import { MEMBERSHIP_SUBSCRIPTION_CENTS, MEMBERSHIP_PLAN, MEMBERSHIP_DURATION_MONTHS, MembershipTier, getPerPoundRate, MEMBERSHIP_TIERS } from '../../utils/pricing';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 });
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply payment rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.PAYMENT);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Authenticate user and get Supabase client
     const { user, roles, supabase } = await requireRole(cookies, ['customer']);

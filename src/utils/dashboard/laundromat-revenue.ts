@@ -6,6 +6,7 @@
 
 import type { Order, Laundromat } from '../../db/schema';
 import { getServiceClient } from '../order-status';
+import { MEMBER_RATE, STANDARD_RATE } from '../pricing';
 
 interface OrderWithRevenue extends Order {
   customer?: {
@@ -340,9 +341,9 @@ function getServicePrice(serviceType?: string): number {
     case 'delicate':
       return 2.99;
     case 'membership':
-      return 1.99;
+      return MEMBER_RATE; // $1.75/lb
     default:
-      return 2.49;
+      return STANDARD_RATE; // $2.25/lb
   }
 }
 

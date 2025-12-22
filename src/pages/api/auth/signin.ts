@@ -1,8 +1,13 @@
 import type { APIRoute } from "astro";
 import { supabase } from "../../../lib/supabase";
 import type { Provider } from "@supabase/supabase-js";
+import { rateLimit, RATE_LIMITS } from "../../../utils/rate-limit";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
+  // Apply rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.AUTH);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const formData = await request.formData();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();

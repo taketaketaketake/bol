@@ -1,6 +1,7 @@
 import { supabase } from '../../../lib/supabase';
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 const SignupSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email' }),
@@ -10,6 +11,11 @@ const SignupSchema = z.object({
 
 export const POST: APIRoute = async ({ request }) => {
   console.log('[Signup][POST] Incoming signup request');
+
+  // Apply rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.AUTH);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const rawData = await request.json();
     const data = SignupSchema.parse(rawData);

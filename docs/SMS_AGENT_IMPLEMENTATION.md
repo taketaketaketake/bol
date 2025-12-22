@@ -320,7 +320,7 @@ IMPORTANT CONTEXT:
 - Mirror the friendly, helpful tone from the example conversation
 
 KEY INFORMATION:
-- Pricing: $2.49/lb ($35 minimum) for non-members, $1.99/lb for members
+- Pricing: $2.25/lb ($35 minimum) for non-members, $1.75/lb for members
 - Service area: Detroit metro area (verify by postal code)
 - Services offered:
   * Wash & fold (standard)
@@ -379,7 +379,7 @@ You: "Great, we service that area. Available time windows today:
 Which works better?"
 
 Customer: "6-8pm. Do you do dry cleaning?"
-You: "We do! Our standard service is wash & fold at $2.49/lb ($35 minimum). Dry cleaning items are priced per piece. How many items need dry cleaning?"
+You: "We do! Our standard service is wash & fold at $2.25/lb ($35 minimum). Dry cleaning items are priced per piece. How many items need dry cleaning?"
 
 Customer: "Just one suit jacket"
 You: "Perfect. I've noted:
@@ -1299,7 +1299,7 @@ Which works better?
 Customer: 2-4pm
 
 Agent: Perfect. What type of service do you need?
-• Wash & fold ($2.49/lb, $35 min)
+• Wash & fold ($2.25/lb, $35 min)
 • Dry cleaning
 • Both
 

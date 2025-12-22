@@ -3,12 +3,17 @@ import Stripe from 'stripe';
 import { requireRole } from '../../../utils/require-role';
 import { createAuthErrorResponse } from '../../../utils/require-auth';
 import { getCustomerId } from '../../../utils/dashboard/customer';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 });
 
 export const GET: APIRoute = async ({ request, cookies, redirect }) => {
+  // Apply general rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.GENERAL);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Authenticate user and get Supabase client
     const { user, roles, supabase } = await requireRole(cookies, ['customer']);

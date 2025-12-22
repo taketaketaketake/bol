@@ -3,6 +3,7 @@ import { requireRole } from '../../utils/require-role';
 import { createAuthErrorResponse } from '../../utils/require-auth';
 import { createClient } from '@supabase/supabase-js';
 import { getConfig } from '../../utils/env';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 // Get validated configuration
 const config = getConfig();
@@ -21,6 +22,10 @@ const log = (message: string, data?: any) => {
 };
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply general rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.GENERAL);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Authenticate and authorize (admin or laundromat staff only)
     const { user, roles, supabase } = await requireRole(cookies, ['admin', 'laundromat_staff']);

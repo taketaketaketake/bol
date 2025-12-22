@@ -1,11 +1,16 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
 });
 
 export const POST: APIRoute = async ({ request }) => {
+  // Apply payment rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.PAYMENT);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const {

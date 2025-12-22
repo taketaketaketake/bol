@@ -8,11 +8,16 @@
 import type { APIRoute } from 'astro';
 import { requireRole } from '../../../utils/require-role';
 import { supabase } from '../../../lib/supabase';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 const log = (msg: string, data?: any) =>
   import.meta.env.MODE !== 'production' && console.log(`[driver-tasks] ${msg}`, data || '');
 
-export const GET: APIRoute = async ({ cookies, url }) => {
+export const GET: APIRoute = async ({ cookies, url, request }) => {
+  // Apply read rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.READ);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // 1️⃣ Auth check (driver or admin)
     const { user, roles } = await requireRole(cookies, ['driver', 'admin']);

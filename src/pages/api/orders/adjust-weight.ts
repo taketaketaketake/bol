@@ -3,8 +3,10 @@ import { requireRole } from '../../../utils/require-role';
 import { createAuthErrorResponse } from '../../../utils/require-auth';
 import { PaymentStatus } from '../../../utils/payment-status';
 import { checkBagOverweight, calculateBagPricingWithOverweight } from '../../../utils/pricing';
+import { checkMembershipStatus } from '../../../utils/membership';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia',
@@ -24,6 +26,10 @@ const log = (message: string, data?: any) => {
 };
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply general rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.GENERAL);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Require admin access for weight adjustments
     const { user, roles } = await requireRole(cookies, ['admin']);
@@ -53,10 +59,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     log('Processing weight adjustment:', { orderId, actualWeight, adminUserId: user.id });
 
-    // Retrieve the order from database
+    // Retrieve the order from database with customer info for membership check
     const { data: order, error: orderError } = await serviceClient
       .from('orders')
-      .select('*')
+      .select('*, customers(auth_user_id)')
       .eq('id', orderId)
       .single();
 
@@ -102,9 +108,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Calculate overweight fees
-    const overweightResult = checkBagOverweight(bagSize, actualWeight);
-    const pricingResult = calculateBagPricingWithOverweight(bagSize, actualWeight);
+    // Check membership status to determine correct per-pound rate
+    const authUserId = (order.customers as any)?.auth_user_id;
+    const isMember = authUserId ? await checkMembershipStatus(authUserId, serviceClient) : false;
+
+    // Calculate overweight fees with correct member rate
+    const overweightResult = checkBagOverweight(bagSize, actualWeight, isMember);
+    const pricingResult = calculateBagPricingWithOverweight(bagSize, actualWeight, isMember);
     
     log('Overweight calculation:', { 
       bagSize, 

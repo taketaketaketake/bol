@@ -2,8 +2,9 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { calculatePricing } from '../../utils/pricing';
-import { getMemberIfPresent } from '../../utils/require-roles';
+import { checkMembershipStatus } from '../../utils/membership';
 import { getConfig } from '../../utils/env';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 // Get validated configuration
 const config = getConfig();
@@ -19,6 +20,10 @@ const supabase = createClient(
 );
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply payment rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.PAYMENT);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const {
@@ -29,9 +34,23 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       rushFee = 0
     } = body;
 
-    // Check membership status to determine correct rate
-    const memberResult = await getMemberIfPresent(cookies);
-    const isMember = memberResult !== null;
+    // Get order and customer's auth_user_id to check membership status
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('customer_id, customers(auth_user_id)')
+      .eq('id', orderId)
+      .single();
+
+    if (orderError || !order || !order.customers) {
+      return new Response(
+        JSON.stringify({ error: 'Order not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check membership status from database to determine correct rate
+    const authUserId = (order.customers as any).auth_user_id;
+    const isMember = await checkMembershipStatus(authUserId, supabase);
 
     // Use centralized pricing logic for consistency
     const pricingResult = calculatePricing({

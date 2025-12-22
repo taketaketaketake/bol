@@ -1,8 +1,13 @@
 import type { APIRoute } from 'astro';
 import { requireRole } from '../../../utils/require-role';
 import { createAuthErrorResponse } from '../../../utils/require-auth';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply strict rate limiting for password reset
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.PASSWORD_RESET);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Authenticate user and get Supabase client
     const { user, roles, supabase } = await requireRole(cookies, ['customer']);

@@ -1,6 +1,11 @@
 import type { APIRoute } from 'astro';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Apply auth rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.AUTH);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { access_token, refresh_token } = await request.json();
 

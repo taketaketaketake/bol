@@ -43,7 +43,7 @@ npx drizzle-kit studio     # Open Drizzle Studio for database inspection
 
 **Capacity Management**: `daily_capacity` table tracks available pickup/delivery slots per zone and time window. Used by `get_available_windows()` SQL function for real-time availability checking.
 
-**Memberships**: Stripe subscription integration with customer pricing tiers. Active memberships change per-pound pricing from $2.49 to $1.99.
+**Memberships**: Stripe subscription integration with customer pricing tiers. Active memberships change per-pound pricing from $2.25 to $1.75.
 
 ### API Patterns
 

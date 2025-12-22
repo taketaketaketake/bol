@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import { getConfig } from '../../utils/env';
+import { rateLimit, RATE_LIMITS } from '../../utils/rate-limit';
 
 // Get validated configuration
 const config = getConfig();
@@ -12,6 +13,10 @@ const serviceClient = createClient(
 );
 
 export const POST: APIRoute = async ({ request }) => {
+  // Apply read rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.READ);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const { address, date } = body;

@@ -1,7 +1,12 @@
 import { supabase } from '../../../lib/supabase';
 import type { APIRoute } from 'astro';
+import { rateLimit, RATE_LIMITS } from '../../../utils/rate-limit';
 
 export const get: APIRoute = async ({ request, redirect }) => {
+  // Apply auth rate limiting
+  const rateLimitResponse = await rateLimit(request, RATE_LIMITS.AUTH);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
