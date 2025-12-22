@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { requireAuth, createAuthErrorResponse } from '../../utils/require-auth';
+import { requireRole } from '../../utils/require-role';
+import { createAuthErrorResponse } from '../../utils/require-auth';
 import { createClient } from '@supabase/supabase-js';
 import { getConfig } from '../../utils/env';
 
@@ -21,12 +22,9 @@ const log = (message: string, data?: any) => {
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    // Authenticate user (admin/staff only)
-    const { user, supabase } = await requireAuth(cookies);
+    // Authenticate and authorize (admin or laundromat staff only)
+    const { user, roles, supabase } = await requireRole(cookies, ['admin', 'laundromat_staff']);
 
-    // TODO: Add role-based authorization check
-    // For now, any authenticated user can assign laundromats
-    
     const body = await request.json();
     const { orderId, laundromateId, zipCode } = body;
 
@@ -173,8 +171,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
 export const GET: APIRoute = async ({ request, cookies }) => {
   try {
-    // Authenticate user
-    const { user, supabase } = await requireAuth(cookies);
+    // Authenticate and authorize (admin or laundromat staff only)
+    const { user, roles, supabase } = await requireRole(cookies, ['admin', 'laundromat_staff']);
 
     const url = new URL(request.url);
     const zipCode = url.searchParams.get('zip');

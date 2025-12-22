@@ -1,11 +1,12 @@
 import type { APIRoute } from 'astro';
-import { requireAuth, createAuthErrorResponse } from '../../../utils/require-auth';
+import { requireRole } from '../../../utils/require-role';
+import { createAuthErrorResponse } from '../../../utils/require-auth';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Authenticate user and get Supabase client
-    const { user, supabase } = await requireAuth(cookies);
-    
+    const { user, roles, supabase } = await requireRole(cookies, ['customer']);
+
     const { password } = await request.json();
 
     if (!password || password.length < 6) {

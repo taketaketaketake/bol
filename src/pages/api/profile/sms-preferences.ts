@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { requireAuth, createAuthErrorResponse } from '../../../utils/require-auth';
+import { requireRole } from '../../../utils/require-role';
+import { createAuthErrorResponse } from '../../../utils/require-auth';
 import { createClient } from '@supabase/supabase-js';
 import { getConfig } from '../../../utils/env';
 
@@ -14,7 +15,7 @@ const serviceClient = createClient(
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Authenticate user
-    const { user } = await requireAuth(cookies);
+    const { user, roles } = await requireRole(cookies, ['customer']);
 
     const { sms_opt_in } = await request.json();
 
@@ -67,7 +68,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 export const GET: APIRoute = async ({ cookies }) => {
   try {
     // Authenticate user
-    const { user } = await requireAuth(cookies);
+    const { user, roles } = await requireRole(cookies, ['customer']);
 
     // Get current SMS opt-in status
     const { data: customer, error } = await serviceClient

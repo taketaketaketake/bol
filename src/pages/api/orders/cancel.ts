@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { requireAuth, createAuthErrorResponse } from '../../../utils/require-auth';
+import { requireRole } from '../../../utils/require-role';
+import { createAuthErrorResponse } from '../../../utils/require-auth';
 import { getCustomerId } from '../../../utils/dashboard/customer';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
@@ -10,7 +11,7 @@ const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
 export const GET: APIRoute = async ({ request, cookies, redirect }) => {
   try {
     // Authenticate user and get Supabase client
-    const { user, supabase } = await requireAuth(cookies);
+    const { user, roles, supabase } = await requireRole(cookies, ['customer']);
 
     // Get order ID from query params
     const url = new URL(request.url);

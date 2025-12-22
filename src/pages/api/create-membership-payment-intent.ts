@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { requireAuth, createAuthErrorResponse } from '../../utils/require-auth';
+import { requireRole } from '../../utils/require-role';
+import { createAuthErrorResponse } from '../../utils/require-auth';
 import { MEMBERSHIP_SUBSCRIPTION_CENTS, MEMBERSHIP_PLAN, MEMBERSHIP_DURATION_MONTHS, MembershipTier, getPerPoundRate, MEMBERSHIP_TIERS } from '../../utils/pricing';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
@@ -10,7 +11,7 @@ const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY, {
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Authenticate user and get Supabase client
-    const { user, supabase } = await requireAuth(cookies);
+    const { user, roles, supabase } = await requireRole(cookies, ['customer']);
 
     const { email } = await request.json();
 

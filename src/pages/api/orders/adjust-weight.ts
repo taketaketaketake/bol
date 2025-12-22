@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { requireAdmin } from '../../../utils/require-roles';
+import { requireRole } from '../../../utils/require-role';
 import { createAuthErrorResponse } from '../../../utils/require-auth';
 import { PaymentStatus } from '../../../utils/payment-status';
 import { checkBagOverweight, calculateBagPricingWithOverweight } from '../../../utils/pricing';
@@ -26,8 +26,8 @@ const log = (message: string, data?: any) => {
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Require admin access for weight adjustments
-    const { user } = await requireAdmin(cookies);
-    
+    const { user, roles } = await requireRole(cookies, ['admin']);
+
     const body = await request.json();
     const { orderId, actualWeight } = body;
 

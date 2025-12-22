@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { requireAuth, createAuthErrorResponse } from '../../utils/require-auth';
+import { requireRole } from '../../utils/require-role';
+import { createAuthErrorResponse } from '../../utils/require-auth';
 import { checkMembershipStatus } from '../../utils/membership';
 import { calculatePricing, BAG_PRICING_CENTS } from '../../utils/pricing';
 import { PaymentStatus } from '../../utils/payment-status';
@@ -37,7 +38,7 @@ const log = (message: string, data?: any) => {
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Authenticate user and get Supabase client
-    const { user, supabase } = await requireAuth(cookies);
+    const { user, roles, supabase } = await requireRole(cookies, ['customer']);
 
     const body = await request.json();
 

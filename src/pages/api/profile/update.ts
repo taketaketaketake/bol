@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { requireAuth, createAuthErrorResponse } from '../../../utils/require-auth';
+import { requireRole } from '../../../utils/require-role';
+import { createAuthErrorResponse } from '../../../utils/require-auth';
 import { createClient } from '@supabase/supabase-js';
 import { getConfig } from '../../../utils/env';
 
@@ -14,7 +15,7 @@ const serviceClient = createClient(
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Authenticate user and get Supabase client
-    const { user, supabase } = await requireAuth(cookies);
+    const { user, roles, supabase } = await requireRole(cookies, ['customer']);
 
     const updates = await request.json();
 

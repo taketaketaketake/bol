@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { requireAdmin } from '../../utils/require-roles';
+import { requireRole } from '../../utils/require-role';
 import { createAuthErrorResponse } from '../../utils/require-auth';
 import { PaymentStatus, isRefundable } from '../../utils/payment-status';
 import { createClient } from '@supabase/supabase-js';
@@ -25,8 +25,8 @@ const log = (message: string, data?: any) => {
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // Require admin access for refund operations
-    const { user } = await requireAdmin(cookies);
-    
+    const { user, roles } = await requireRole(cookies, ['admin']);
+
     const body = await request.json();
     const { orderId, refundAmountCents, reason, reasonInternal } = body;
 
